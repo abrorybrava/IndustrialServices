@@ -1,0 +1,143 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Edit Faculty Member";
+}
+
+<div class="pagetitle">
+    <h1>- Edit Faculty Member -</h1>
+</div>
+<br />
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                    <hr />
+                    <br />
+
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="id_pengajar" id="id_pengajar" value="@ViewBag.Id" hidden>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="npk" class="col-sm-2 col-form-label">NPK</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="npk" id="npk">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="nama_pengajar" class="col-sm-2 col-form-label">Teacher's Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="nama_pengajar" id="nama_pengajar">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="bidang_keahlian" id="bidang_keahlian">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="foto_pengajar" class="col-sm-2 col-form-label">Teacher's Photo</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="file" name="fotopengajar" id="foto_pengajar">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <input class="form-control" id="status" name="status" value=1 hidden />
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    loadTenagaPengajar()
+
+    function loadTenagaPengajar() {
+        var id_pengajar = document.getElementById("id_pengajar")
+        var npk = document.getElementById("npk")
+        var nama_pengajar = document.getElementById("nama_pengajar")
+        var bidang_keahlian = document.getElementById("bidang_keahlian")
+        var foto_pengajar = document.getElementById("foto_pengajar")
+        var status = document.getElementById("status")
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetFacultyMember?id=" + @ViewBag.Id;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var faculty = data.data
+                npk.value = faculty.npk
+                nama_pengajar.value = faculty.nama_pengajar
+                bidang_keahlian.value = faculty.bidang_keahlian
+                foto_pengajar.value = faculty.foto_pengajar
+                status.value = faculty.status
+            }
+        });
+    }
+
+
+
+    function simpanedit() {
+        var id_pengajar = document.getElementById("id_pengajar").value
+        var npk = document.getElementById("npk").value
+        var nama_pengajar = document.getElementById("nama_pengajar").value
+        var bidang_keahlian = document.getElementById("bidang_keahlian").value
+        var foto_pengajar = document.getElementById("foto_pengajar").value
+        var status = document.getElementById("status").value
+
+        var hostname = "https://localhost:7033/" // Ganti dengan URL API Anda
+        var url = hostname + "UpdateFacultyMember" // Sesuaikan dengan endpoint Anda
+        var method = "POST"
+        var input = {
+            id_pengajar: id_pengajar,
+            npk: npk,
+            nama_pengajar: nama_pengajar,
+            bidang_keahlian: bidang_keahlian,
+            foto_pengajar: foto_pengajar,
+            status: status
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/FacultyMember/Index';
+
+            },
+        });
+    }
+
+    function canceledit() {
+        document.getElementById("npk").value = "";
+        document.getElementById("nama_pengajar").value = "";
+        document.getElementById("bidang_keahlian").value = "";
+    }
+</script>

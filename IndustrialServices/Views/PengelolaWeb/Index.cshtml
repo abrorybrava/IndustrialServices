@@ -1,0 +1,362 @@
+﻿@{
+    ViewData["Title"] = "Web Manager Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    int no = 1;
+}
+
+<div class="pagetitle">
+    <h1>Web Manager Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Data</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Datatables</h5>
+
+                    <button class="btn btn-primary addPengelolaWeb">+ Add Web Manager</button>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyPengelolaWeb">
+                        </tbody>
+                    </table>
+                    <!-- End Table with stripped rows -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    loadPengelolaWeb();
+
+    function loadPengelolaWeb() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllPengelolaWeb";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var list = data.data;
+                list.forEach(function (pengelola, index) {
+                    var statusText = pengelola.status === 1 ? "Active" : "Inactive";
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + pengelola.nama_pengelola + '</td>' +
+                        '<td>' + pengelola.username + '</td>' +
+                        '<td>' + pengelola.peran + '</td>' +
+                        '<td>' + statusText + '</td>' +
+                        '<td>' +
+                        '<button class="btn btn-primary editPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-edit"></i></button>' +
+                        '<button class="btn btn-danger" value="' + pengelola.id_pengelola + '" onclick="hapus(this.value)"><i class="fas fa-trash"></i></button>' +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyPengelolaWeb').append(newRow);
+
+                    // Event listener for edit button
+                    $('.editPengelolaWeb[data-id="' + pengelola.id_pengelola + '"]').click(function () {
+                        var id_pengelola = $(this).data("id");
+                        loadEditPengelolaWeb(id_pengelola);
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+
+
+    function hapus(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeletePengelolaWeb?id=" + id;
+        var method = "POST";
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                alert("Data Pengelola Web Berhasil Dihapus");
+                location.reload();
+            },
+        });
+    }
+    $(".addPengelolaWeb").click(function () {
+        $("#addPengelolaWebModal_").modal("show");
+    });
+
+    function cancel() {
+        document.getElementById("nama_pengelola").value = "";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("peran").value = "--- Choose Role ---";
+    }
+
+
+    function simpan() {
+        var nama_pengelola = document.getElementById("nama_pengelola").value;
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var peran = document.getElementById("peran").value;
+        var status = document.getElementById("status").value;
+
+        var input = {
+            nama_pengelola: nama_pengelola,
+            username: username,
+            password: password,
+            peran: peran,
+            status: status
+        };
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "InsertPengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: JSON.stringify(input),
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/PengelolaWeb/Index';
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+    $(".editPengelolaWeb").click(function () {
+        var id_pengelola = $(this).data("id_pengelola");
+        loadEditPengelolaWeb(id_pengelola);
+    });
+
+    function loadEditPengelolaWeb(id_pengelola) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetPengelolaWeb?id=" + id_pengelola;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pengelola = data.data;
+
+                $('#editid_pengelola').val(pengelola.id_pengelola);
+                $('#editnama_pengelola').val(pengelola.nama_pengelola);
+                $('#editusername').val(pengelola.username);
+                $('#editpassword').val(pengelola.password);
+                $('#editperan').val(pengelola.peran);
+                $('#editstatus').val(pengelola.status);
+
+                // Show the Bootstrap modal for editing
+                $('#editPengelolaWebModal').modal('show');
+            }
+        });
+    }
+    function simpanedit() {
+        var id_pengelola = document.getElementById("editid_pengelola").value;
+        var nama_pengelola = document.getElementById("editnama_pengelola").value;
+        var username = document.getElementById("editusername").value;
+        var password = document.getElementById("editpassword").value;
+        var peran = document.getElementById("editperan").value;
+        var status = document.getElementById("editstatus").value;
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "UpdatePengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            id_pengelola: id_pengelola,
+            nama_pengelola: nama_pengelola,
+            username: username,
+            password: password,
+            peran: peran,
+            status: status
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/PengelolaWeb/Index';
+            },
+        });
+    }
+</script>
+
+
+<div class="modal fade" id="addPengelolaWebModal_" tabindex="-1" role="dialog" aria-labelledby="addPengelolaWebModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size:28px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Web Manager</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Please Fill in Correctly!</h5>
+                                    <hr />
+                                    <br />
+
+                                    <!-- General Form Elements -->
+                                    <form id="addPengelolaWebForm" enctype="multipart/form-data">
+                                        <div class="row mb-3">
+                                            <label for="nama_pengelola" class="col-sm-2 col-form-label">Web Manager's Name</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="nama_pengelola" id="nama_pengelola">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="username" class="col-sm-2 col-form-label">Username</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" name="username" id="username">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="password" class="col-sm-2 col-form-label">Password</label>
+                                            <div class="col-sm-10">
+                                                <input type="password" class="form-control" name="password" id="password">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <label for="peran" class="col-sm-2 col-form-label">Role</label>
+                                            <div class="col-sm-10">
+                                                <select type="text" class="form-control" name="peran" id="peran">
+                                                    <option>--- Choose Role ---</option>
+                                                    <option value="Admin">Admin</option>
+                                                    <option value="Contributor">Contributor</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-10">
+                                                <input class="form-control" id="status" name="status" value="1" hidden />
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-sm-10">
+                                                <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                                <button type="button" class="btn btn-primary" onclick="simpan()">Submit</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <!-- End General Form Elements -->
+
+                                </div>
+                            </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editPengelolaWebModal" tabindex="-1" role="dialog" aria-labelledby="editPengelolaWebModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Web Manager</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="col-lg-12">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                    <hr />
+                                    <br />
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="editid_pengelola" id="editid_pengelola" value="@ViewBag.Id" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="nama_pengelola" class="col-sm-2 col-form-label">Web Manager's Name</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="editnama_pengelola" id="editnama_pengelola">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="username" class="col-sm-2 col-form-label">Username</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="editusername" id="editusername">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="password" class="col-sm-2 col-form-label">Password</label>
+                                        <div class="col-sm-10">
+                                            <input type="password" class="form-control" name="editpassword" id="editpassword">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="peran" class="col-sm-2 col-form-label">Role</label>
+                                        <div class="col-sm-10">
+                                            <select type="text" class="form-control" name="editperan" id="editperan">
+                                                <option>--- Choose Role ---</option>
+                                                <option value="Admin">Admin</option>
+                                                <option value="Contributor">Contributor</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <input class="form-control" id="editstatus" name="editstatus" value="1" hidden />
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <br />
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                            <button type="submit" class="btn btn-primary" onclick="simpanedit()">Submit</button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>

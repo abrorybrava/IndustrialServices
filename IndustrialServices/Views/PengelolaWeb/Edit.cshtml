@@ -1,0 +1,144 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Edit Pengelola Web";
+}
+
+<div class="pagetitle">
+    <h1>- Edit Pengelola Web -</h1>
+</div>
+<br />
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                    <hr />
+                    <br />
+
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="id_pengelola" id="id_pengelola" value="@ViewBag.Id" hidden>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="nama_pengelola" class="col-sm-2 col-form-label">Nama Pengelola</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="nama_pengelola" id="nama_pengelola">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="username" class="col-sm-2 col-form-label">Username</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="username" id="username">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="password" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" name="password" id="password">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="peran" class="col-sm-2 col-form-label">Peran</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="peran" id="peran">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <input class="form-control" id="status" name="status" value="1" hidden />
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <div class="row mb-3">
+                        <div class="col-sm-10">
+                            <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function cancel() {
+        document.getElementById("nama_pengelola").value = "";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("peran").value = "--- Choose Role ---";
+    }
+
+    function loadPengelolaWeb() {
+        var id_pengelola = document.getElementById("id_pengelola");
+        var nama_pengelola = document.getElementById("nama_pengelola");
+        var username = document.getElementById("username");
+        var password = document.getElementById("password");
+        var peran = document.getElementById("peran");
+        var status = document.getElementById("status");
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetPengelolaWeb?id=" + @ViewBag.Id;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pengelola = data.data;
+                id_pengelola.value = pengelola.id_pengelola;
+                nama_pengelola.value = pengelola.nama_pengelola;
+                username.value = pengelola.username;
+                password.value = pengelola.password;
+                peran.value = pengelola.peran;
+                status.value = pengelola.status;
+            }
+        });
+    }
+
+    function simpan() {
+        var id_pengelola = document.getElementById("id_pengelola").value;
+        var nama_pengelola = document.getElementById("nama_pengelola").value;
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var peran = document.getElementById("peran").value;
+        var status = document.getElementById("status").value;
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "UpdatePengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            id_pengelola: id_pengelola,
+            nama_pengelola: nama_pengelola,
+            username: username,
+            password: password,
+            peran: peran,
+            status: status
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/PengelolaWeb/Index';
+            },
+        });
+    }
+
+    $(document).ready(function () {
+        loadPengelolaWeb();
+    });
+</script>

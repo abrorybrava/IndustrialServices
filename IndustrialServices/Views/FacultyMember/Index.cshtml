@@ -1,0 +1,359 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Faculty Member Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    int no = 1;
+}
+
+<div class="pagetitle">
+    <h1>Faculty Member Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Data</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Datatables</h5>
+
+                    <button class="btn btn-primary addFacultyMember">+ Add Faculty Member</button>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">NPK</th>
+                                <th scope="col">Teacher's Name</th>
+                                <th scope="col">Areas of expertise</th>
+                                <th scope="col">Teacher's Photo</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTenagaPengajar">
+                        </tbody>
+                    </table>
+                    <!-- End Table with stripped rows -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </section>
+
+<script>
+    function simpan() {
+        var npk = document.getElementById("npk").value
+        var nama_pengajar = document.getElementById("nama_pengajar").value
+        var bidang_keahlian = document.getElementById("bidang_keahlian").value
+        var foto_pengajar = document.getElementById("foto_pengajar").value
+        var status = document.getElementById("status").value
+
+        var hostname = "https://localhost:7033/" // Ganti dengan URL API Anda
+        var url = hostname + "InsertFacultyMember" // Sesuaikan dengan endpoint Anda
+        var method = "POST"
+        var input = {
+            npk: npk,
+            nama_pengajar: nama_pengajar,
+            bidang_keahlian: bidang_keahlian,
+            foto_pengajar: foto_pengajar,
+            status: status
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/FacultyMember/Index';
+
+            },
+        });
+    }
+
+    function cancel() {
+        document.getElementById("npk").value = "";
+        document.getElementById("nama_pengajar").value = "";
+        document.getElementById("bidang_keahlian").value = "";
+    }
+
+
+    loadTenagaPengajar()
+
+    function loadTenagaPengajar() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFacultyMembers";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var list = data.data;
+                list.forEach(function (pengajar, index) {
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + pengajar.npk + '</td>' +
+                        '<td>' + pengajar.nama_pengajar + '</td>' +
+                        '<td>' + pengajar.bidang_keahlian + '</td>' +
+                        '<td><img src="/assets/img/' + pengajar.foto_pengajar + '" alt="Foto Pengajar" width="70" height="70"></td>' +
+                        '<td>' +
+                        '<button class="btn btn-primary editFacultyMember" data-id_pengajar="' + pengajar.id_pengajar + '"><i class="fas fa-edit"></i></button>' +
+                        '<button class="btn btn-danger" value="' + pengajar.id_pengajar + '" onclick="hapus(this.value)"><i class="fas fa-trash"></i></button>' +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyTenagaPengajar').append(newRow);
+
+                    // Event listener for edit button
+                    $('.editFacultyMember[data-id_pengajar="' + pengajar.id_pengajar + '"]').click(function () {
+                        var id_pengajar = $(this).data("id_pengajar");
+                        loadEditTenagaPengajar(id_pengajar);
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+
+
+    function hapus(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeleteFacultyMember?id=" + id
+        var method = "POST";
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                alert("Data Tenaga Pengajar Berhasil Dihapus");
+                location.reload();
+            },
+        });
+    }
+    $(".addFacultyMember").click(function () {
+        $("#addFacultyMemberModal").modal("show");
+    });
+    $(".editFacultyMember").click(function () {
+        var id_pengajar = $(this).data("id_pengajar");
+        loadEditTenagaPengajar(id_pengajar);
+    });
+
+    function loadEditTenagaPengajar(id_pengajar) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetFacultyMember?id=" + id_pengajar;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var faculty = data.data;
+
+                $('#editid_pengajar').val(faculty.id_pengajar);
+                $('#editnpk').val(faculty.npk);
+                $('#editnama_pengajar').val(faculty.nama_pengajar);
+                $('#editbidang_keahlian').val(faculty.bidang_keahlian);
+                $('#editstatus').val(faculty.status);
+
+                // Show the Bootstrap modal
+                $('#editFacultyMemberModal_').modal('show');
+            }
+        });
+    }
+
+    function simpanedit() {
+        var id_pengajar = document.getElementById("editid_pengajar").value
+        var npk = document.getElementById("editnpk").value
+        var nama_pengajar = document.getElementById("editnama_pengajar").value
+        var bidang_keahlian = document.getElementById("editbidang_keahlian").value
+        var foto_pengajar = document.getElementById("editfoto_pengajar").value
+        var status = document.getElementById("editstatus").value
+
+        var hostname = "https://localhost:7033/" // Ganti dengan URL API Anda
+        var url = hostname + "UpdateFacultyMember" // Sesuaikan dengan endpoint Anda
+        var method = "POST"
+        var input = {
+            id_pengajar: id_pengajar,
+            npk: npk,
+            nama_pengajar: nama_pengajar,
+            bidang_keahlian: bidang_keahlian,
+            foto_pengajar: foto_pengajar,
+            status: status
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/FacultyMember/Index';
+
+            },
+        });
+    }
+
+    function canceledit() {
+        document.getElementById("editnpk").value = "";
+        document.getElementById("editnama_pengajar").value = "";
+        document.getElementById("editbidang_keahlian").value = "";
+    }
+   
+</script>
+
+
+@*Modal*@
+<div class="modal fade" id="addFacultyMemberModal" tabindex="-1" role="dialog" aria-labelledby="addFacultyMember" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size:28px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Faculty Member</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                    <hr />
+                                    <br />
+
+                                    <!-- General Form Elements -->
+                                    <div class="row mb-3">
+                                        <label for="npk" class="col-sm-2 col-form-label">NPK</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="npk" id="npk">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="nama_pengajar" class="col-sm-2 col-form-label">Teacher's Name</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="nama_pengajar" id="nama_pengajar">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="bidang_keahlian" id="bidang_keahlian">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="foto_pengajar" class="col-sm-2 col-form-label">Teacher's Photo</label>
+                                        <div class="col-sm-10">
+                                            <input class="form-control" type="file" name="fotopengajar" id="foto_pengajar">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <input class="form-control" id="status" name="status" value=1 hidden />
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <br />
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                            <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editFacultyMemberModal_" tabindex="-1" role="dialog" aria-labelledby="editFacultyMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size:28px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Faculty Member</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                    <hr />
+                                    <br />
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="id_pengajar" id="editid_pengajar" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="npk" class="col-sm-2 col-form-label">NPK</label>
+                                        <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="editnpk" id="editnpk">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="nama_pengajar" class="col-sm-2 col-form-label">Teacher's Name</label>
+                                        <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="editnama_pengajar" id="editnama_pengajar">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
+                                        <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="editbidang_keahlian" id="editbidang_keahlian">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="foto_pengajar" class="col-sm-2 col-form-label">Teacher's Photo</label>
+                                        <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="editfotopengajar" id="editfoto_pengajar">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                        <input class="form-control" id="editstatus" name="editstatus" value=1 hidden />
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <br />
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="canceledit()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpanedit()">Submit</button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,115 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Add Pengelola Web";
+}
+
+<div class="pagetitle">
+    <h1>- Add Pengelola Web -</h1>
+</div>
+<br />
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Please Fill in Correctly!</h5>
+                    <hr />
+                    <br />
+
+                    <!-- General Form Elements -->
+                    <form id="addPengelolaWebForm" enctype="multipart/form-data">
+                        <div class="row mb-3">
+                            <label for="nama_pengelola" class="col-sm-2 col-form-label">Web Manager's Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="nama_pengelola" id="nama_pengelola">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="username" class="col-sm-2 col-form-label">Username</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="username" id="username">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="password" class="col-sm-2 col-form-label">Password</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" name="password" id="password">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="peran" class="col-sm-2 col-form-label">Role</label>
+                            <div class="col-sm-10">
+                                <select type="text" class="form-control" name="peran" id="peran">
+                                    <option>--- Choose Role ---</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Contributor">Contributor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-10">
+                                <input class="form-control" id="status" name="status" value="1" hidden />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-10">
+                                <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="simpan()">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- End General Form Elements -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function cancel(){
+        document.getElementById("nama_pengelola").value = "";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("peran").value = "--- Choose Role ---";
+    }
+
+
+    function simpan() {
+        var nama_pengelola = document.getElementById("nama_pengelola").value;
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var peran = document.getElementById("peran").value;
+        var status = document.getElementById("status").value;
+
+        var input = {
+            nama_pengelola: nama_pengelola,
+            username: username,
+            password: password,
+            peran: peran,
+            status: status
+        };
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "InsertPengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: JSON.stringify(input),
+            contentType: "application/json",
+            success: function (data) {
+                window.location.href = '/PengelolaWeb/Index';
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+</script>
