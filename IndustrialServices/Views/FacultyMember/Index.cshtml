@@ -53,15 +53,19 @@
 
 <script>
     function simpan() {
-        var npk = document.getElementById("npk").value
-        var nama_pengajar = document.getElementById("nama_pengajar").value
-        var bidang_keahlian = document.getElementById("bidang_keahlian").value
-        var foto_pengajar = document.getElementById("foto_pengajar").value
-        var status = document.getElementById("status").value
+        var check = 0;
+        var npk = document.getElementById("npk").value;
+        var nama_pengajar = document.getElementById("nama_pengajar").value;
+        var bidang_keahlian = document.getElementById("bidang_keahlian").value;
+        var foto_pengajar = document.getElementById("foto_pengajar").value;
+        var status = document.getElementById("status").value;
 
-        var hostname = "https://localhost:7033/" // Ganti dengan URL API Anda
-        var url = hostname + "InsertFacultyMember" // Sesuaikan dengan endpoint Anda
-        var method = "POST"
+        var fotopengajar = document.getElementById("foto_pengajar").files[0];
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "InsertFacultyMember"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+
         var input = {
             npk: npk,
             nama_pengajar: nama_pengajar,
@@ -69,19 +73,46 @@
             foto_pengajar: foto_pengajar,
             status: status
         };
-        var data = JSON.stringify(input);
 
         $.ajax({
             url: url,
             method: method,
-            data: data,
+            data: JSON.stringify(input),
             contentType: "application/json",
             success: function (data) {
-                window.location.href = '/FacultyMember/Index';
+                check = 1;
 
+                if (check == 1) {
+                    uploadFoto(fotopengajar);
+                }
             },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                // Handle error
+            }
         });
     }
+
+    function uploadFoto(file) {
+        var formData = new FormData();
+        formData.append('fotopengajar', file);
+
+        $.ajax({
+            url: '/FacultyMember/UploadPhoto',
+            method: 'POST',
+            data: formData,
+            contentType: false, // false agar FormData menentukan Content-Type
+            processData: false, // false agar FormData tidak diproses
+            success: function (response) {
+                alert('   ');
+                window.location.href = '/FacultyMember/Index';
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
 
     function cancel() {
         document.getElementById("npk").value = "";
