@@ -218,6 +218,8 @@
         var foto_pengajar = document.getElementById("editfoto_pengajar").value
         var status = document.getElementById("editstatus").value
 
+        var fotopengajar = document.getElementById("editfoto_pengajar").files[0];
+
         var hostname = "https://localhost:7033/" // Ganti dengan URL API Anda
         var url = hostname + "UpdateFacultyMember" // Sesuaikan dengan endpoint Anda
         var method = "POST"
@@ -237,7 +239,11 @@
             data: data,
             contentType: "application/json",
             success: function (data) {
-                window.location.href = '/FacultyMember/Index';
+                check = 1;
+
+                if (check == 1) {
+                    uploadFoto(fotopengajar);
+                }
 
             },
         });
