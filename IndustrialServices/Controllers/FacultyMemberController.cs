@@ -30,6 +30,11 @@ namespace IndustrialServices.Controllers
             var imgext = Path.GetExtension(fotopengajar.FileName);
             var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotopengajar.FileName);
 
+            if(fotopengajar == null)
+            {
+                return Ok("File kosong");
+            }
+
             if (imgext == ".jpg" || imgext == ".png" || imgext == ".jpeg")
             {
                 // Check if the file with the same name exists in the directory

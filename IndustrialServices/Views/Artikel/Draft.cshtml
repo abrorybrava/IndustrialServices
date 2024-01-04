@@ -1,5 +1,199 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Edit Article";
 }
+
+<div class="pagetitle">
+    <h1>- Edit Article -</h1>
+</div>
+<br />
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                    <hr />
+                    <br />
+
+                    <!-- Form for editing article data -->
+                        <div class="row mb-3">
+                            <input type="text" class="form-control" name="id_artikel" id="id_artikel" value="@ViewBag.Id" hidden>
+                            <input type="text" class="form-control" name="id_pengelola" id="id_pengelola" hidden>
+                        </div>
+                    <div class="row mb-3">
+                        <label for="tanggal_rilis" class="col-sm-2 col-form-label">Date of Release</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="tanggal_rilis" id="tanggal_rilis" disabled>
+                        </div>
+                    </div>
+                        <div class="row mb-3">
+                            <label for="judul_artikel" class="col-sm-2 col-form-label">Article Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="judul_artikel" id="judul_artikel">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="sampul_artikel" class="col-sm-2 col-form-label">Added Article Cover</label>
+                            <div class="col-sm-10">
+                                <img src="" id="preview_image" alt="Article Cover" width="70" height="70">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="sampul_artikel" class="col-sm-2 col-form-label">Article Cover to Add (Optional)</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="file" name="sampul_artikel" id="sampul_artikel">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="isi_artikel" class="col-sm-2 col-form-label">Article Content</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" name="isi_artikel" id="isi_artikel" rows="10"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-10">
+                                <input class="form-control" id="status" name="status" value="1" hidden />
+                            </div>
+                        </div>
+                        <br />
+                        <br />
+                        <div class="row mb-3">
+                            <div class="col-sm-10">
+                                <button type="button" class="btn btn-danger" onclick="cancelEdit()">Cancel</button>
+                                <button type="submit" class="btn btn-primary" onclick="simpanEdit()">Submit</button>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    loadArticleData();
+
+    function loadArticleData() {
+        var id_artikel = document.getElementById("id_artikel");
+        var id_pengelola = document.getElementById("id_pengelola");
+        var judul_artikel = document.getElementById("judul_artikel");
+        var sampul_artikel = document.getElementById("sampul_artikel");
+        var isi_artikel = document.getElementById("isi_artikel");
+        var status = document.getElementById("status");
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetArtikel?id=" + @ViewBag.Id;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var article = data.data;
+                id_pengelola.value = article.id_pengelola;
+                judul_artikel.value = article.judul_artikel;
+                isi_artikel.value = article.isi_artikel;
+                status.value = article.status;
+
+                // Tampilkan pratinjau gambar sampul artikel jika ada
+                if (article.sampul_artikel) {
+                    var imagePath = "/assets/img/" + article.sampul_artikel;
+                    $("#preview_image").attr("src", imagePath);
+                }
+            }
+        });
+    }
+
+    function simpanEdit() {
+        var check = 0;
+        var id_artikel = document.getElementById("id_artikel").value;
+        var id_pengelola = document.getElementById("id_pengelola").value;
+        var tanggal_rilis = document.getElementById("tanggal_rilis").value;
+        var judul_artikel = document.getElementById("judul_artikel").value;
+        var isi_artikel = document.getElementById("isi_artikel").value;
+        var sampul_artikel = document.getElementById("sampul_artikel").value;
+        var status = document.getElementById("status").value;
+        var tanggal_rilis = document.getElementById("tanggal_rilis").value;
+
+        var sampulartikel = document.getElementById("sampul_artikel").files[0];
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "UpdateArtikel";
+        var method = "POST";
+        var input = {
+            id_artikel: id_artikel,
+            id_pengelola: id_pengelola,
+            tanggal_rilis: tanggal_rilis,
+            judul_artikel: judul_artikel,
+            isi_artikel: isi_artikel,
+            sampul_artikel: sampul_artikel,
+            status: status,
+            tanggal_rilis: tanggal_rilis
+        };
+
+        console.log(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: JSON.stringify(input),
+            contentType: "application/json",
+            success: function (data) {
+                check = 1;
+
+                if(sampulartikel == null){
+                    check = 2;
+                }
+
+                if (check == 1) {
+
+                    uploadFoto(sampulartikel);
+                }
+
+                if(check == 2){
+                    window.location.href = '/Artikel/Index';
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function uploadFoto(file) {
+        var formData = new FormData();
+        formData.append('sampulartikel', file);
+
+        $.ajax({
+            url: '/Artikel/UploadPhoto',
+            method: 'POST',
+            data: formData,
+            contentType: false, // false agar FormData menentukan Content-Type
+            processData: false, // false agar FormData tidak diproses
+            success: function (response) {
+                window.location.href = '/Artikel/Index';
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function cancelEdit() {
+        document.getElementById("judul_artikel").value = "";
+        document.getElementById("isi_artikel").value = "";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var today = new Date();
+
+        // Mendapatkan tanggal dalam format yang dapat dimasukkan ke dalam database (yyyy-MM-dd)
+        var formattedDate = today.toLocaleDateString('en-CA'); // 'en-CA' adalah kode untuk format 'yyyy-MM-dd'
+
+        // Set nilai default pada input tanggal dengan id "tanggal_rilis"
+        document.getElementById('tanggal_rilis').value = formattedDate;
+    });
+</script>

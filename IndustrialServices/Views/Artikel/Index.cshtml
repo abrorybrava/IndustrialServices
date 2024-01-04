@@ -1,5 +1,157 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Article Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
+
+<div class="pagetitle">
+    <h1>Article Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Article</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Article Table</h5>
+
+                    <a class="btn btn-primary" asp-action="Create" asp-controller="Artikel">+ Add Article</a>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Article Title</th>
+                                <th scope="col">Release Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyArticle">
+                            <!-- Article data will be added here -->
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    loadArticles()
+
+    function loadArticles() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllArtikel";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var articles = data.data; // Assuming data is returned in the correct format
+                articles.forEach(function (article, index) {
+                    var formattedDate = formatDate(article.tanggal_rilis);
+                    var statusText = getStatusText(article.status);
+                    var editButton = '';
+                    var deleteButton = '';
+                    var doneButton = '';
+                    var detailButton = '';
+
+                    if (article.status === 1) {
+                        editButton = '<a class="btn btn-primary" href="Artikel/Draft?id=' + article.id_artikel + '"><i class="fas fa-edit"></i></a>';
+                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
+                        doneButton = '<button class="btn btn-success" value="' + article.id_artikel + '" onclick="doneArtikel(this.value)"><i class="fa-solid fa-check"></i></button>';
+                    }
+
+                    if (window.location.href === "https://localhost:7240/Artikel/Index" && article.status === 1) {
+                        editButton = '<a class="btn btn-primary" href="/Artikel/Draft?id=' + article.id_artikel + '"><i class="fas fa-edit"></i></a>';
+                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
+                        doneButton = '<button class="btn btn-success" value="' + article.id_artikel + '" onclick="doneArtikel(this.value)"><i class="fa-solid fa-check"></i></button>';
+                    }
+
+                    if (window.location.href === "https://localhost:7240/Artikel/Index" && article.status === 2) {
+                        detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-solid fa-bars"></i></i></a>';
+                    }
+
+                    if (article.status === 2) {
+                        detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-solid fa-bars"></i></i></a>';
+                    }
+
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + article.judul_artikel + '</td>' +
+                        '<td>' + formattedDate + '</td>' +
+                        '<td>' + statusText + '</td>' +
+                        '<td>' +
+                        editButton +
+                        deleteButton +
+                        doneButton +
+                        detailButton +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyArticle').append(newRow);
+
+                    // Event listener for edit button...
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+    function deleteArtikel(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeleteArtikel?id=" + id
+        var method = "POST";
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                location.reload();
+            },
+        });
+    }
+
+    function doneArtikel(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DoneArtikel?id=" + id
+        var method = "POST";
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                location.reload();
+            },
+        });
+    }
+
+    function getStatusText(status) {
+        if (status === 1) {
+            return 'Draft';
+        } else if (status === 2) {
+            return 'Published';
+        } else {
+            return 'Unknown';
+        }
+    }
+
+    function formatDate(dateString) {
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var date = new Date(dateString);
+        return date.toLocaleDateString('en-US', options);
+    }
+</script>
