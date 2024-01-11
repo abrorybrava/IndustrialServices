@@ -164,16 +164,44 @@
 
     function hapus(id) {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "DeleteFacultyMember?id=" + id
+        var url = hostname + "DeleteFacultyMember?id=" + id;
         var method = "POST";
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                alert("Data Tenaga Pengajar Berhasil Dihapus");
-                location.reload();
-            },
+
+        // Konfirmasi sebelum menghapus menggunakan SweetAlert2
+        Swal.fire({
+            title: 'Are you sure for deleting this Faculty Member?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ajax untuk menghapus data Tenaga Pengajar
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire(
+                            'Success!',
+                            'Faculty Member data deleted sucessfully.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error deleting faculty member:", error);
+                        // Tangani kesalahan jika terjadi saat menghapus data Tenaga Pengajar
+                        Swal.fire(
+                            'Error!',
+                            'error'
+                        );
+                    }
+                });
+            }
         });
     }
     $(".addFacultyMember").click(function () {
@@ -297,7 +325,11 @@
                                     <div class="row mb-3">
                                         <label for="bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
                                         <div class="col-sm-10">
-                                            <input type="text" class="form-control" name="bidang_keahlian" id="bidang_keahlian">
+                                            <select type="text" class="form-select" name="bidang_keahlian" id="bidang_keahlian">
+                                            <option>Select Areas of expertise</option>
+                                                <option value="Technical">Technical</option>
+                                            <option value="Non-Technical">Non-Technical</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -367,7 +399,11 @@
                                     <div class="row mb-3">
                                         <label for="bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
                                         <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="editbidang_keahlian" id="editbidang_keahlian">
+                                        <select type="text" class="form-select" name="editbidang_keahlian" id="editbidang_keahlian">
+                                            <option>Select Areas of expertise</option>
+                                                <option value="Technical">Technical</option>
+                                            <option value="Non-Technical">Non-Technical</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="row mb-3">

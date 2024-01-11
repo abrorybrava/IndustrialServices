@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Departement of Training and Production Data";
+    ViewData["Title"] = "Departement of Training and Production";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
@@ -92,7 +92,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Facilities Data</h5>
-                        <a class="btn btn-primary addFasilitas">+ Add New Facilities</a>
+                        <a class="btn btn-primary addFasilitas">+ Add New Facility</a>
                         <table class="table datatable">
 
                             <thead>
@@ -126,21 +126,22 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Training Sertification Data</h5>
-                        <a class="btn btn-primary">+ Add New Training Sertification</a>
+                        <h5 class="card-title">Training Data</h5>
+                        <a class="btn btn-primary addPelatihan">+ Add New Training</a>
                         <table class="table datatable">
 
                             <thead>
                                 <tr>
                                     <th scope="col">No</th>
                                     <th scope="col">Training Name</th>
-                                    <th scope="col">Training Duration</th>
+                                    <th scope="col">Training Start Date</th>
+                                    <th scope="col">Training End Date</th>
                                     <th scope="col">Training Type</th>
                                     <th scope="col">Training Description</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="">
+                            <tbody id="tbodyTraining">
                                 <!-- Data artikel akan ditambahkan di sini -->
                             </tbody>
 
@@ -158,6 +159,7 @@
         //Start Products DOM JQUERY
     loadProducts()
     loadFasilitas()
+    loadPelatihan()
     function loadProducts() {
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetAllProduk";
@@ -237,32 +239,35 @@
             fotoPaths.push(foto_5);
         }
 
-        // Ambil file untuk setiap input foto
-        var foto1 = document.getElementById("addphoto1").files[0];
-        var foto2 = document.getElementById("addphoto2").files[0];
-        var foto3 = document.getElementById("addphoto3").files[0];
-        var foto4 = document.getElementById("addphoto4").files[0];
-        var foto5 = document.getElementById("addphoto5").files[0];
 
         var hostname = "https://localhost:7033/";
-        var url = hostname + "InsertProduk"; 
+        var url = hostname + "InsertProduk";
         var method = "POST";
 
         // Buat FormData untuk setiap foto yang akan dikirimkan
-        var formData1 = new FormData();
-        formData1.append("file", foto1);
+        var fileInputs = [];
 
-        var formData2 = new FormData();
-        formData2.append("file", foto2);
+        var file1 = document.getElementById("addphoto1").files[0];
+        var file2 = document.getElementById("addphoto2").files[0];
+        var file3 = document.getElementById("addphoto3").files[0];
+        var file4 = document.getElementById("addphoto4").files[0];
+        var file5 = document.getElementById("addphoto5").files[0];
 
-        var formData3 = new FormData();
-        formData3.append("file", foto3);
-
-        var formData4 = new FormData();
-        formData4.append("file", foto4);
-
-        var formData5 = new FormData();
-        formData5.append("file", foto5);
+        if (file1) {
+            fileInputs.push(file1);
+        }
+        if (file2) {
+            fileInputs.push(file2);
+        }
+        if (file3) {
+            fileInputs.push(file3);
+        }
+        if (file4) {
+            fileInputs.push(file4);
+        }
+        if (file5) {
+            fileInputs.push(file5);
+        }
 
         // Data untuk pengiriman informasi produk
         var productData = {
@@ -281,12 +286,7 @@
             data: JSON.stringify(productData),
             success: function (data) {
                 console.log("Data produk berhasil disimpan:", data);
-                // Setelah produk disimpan, kirim foto-fotonya satu per satu
-                uploadPhoto(formData1);
-                uploadPhoto(formData2);
-                uploadPhoto(formData3);
-                uploadPhoto(formData4);
-                uploadPhoto(formData5);
+                uploadPhoto(fileInputs);
                 sendPhotoProduk(fotoPaths);
 
                 location.reload(); // Opsional: Jika Anda ingin memuat ulang halaman
@@ -299,8 +299,15 @@
     }
 
     // Fungsi untuk mengirimkan foto ke server
-    function uploadPhoto(formData) {
-        var url = '/DPP/UploadPhoto';
+
+
+function uploadPhoto(formDataArray) {
+    var url = '/DPP/UploadPhoto';
+
+    formDataArray.forEach(function (data) {
+        var formData = new FormData(); // perbaikan: nama FormData harus huruf besar-besar
+        formData.append('foto', data);
+
         $.ajax({
             url: url,
             method: 'POST',
@@ -309,13 +316,15 @@
             data: formData,
             success: function (response) {
                 console.log("Foto berhasil diunggah:", response);
+                // Lakukan tindakan lebih lanjut jika diperlukan setelah foto berhasil diunggah
             },
             error: function (xhr, status, error) {
                 console.error("Error uploading photo:", error);
-                // Handle error
+                // Tangani kesalahan jika ada
             }
         });
-    }
+    });
+}
 
     function sendPhotoProduk(photoPaths) {
         var hostname = 'https://localhost:7033/'; // Ganti dengan URL untuk mengunggah foto
@@ -339,11 +348,9 @@
             contentType: "application/json",
             data: JSON.stringify(fotoProdukArray),
             success: function (data) {
-                alert('waw')
                 console.log("Foto berhasil diunggah:", data);
             },
             error: function (xhr, status, error) {
-                                alert('wiw')
                 console.error("Error uploading photo:", error);
                 // Handle error
             }
@@ -446,7 +453,7 @@
                     var fotoProduk = data;
 
                     // Kosongkan konten sebelum menambahkan data baru
-                    $(".showFotoProduct").empty();
+                    $("#showFotoProduct").empty();
 
                     // Perulangan untuk menampilkan path_foto_produk ke dalam modal pop-up
                     $.each(fotoProduk, function (index, foto) {
@@ -455,7 +462,7 @@
                             '<p>Photo Produk ' + (index + 1) + '</p>' +
                             '<img src="/assets/img/' + foto.path_foto_produk + '" alt="Foto Produk" width="70" height="70">' +
                             '</div>';
-                        $(".showFotoProduct").append(fotoHtml);
+                        $("#showFotoProduct").append(fotoHtml);
                     });
 
                     // Tampilkan modal pop-up setelah mendapatkan dan menambahkan foto produk
@@ -478,9 +485,8 @@
     //End Products DOM JQUERY
 
 
-    // Start Mesin DOM JQUERY
+    // Start Fasilitas DOM JQUERY
 
-    // Fungsi untuk memuat semua mesin
     function loadFasilitas() {
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetAllFasilitas";
@@ -557,30 +563,33 @@
         }
 
         // Ambil file untuk setiap input foto
-        var foto1 = document.getElementById("photoFasilitas1").files[0];
-        var foto2 = document.getElementById("photoFasilitas2").files[0];
-        var foto3 = document.getElementById("photoFasilitas3").files[0];
-        var foto4 = document.getElementById("photoFasilitas4").files[0];
-        var foto5 = document.getElementById("photoFasilitas5").files[0];
+var fotoArray = [
+    document.getElementById("photoFasilitas1").files[0],
+    document.getElementById("photoFasilitas2").files[0],
+    document.getElementById("photoFasilitas3").files[0],
+    document.getElementById("photoFasilitas4").files[0],
+    document.getElementById("photoFasilitas5").files[0]
+];
+
+        if (foto1) {
+            fotoArray.push(foto1);
+        }
+        if (foto2) {
+            fotoArray.push(foto2);
+        }
+        if (foto3) {
+            fotoArray.push(foto3);
+        }
+        if (foto4) {
+            fotoArray.push(foto4);
+        }
+        if (foto5) {
+            fotoArray.push(foto5);
+        }
 
         var hostname = "https://localhost:7033/";
         var url = hostname + "InsertFasilitas";
         var method = "POST";
-
-        var formData1 = new FormData();
-        formData1.append("file", foto1);
-
-        var formData2 = new FormData();
-        formData2.append("file", foto2);
-
-        var formData3 = new FormData();
-        formData3.append("file", foto3);
-
-        var formData4 = new FormData();
-        formData4.append("file", foto4);
-
-        var formData5 = new FormData();
-        formData5.append("file", foto5);
 
         // Data yang akan dikirim
         var fasilitasData = {
@@ -598,11 +607,7 @@
             data: JSON.stringify(fasilitasData),
             success: function (data) {
                 console.log("Data fasilitas berhasil disimpan:", data);
-                uploadPhoto(formData1);
-                uploadPhoto(formData2);
-                uploadPhoto(formData3);
-                uploadPhoto(formData4);
-                uploadPhoto(formData5);
+                uploadPhoto(fotoArray);
                 sendPhotoFasilitas(fotoPaths);
                 location.reload();
             },
@@ -744,7 +749,7 @@
                     var fotoFasilitas = data;
 
                     // Kosongkan konten sebelum menambahkan data baru
-                    $(".showFotoFasilitas").empty();
+                    $("#showFotoFasilitas").empty();
 
                     // Perulangan untuk menampilkan path_foto_fasilitas ke dalam modal pop-up
                     $.each(fotoFasilitas, function (index, foto) {
@@ -767,9 +772,463 @@
         });
     });
 
+    //End Fasilitas DOM JQUERY
+
+    //Start Pelatihan DOM JQUERY
+    function loadPelatihan() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllPelatihan";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pelatihanList = data;
+                if (Array.isArray(pelatihanList)) {
+                    pelatihanList.forEach(function (pelatihan, index) {
+                        // Konversi tanggal_pelatihan ke objek Date
+                        var tanggalPelatihan1 = new Date(pelatihan.tanggal_pelatihan_awal);
+                        var tanggalPelatihan2 = new Date(pelatihan.tanggal_pelatihan_akhir);
+                        tanggalPelatihan1.setDate(tanggalPelatihan1.getDate() + 1);
+                                                tanggalPelatihan2.setDate(tanggalPelatihan2.getDate() + 1);
+                        // Konversi tanggal ke format yang diinginkan
+                        var tanggalAwalFinal = tanggalPelatihan1.toISOString().split('T')[0];
+                        var tanggalAkhirFinal = tanggalPelatihan2.toISOString().split('T')[0];
+
+                        var newRow = '<tr>' +
+                            '<td>' + (index + 1) + '</td>' +
+                            '<td>' + pelatihan.nama_pelatihan + '</td>' +
+                            '<td>' + tanggalAwalFinal + '</td>' +
+                            '<td>' + tanggalAkhirFinal + '</td>' +
+                            '<td>' + pelatihan.jenis_pelatihan + '</td>' +
+                            '<td>' + pelatihan.deskripsi_pelatihan + '</td>' +
+                            '<td>' +
+                            '<button class="btn btn-success showPhotoPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fa-regular fa-image"></i></button>' +
+                            '<button class="btn btn-primary editPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fas fa-edit"></i></button>' +
+                            '<button class="btn btn-danger" value="' + pelatihan.id_pelatihan + '" onclick="hapusPelatihan(this.value)"><i class="fas fa-trash"></i></button>' +
+                            '</td>' +
+                            '</tr>';
+
+                        $('#tbodyTraining').append(newRow);
+
+                        // Event listener untuk tombol edit
+                        $('.editPelatihan[data-id_pelatihan="' + pelatihan.id_pelatihan + '"]').click(function () {
+                            var id_pelatihan = $(this).data("id_pelatihan");
+                            loadEditPelatihan(id_pelatihan);
+                        });
+                    });
+                } else {
+                    console.error("Format data tidak valid");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
 
 
-    //End Machine DOM JQUERY
+
+
+
+
+    function simpanPelatihan() {
+        var nama_pelatihan = document.getElementById("nama_pelatihan").value;
+        var tanggal_pelatihan_awal = document.getElementById("tanggal_pelatihan_awal").value;
+        var tanggal_pelatihan_akhir = document.getElementById("tanggal_pelatihan_akhir").value;
+        var jenis_pelatihan = document.getElementById("jenis_pelatihan").value;
+        var deskripsi_pelatihan = document.getElementById("deskripsi_pelatihan").value;
+        var status = document.getElementById("status_pelatihan").value;
+
+        var id_pengajar = document.getElementById("id_pengajar").value;
+
+        var pengajarArray = [];
+        pengajarArray.push(id_pengajar);
+        $('.form-group-added').each(function (index, row) {
+            var id_pengajar_clone = $(row).find('select').val();
+
+            // Check if id_pengajar_clone is not undefined or null before adding to array
+            if (id_pengajar_clone !== undefined && id_pengajar_clone !== null) {
+
+                    var rowData = id_pengajar_clone
+                    // Anda juga dapat menambahkan data lain ke dalam rowData sesuai kebutuhan
+
+
+                pengajarArray.push(rowData); // Menambahkan data ke dalam array
+            }
+        });
+
+        console.log(pengajarArray);
+        alert('check')
+
+        var fotoPaths = [];
+
+        var foto_1 = document.getElementById("photoPelatihan1").value;
+        var foto_2 = document.getElementById("photoPelatihan2").value;
+        var foto_3 = document.getElementById("photoPelatihan3").value;
+        var foto_4 = document.getElementById("photoPelatihan4").value;
+        var foto_5 = document.getElementById("photoPelatihan5").value;
+
+        // Menambahkan foto-foto yang tidak kosong ke dalam array fotoPaths
+        if (foto_1.trim() !== '') {
+            fotoPaths.push(foto_1);
+        }
+        if (foto_2.trim() !== '') {
+            fotoPaths.push(foto_2);
+        }
+        if (foto_3.trim() !== '') {
+            fotoPaths.push(foto_3);
+        }
+        if (foto_4.trim() !== '') {
+            fotoPaths.push(foto_4);
+        }
+        if (foto_5.trim() !== '') {
+            fotoPaths.push(foto_5);
+        }
+
+        // Ambil file untuk setiap input foto
+        var fotoPelatihanArray = [];
+
+        // Mengumpulkan file foto dalam array jika tidak kosong
+        if (document.getElementById("photoPelatihan1").files.length > 0) {
+            fotoPelatihanArray.push(document.getElementById("photoPelatihan1").files[0]);
+        }
+        if (document.getElementById("photoPelatihan2").files.length > 0) {
+            fotoPelatihanArray.push(document.getElementById("photoPelatihan2").files[0]);
+        }
+        if (document.getElementById("photoPelatihan3").files.length > 0) {
+            fotoPelatihanArray.push(document.getElementById("photoPelatihan3").files[0]);
+        }
+        if (document.getElementById("photoPelatihan4").files.length > 0) {
+            fotoPelatihanArray.push(document.getElementById("photoPelatihan4").files[0]);
+        }
+        if (document.getElementById("photoPelatihan5").files.length > 0) {
+            fotoPelatihanArray.push(document.getElementById("photoPelatihan5").files[0]);
+        }
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertPelatihan";
+        var method = "POST";
+
+        // Data yang akan dikirim
+        var pelatihanData = {
+            nama_pelatihan: nama_pelatihan,
+            tanggal_pelatihan_awal: tanggal_pelatihan_awal,
+            tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
+            jenis_pelatihan: jenis_pelatihan,
+            deskripsi_pelatihan: deskripsi_pelatihan,
+            status: status
+        };
+
+        // Mengirim permintaan AJAX untuk menyimpan data pelatihan
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            data: JSON.stringify(pelatihanData),
+            success: function (data) {
+                console.log("Data pelatihan berhasil disimpan:", data);
+                uploadPhoto(fotoPelatihanArray);
+                sendPhotoPelatihan(fotoPaths);
+                detailPengajarPelatihan(pengajarArray);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                // Tangani error
+            }
+        });
+    }
+
+    function sendPhotoPelatihan(photoPaths) {
+        var hostname = 'https://localhost:7033/'; // Ganti dengan URL untuk mengunggah foto
+        var url = hostname + "SendPhotoPelatihan";
+
+        var fotoPelatihanArray = [];
+
+        photoPaths.forEach(function (photoPath) {
+            var fotoPelatihan = {
+                path_foto_pelatihan: photoPath,
+                status: 1 // Atur status yang sesuai jika diperlukan
+            };
+
+            fotoPelatihanArray.push(fotoPelatihan);
+        });
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(fotoPelatihanArray),
+            success: function (data) {
+                console.log("Foto pelatihan berhasil diunggah:", data);
+            },
+            error: function (xhr, status, error) {
+                alert('error add foto')
+                console.error("Error uploading photo pelatihan:", error);
+                // Handle error
+            }
+        });
+    }
+
+    function detailPengajarPelatihan(pengajarArray) {
+    var hostname = 'https://localhost:7033/';
+        var url = hostname + "InsertPengajarPelatihan";
+    var dataDropdown = [];
+
+    // Mengambil nilai dari setiap dropdown yang ditambahkan
+    pengajarArray.forEach(function (pengajar) {
+        var pengajarId = {
+            id_pengajar: pengajar
+        };
+        dataDropdown.push(pengajarId);
+    });
+
+    console.log(dataDropdown);
+    alert('  ');
+    
+    $.ajax({
+        url: url,
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(dataDropdown),
+        success: function (response) {
+            // Handle response dari server jika diperlukan
+            console.log('Data berhasil dikirim ke database', response);
+        },
+        error: function (xhr, status, error) {
+            // Tangani kesalahan jika ada
+            console.error('Terjadi kesalahan:', error);
+        }
+    });
+}
+
+    function hapusPelatihan(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeletePelatihan?id=" + id;
+        var method = "POST";
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                location.reload(); // Memuat ulang halaman setelah menghapus
+            },
+        });
+    }
+
+    function loadEditPelatihan(id_pelatihan) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetPelatihan?id=" + id_pelatihan;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pelatihan = data;
+                $('#editid_pelatihan').val(pelatihan.id_pelatihan);
+                $('#editnama_pelatihan').val(pelatihan.nama_pelatihan);
+                var date1 = new Date(pelatihan.tanggal_pelatihan_awal);
+                date1.setDate(date1.getDate() + 1);
+                var formattedDate1 = date1.toISOString().split('T')[0];
+                var date2 = new Date(pelatihan.tanggal_pelatihan_akhir);
+                date2.setDate(date2.getDate() + 1);
+                var formattedDate2 = date2.toISOString().split('T')[0];
+                $('#edittanggal_pelatihan_awal').val(formattedDate1);
+                $('#edittanggal_pelatihan_akhir').val(formattedDate2);
+                $('#editjenis_pelatihan').val(pelatihan.jenis_pelatihan);
+                $('#editdeskripsi_pelatihan').val(pelatihan.deskripsi_pelatihan);
+                $('#editstatus_pelatihan').val(pelatihan.status);
+                console.log(pelatihan.tanggal_pelatihan);
+                // Menampilkan modal pop-up untuk edit
+                $('#editPelatihanModal').modal('show');
+            }
+        });
+    }
+
+    function updatePelatihan() {
+        var id_pelatihan = document.getElementById("editid_pelatihan").value;
+        var nama_pelatihan = document.getElementById("editnama_pelatihan").value;
+        var tanggal_pelatihan_awal = document.getElementById("edittanggal_pelatihan_awal").value;
+        var tanggal_pelatihan_akhir = document.getElementById("edittanggal_pelatihan_akhir").value;
+        var jenis_pelatihan = document.getElementById("editjenis_pelatihan").value;
+        var deskripsi_pelatihan = document.getElementById("editdeskripsi_pelatihan").value;
+        var status = document.getElementById("editstatus_pelatihan").value;
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "UpdatePelatihan";
+        var method = "POST";
+        var input = {
+            id_pelatihan: id_pelatihan,
+            nama_pelatihan: nama_pelatihan,
+            tanggal_pelatihan_awal: tanggal_pelatihan_awal,
+            tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
+            jenis_pelatihan: jenis_pelatihan,
+            deskripsi_pelatihan: deskripsi_pelatihan,
+            status: status
+        };
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: JSON.stringify(input),
+            contentType: "application/json",
+            success: function (data) {
+                console.log("Data pelatihan berhasil diperbarui:", data);
+                $('#editPelatihanModal').modal('hide');
+                location.reload(); // Opsional: Jika ingin memuat ulang halaman setelah update
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                // Tangani error
+            }
+        });
+    }
+
+    $('.addPelatihan').click(function () {
+        $('.form-group-added').remove();
+        $("#addPelatihanModal").modal("show");
+    });
+    $(document).ready(function () {
+        // Event listener untuk menampilkan foto Pelatihan ketika tombol showPhotoPelatihan ditekan
+        $(document).on('click', '.showPhotoPelatihan', function () {
+            var pelatihanId = $(this).data('id_pelatihan'); // Mendapatkan id_pelatihan dari atribut data
+            var hostname = "https://localhost:7033/";
+            var url = hostname + "GetPhotoPelatihan?id=" + pelatihanId;
+            var method = "GET";
+
+            // Ajax request untuk mendapatkan foto Pelatihan berdasarkan id_pelatihan
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: "application/json",
+                success: function (data) {
+                    // Jika panggilan berhasil, data akan berisi daftar foto Pelatihan
+                    var fotoPelatihan = data;
+
+                    // Kosongkan konten sebelum menambahkan data baru
+                    $("#showFotoPelatihan").empty();
+
+                    // Perulangan untuk menampilkan path_foto_pelatihan ke dalam modal pop-up
+                    $.each(fotoPelatihan, function (index, foto) {
+                        // Tambahkan data path_foto_pelatihan ke dalam elemen div di dalam modal pop-up
+                        var fotoHtml = '<div class="foto-item">' +
+                            '<p>Photo Pelatihan ' + (index + 1) + '</p>' +
+                            '<img src="/assets/img/' + foto.path_foto_pelatihan + '" alt="Foto Pelatihan" width="70" height="70">' +
+                            '</div>';
+                        $("#showFotoPelatihan").append(fotoHtml);
+                    });
+
+                    // Tampilkan modal pop-up setelah mendapatkan dan menambahkan foto Pelatihan
+                    $('#showPhotoPelatihanModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    // Tangani kesalahan jika panggilan gagal
+                    console.error(error);
+                }
+            });
+        });
+    });
+
+
+    function populateFacultyMembers() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFacultyMembers"; // Ganti dengan URL endpoint yang sesuai
+
+        $.ajax({
+            url: url,
+            method: "GET",
+            contentType: "application/json",
+            success: function (data) {
+                var facultyMembers = data.data;
+
+                // Mendapatkan elemen dropdown list
+                var dropdown = $('#id_pengajar');
+
+                // Menghapus semua opsi sebelum menambahkan opsi yang baru
+                dropdown.empty();
+
+                // Menambahkan opsi default
+                dropdown.append($('<option></option>').text('Select Faculty Member'));
+
+                // Menambahkan daftar FacultyMember ke dalam dropdown list
+                facultyMembers.forEach(function (pengajar) {
+                    dropdown.append($('<option></option>').attr('value', pengajar.id_pengajar).text(pengajar.nama_pengajar));
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching FacultyMembers:", error);
+                // Tangani error jika ada
+            }
+        });
+    }
+
+        function populateEditFacultyMembersinPelatihan() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFacultyMembers"; // Ganti dengan URL endpoint yang sesuai
+
+        $.ajax({
+            url: url,
+            method: "GET",
+            contentType: "application/json",
+            success: function (data) {
+                var facultyMembers = data.data;
+
+                // Mendapatkan elemen dropdown list
+                var dropdown = $('#editid_pengajar');
+
+                // Menghapus semua opsi sebelum menambahkan opsi yang baru
+                dropdown.empty();
+
+                // Menambahkan opsi default
+                dropdown.append($('<option></option>').text('Select Faculty Member'));
+
+                // Menambahkan daftar FacultyMember ke dalam dropdown list
+                facultyMembers.forEach(function (pengajar) {
+                    dropdown.append($('<option></option>').attr('value', pengajar.id_pengajar).text(pengajar.nama_pengajar));
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching FacultyMembers:", error);
+                // Tangani error jika ada
+            }
+        });
+    }
+
+    // Panggil fungsi untuk mengisi dropdown list saat halaman dimuat
+        populateFacultyMembers();
+        populateEditFacultyMembersinPelatihan();
+
+    function tambahDropdown() {
+        var dropdownClone = $('#id_pengajar').clone(); // Clone dropdown
+        dropdownClone.removeAttr('id'); // Hapus atribut 'id' dari dropdown clone
+
+        // Tambahkan dropdown clone beserta tombol hapusnya
+        $('.form-group').last().after(
+            `<div class="form-group-added row mb-3">
+                    <div class="col-sm-10">
+                        ${dropdownClone[0].outerHTML}
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" class="btn btn-danger" onclick="hapusDropdown(this)">Delete</button>
+                    </div>
+                </div>`
+        );
+    }
+
+    function hapusDropdown(btn) {
+        $(btn).closest('.form-group-added').remove(); // Hapus dropdown terkait dengan tombol hapus yang ditekan
+    }
+
+
+
+
+    //End Pelatihan DOM JQUERY
 
 
     // Buttons
@@ -790,7 +1249,7 @@
     $('.fasilitas').click(function () {
         $('.tableFacilities').show();
         $('.tableProduct').hide();
-                $('.tableTraining').hide(); 
+        $('.tableTraining').hide(); 
     });
 </script>
 
@@ -800,7 +1259,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Product</h1>
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add New Product</h1>
             </div>
             <div class="modal-body">
                 <section class="section">
@@ -971,7 +1430,7 @@
                             <div class="card-body">
                                 <br/>
 
-                                <div class="showFotoProduct">
+                                <div id="showFotoProduct">
                                 </div>
                             </div>
                         </div>
@@ -987,12 +1446,12 @@
 
 
 
-@*Modal Machine*@
+@*Modal Facility*@
 <div class="modal fade" id="addFasilitasModal" tabindex="-1" role="dialog" aria-labelledby="addFasilitas" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Fasilitas</h1>
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add New Facility</h1>
             </div>
             <div class="modal-body">
                 <section class="section">
@@ -1086,7 +1545,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title" id="editFasilitasModalLabel" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Fasilitas</h1>
+                <h1 class="modal-title" id="editFasilitasModalLabel" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Facility</h1>
             </div>
             <div class="modal-body">
                 <section class="section">
@@ -1164,5 +1623,257 @@
     </div>
 </div>
 
+@*Modal Facility*@
 
-@*Modal Machine*@
+
+@*Modal Training*@
+<div class="modal fade" id="addPelatihanModal" tabindex="-1" role="dialog" aria-labelledby="addPelatihan" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add New Training</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="nama_pelatihan" class="col-sm-2 col-form-label">Training Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="nama_pelatihan" id="nama_pelatihan">
+                                    </div>
+                                </div>
+
+                                <!-- Tambahkan input untuk tanggal_pelatihan -->
+                                <div class="form-group row mb-6">
+                                    <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date</label>
+                                    <div class="col-sm-3">
+                                        <input type="date" class="form-control" name="tanggal_pelatihan_awal" id="tanggal_pelatihan_awal">
+                                    </div>
+                                     <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training End Date</label>
+                                    <div class="col-sm-3">
+                                        <input type="date" class="form-control" name="tanggal_pelatihan_akhir" id="tanggal_pelatihan_akhir">
+                                    </div>
+                                </div>
+
+                                <!-- Tambahkan input untuk durasi_pelatihan -->
+                                <div class="row mb-3">
+
+                                </div>
+
+                                <!-- Tambahkan input untuk jenis_pelatihan -->
+                                <div class="row mb-3">
+                                    <label for="jenis_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-select" name="jenis_pelatihan" id="jenis_pelatihan">
+                                            <option>Select Training Type</option>
+                                            <option value="Automotive Advance Technology">Automotive Advance Technology</option>
+                                            <option value="Civil & Construction">Civil & Construction</option>
+                                            <option value="Design">Design</option>
+                                            <option value="Electrical & Automation">Electrical & Automation</option>
+                                            <option value="Heavy Equipment">Heavy Equipment</option>
+                                            <option value="Information Technology">Information Technology</option>
+                                            <option value="Lean Manufacturing">Lean Manufacturing</option>
+                                            <option value="Machining">Machining</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Mechatronics">Mechatronics</option>
+                                            <option value="Quality Control">Quality Control</option>
+                                            <option value="Supply Chains Manufacturing and Certification">Supply Chains Manufacturing and Certification</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Tambahkan input untuk deskripsi_pelatihan -->
+                                <div class="row mb-3">
+                                    <label for="deskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="deskripsi_pelatihan" id="deskripsi_pelatihan" rows="5"></textarea>
+                                    </div>
+                                </div>
+                                <hr />
+                                <br />
+                                <div class="col-sm-2">
+                                    <button type="button" class="btn btn-success" onclick="tambahDropdown()">Tambah</button>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <label for="faculty_member" class="col-sm-6 col-form-label">Add Faculty Member for Training</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-select" name="id_pengajar" id="id_pengajar">
+                                            <!-- Opsi Dropdown -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <br />
+                                <hr />
+                                <div class="row mb-6">
+                                    <label class="col-sm-6 col-form-label">Add Training's Photo (Min 1, Max size each photo 5 MB)</label>
+                                </div>
+                                                                <br />
+                                <div class="row mb-3">
+                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1</label>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" id="photoPelatihan1">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="photoPelatihan2" class="col-sm-2 col-form-label">Add Photo 2</label>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" id="photoPelatihan2">
+                                    </div>
+                                </div>
+                                <!-- Tambahkan input untuk foto-foto yang lain sesuai kebutuhan -->
+                                <div class="row mb-3">
+                                    <label for="photoPelatihan3" class="col-sm-2 col-form-label">Add Photo 3</label>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" id="photoPelatihan3">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="photoPelatihan4" class="col-sm-2 col-form-label">Add Photo 4</label>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" id="photoPelatihan4">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="photoPelatihan5" class="col-sm-2 col-form-label">Add Photo 5</label>
+                                    <div class="col-sm-10">
+                                        <input type="file" class="form-control" id="photoPelatihan5">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status_pelatihan" name="status_pelatihan" value=1 hidden>
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelPelatihan()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpanPelatihan()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editPelatihanModal" tabindex="-1" role="dialog" aria-labelledby="editPelatihanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" id="editPelatihanModalLabel" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Training</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <input type="text" class="form-control" id="editid_pelatihan" hidden>
+                                <div class="row mb-3">
+                                    <label for="editnama_pelatihan" class="col-sm-2 col-form-label">Training Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="editnama_pelatihan" placeholder="Training Name">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="edittanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date</label>
+                                    <div class="col-sm-10">
+                                        <input type="date" class="form-control" id="edittanggal_pelatihan_awal">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="edittanggal_pelatihan_akhir" class="col-sm-2 col-form-label">Training End Date</label>
+                                    <div class="col-sm-10">
+                                        <input type="date" class="form-control" id="edittanggal_pelatihan_akhir">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="editjenis_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-select" name="editjenis_pelatihan" id="editjenis_pelatihan">
+                                            <option>Select Training Type</option>
+                                            <option value="Automotive Advance Technology">Automotive Advance Technology</option>
+                                            <option value="Civil & Construction">Civil & Construction</option>
+                                            <option value="Design">Design</option>
+                                            <option value="Electrical & Automation">Electrical & Automation</option>
+                                            <option value="Heavy Equipment">Heavy Equipment</option>
+                                            <option value="Information Technology">Information Technology</option>
+                                            <option value="Lean Manufacturing">Lean Manufacturing</option>
+                                            <option value="Machining">Machining</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Mechatronics">Mechatronics</option>
+                                            <option value="Quality Control">Quality Control</option>
+                                            <option value="Supply Chains Manufacturing and Certification">Supply Chains Manufacturing and Certification</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="editdeskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="editdeskripsi_pelatihan" rows="5" placeholder="Training Description"></textarea>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="editstatus_pelatihan" name="editstatus_pelatihan" value=1 hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="updatePelatihan()">Save changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="showPhotoPelatihanModal" tabindex="-1" role="dialog" aria-labelledby="showPhotoPelatihanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" id="showPhotoPelatihanModalLabel" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Training Photos</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <br />
+                                <div id="showFotoPelatihan">
+                                    <!-- Konten foto pelatihan akan ditampilkan di sini -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Modal Training*@

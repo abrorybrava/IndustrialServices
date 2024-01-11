@@ -1,0 +1,33 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="pagetitle">
+    <h1>Calendar of Events</h1>
+</div><!-- End Page Title -->
+<hr/>
+<br/>
+
+<div class="container-md" style="padding: 60px; background-color: steelblue;">
+    <div class="container-fluid" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="flex-grow: 1;">
+            <h5 style="padding-bottom: 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;">Filter-Training</h5>
+            <input type="checkbox" id="technical" name="technical" style="transform: scale(1.3);">
+            <label for="technical" style="color: white; font-size: 18px;">Technical</label><br>
+            <input type="checkbox" id="non-technical" name="non-technical" style="transform: scale(1.3);">
+            <label for="non-technical" style="color: white; font-size: 18px;">Non-Technical</label><br>
+        </div>
+        <div style="margin-left: 20px;">
+            <h5 style="padding-bottom: 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white;">Filter-Month</h5>
+            <select class="form-select" name="month" style="font-size: 18px;">
+                <option value="january">Januari</option>
+                <option value="february">Februari</option>
+                <option value="march">Maret</option>
+                <!-- Tambahkan opsi bulan lainnya sesuai kebutuhan -->
+            </select>
+        </div>
+    </div>
+</div>
+
+

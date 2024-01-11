@@ -82,10 +82,12 @@
 
                     if (window.location.href === "https://localhost:7240/Artikel/Index" && article.status === 2) {
                         detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-solid fa-bars"></i></i></a>';
+                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
                     }
 
                     if (article.status === 2) {
                         detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-solid fa-bars"></i></i></a>';
+                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
                     }
 
                     var newRow = '<tr>' +
@@ -113,17 +115,37 @@
     }
     function deleteArtikel(id) {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "DeleteArtikel?id=" + id
+        var url = hostname + "DeleteArtikel?id=" + id;
         var method = "POST";
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                location.reload();
-            },
+
+        // Konfirmasi sebelum menghapus menggunakan SweetAlert
+        Swal.fire({
+            title: 'Are you sure for deleting this Article?',
+            text: "You can't bring this data back.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Delete!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ajax untuk menghapus artikel
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error deleting article:", error);
+                        // Tangani kesalahan jika terjadi saat menghapus artikel
+                    }
+                });
+            }
         });
     }
+
 
     function doneArtikel(id) {
         var hostname = "https://localhost:7033/";

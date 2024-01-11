@@ -15,36 +15,40 @@ namespace IndustrialServices.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadPhoto(IFormFile foto)
+        public async Task<IActionResult> UploadPhoto(List<IFormFile> foto)
         {
-            var imgext = Path.GetExtension(foto.FileName);
-            var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", foto.FileName);
-
-            if (foto == null)
+            foreach (var fotofoto in foto)
             {
-                return Ok("File kosong");
-            }
+                var imgext = Path.GetExtension(fotofoto.FileName);
+                var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotofoto.FileName);
 
-            if (imgext == ".jpg" || imgext == ".png" || imgext == ".jpeg")
-            {
-                // Check if the file with the same name exists in the directory
-                if (!System.IO.File.Exists(saveimg))
+                if (foto == null)
                 {
-                    using (var uploading = new FileStream(saveimg, FileMode.Create))
+                    return Ok("File kosong");
+                }
+
+                if (imgext == ".jpg" || imgext == ".png" || imgext == ".jpeg")
+                {
+                    // Check if the file with the same name exists in the directory
+                    if (!System.IO.File.Exists(saveimg))
                     {
-                        await foto.CopyToAsync(uploading);
-                        return Ok("Data berhasil diupload ke wwwroot");
+                        using (var uploading = new FileStream(saveimg, FileMode.Create))
+                        {
+                            await fotofoto.CopyToAsync(uploading);
+                            return Ok("Data berhasil diupload ke wwwroot");
+                        }
+                    }
+                    else
+                    {
+                        return Ok("File dengan nama yang sama sudah ada di direktori");
                     }
                 }
                 else
                 {
-                    return Ok("File dengan nama yang sama sudah ada di direktori");
+                    return Ok("Format foto tidak valid. Harap unggah file dengan format .jpg atau .png");
                 }
             }
-            else
-            {
-                return Ok("Format foto tidak valid. Harap unggah file dengan format .jpg atau .png");
-            }
+            return Ok();
         }
     }
 }
