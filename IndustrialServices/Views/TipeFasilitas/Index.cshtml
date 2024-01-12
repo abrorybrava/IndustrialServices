@@ -1,0 +1,332 @@
+﻿@{
+    ViewData["Title"] = "Type Facility Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="pagetitle">
+    <h1>Type Facility Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Type of Facility</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Type of Facility Data</h5>
+                    <a class="btn btn-secondary" asp-controller="DPP" asp-action="Index">Back</a>
+                    <a class="btn btn-primary addTipeFasilitas">+ Add New Type Facility</a>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Type of Facility</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTipeFasilitas">
+                            <!-- Tipe_Fasilitas data will be added here -->
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    loadTipeFasilitas();
+
+    function loadTipeFasilitas() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllTipeFasilitas";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipeFasilitasList = data; // Assuming data is returned in the correct format
+                tipeFasilitasList.forEach(function (tipeFasilitas, index) {
+                    var statusText = (tipeFasilitas.status === 1) ? "Active" : "Inactive";
+                    var editButton = '';
+                    var deleteButton = '';
+
+                    if (tipeFasilitas.status === 1) {
+                        editButton = '<button class="btn btn-primary editTipeFasilitas" data-id_tipe_fasilitas="' + tipeFasilitas.id_tipe_fasilitas + '"><i class="fas fa-edit"></i></button>';
+                        deleteButton = '<button class="btn btn-danger" value="' + tipeFasilitas.id_tipe_fasilitas + '" onclick="deleteTipeFasilitas(this.value)"><i class="fas fa-trash"></i></button>';
+                    }
+
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + tipeFasilitas.tipe_fasilitas + '</td>' +
+                        '<td>' + statusText + '</td>' +
+                        '<td>' +
+                        editButton +
+                        deleteButton +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyTipeFasilitas').append(newRow);
+
+                    $('.editTipeFasilitas[data-id_tipe_fasilitas="' + tipeFasilitas.id_tipe_fasilitas + '"]').click(function () {
+                        var id_tipe_fasilitas = $(this).data("id_tipe_fasilitas");
+                        loadEditTipeFasilitas(id_tipe_fasilitas);
+                    });
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function deleteTipeFasilitas(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeleteTipeFasilitas?id=" + id;
+        var method = "POST";
+
+        // Konfirmasi sebelum menghapus menggunakan SweetAlert2
+        Swal.fire({
+            title: 'Are you sure for deleting this Type of Facility?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ajax untuk menghapus data Tipe_Fasilitas
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire(
+                            'Success!',
+                            'Type of Facility data deleted successfully.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error deleting type of facility:", error);
+                        // Tangani kesalahan jika terjadi saat menghapus data Tipe_Fasilitas
+                        Swal.fire(
+                            'Error!',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+
+    $(".addTipeFasilitas").click(function () {
+        $("#addTipeFasilitasModal").modal("show");
+    });
+
+    $(".editTipeFasilitas").click(function () {
+        var id_tipe_fasilitas = $(this).data("id_tipe_fasilitas");
+        loadEditTipeFasilitas(id_tipe_fasilitas);
+    });
+
+    function loadEditTipeFasilitas(id_tipe_fasilitas) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetTipeFasilitas?id=" + id_tipe_fasilitas;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipeFasilitas = data; // Sesuaikan struktur respons dengan API Anda
+
+                $('#edit_id_tipe_fasilitas').val(tipeFasilitas.id_tipe_fasilitas);
+                $('#edit_tipe_fasilitas').val(tipeFasilitas.tipe_fasilitas);
+                $('#edit_status_tipe_fasilitas').val(tipeFasilitas.status);
+
+                // Tampilkan modal Bootstrap
+                $('#editTipeFasilitasModal').modal('show');
+            }
+        });
+    }
+
+    function updateTipeFasilitas() {
+        var id_tipe_fasilitas = document.getElementById("edit_id_tipe_fasilitas").value;
+        var tipe_fasilitas = document.getElementById("edit_tipe_fasilitas").value;
+        var status_tipe_fasilitas = document.getElementById("edit_status_tipe_fasilitas").value;
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "UpdateTipeFasilitas"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            id_tipe_fasilitas: id_tipe_fasilitas,
+            tipe_fasilitas: tipe_fasilitas,
+            status: status_tipe_fasilitas
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                // Tangani respons sukses, jika diperlukan
+                window.location.href = '/TipeFasilitas/Index'; // Redirect ke halaman TipeFasilitas Index
+            },
+            error: function (xhr, status, error) {
+                console.error("Error updating type of facility:", error);
+                // Tangani respons kesalahan, jika diperlukan
+            }
+        });
+    }
+
+    function cancelEditTipeFasilitas() {
+        // Reset atau hapus nilai pada formulir jika diperlukan
+        document.getElementById("edit_tipe_fasilitas").value = "";
+    }
+
+    function simpanTipeFasilitas() {
+        var tipe_fasilitas = document.getElementById("tipe_fasilitas").value;
+        var status_tipe_fasilitas = document.getElementById("status_tipe_fasilitas").value;
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertTipeFasilitas";
+        var method = "POST";
+
+        var input = {
+            tipe_fasilitas: tipe_fasilitas,
+            status: status_tipe_fasilitas
+        };
+
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                // Handle the success response, if needed
+                $('#addTipeFasilitasModal').modal('hide'); // Hide the modal
+                location.reload(); // Reload the page or update the data
+            },
+            error: function (xhr, status, error) {
+                console.error("Error saving type of facility:", error);
+                // Handle the error response, if needed
+            }
+        });
+    }
+
+
+</script>
+
+@*Modal*@
+<div class="modal fade" id="addTipeFasilitasModal" tabindex="-1" role="dialog" aria-labelledby="addTipeFasilitas" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Tipe Fasilitas</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="tipe_fasilitas" class="col-sm-2 col-form-label">Tipe Fasilitas</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="tipe_fasilitas" id="tipe_fasilitas">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status_tipe_fasilitas" name="status_tipe_fasilitas" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelTipeFasilitas()">Cancel</button>
+                                        <button type="button" class="btn btn-primary" onclick="simpanTipeFasilitas()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editTipeFasilitasModal" tabindex="-1" role="dialog" aria-labelledby="editTipeFasilitas" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Tipe Fasilitas</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Edit it Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="edit_tipe_fasilitas" class="col-sm-2 col-form-label">Tipe Fasilitas</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="edit_tipe_fasilitas" id="edit_tipe_fasilitas">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="edit_status_tipe_fasilitas" name="edit_status_tipe_fasilitas" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelEditTipeFasilitas()">Cancel</button>
+                                        <button type="button" class="btn btn-primary" onclick="updateTipeFasilitas()">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Modal*@

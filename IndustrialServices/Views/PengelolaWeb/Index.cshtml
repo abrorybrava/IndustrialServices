@@ -94,19 +94,48 @@
 
 
     function hapus(id) {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "DeletePengelolaWeb?id=" + id;
-        var method = "POST";
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                alert("Data Pengelola Web Berhasil Dihapus");
-                location.reload();
-            },
+        // Tampilkan SweetAlert konfirmasi sebelum menghapus
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This data will deleted permanent!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var hostname = "https://localhost:7033/";
+                var url = hostname + "DeletePengelolaWeb?id=" + id;
+                var method = "POST";
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        // Tampilkan SweetAlert sukses setelah menghapus
+                        Swal.fire(
+                            'Deleted!',
+                            'Your data has been deleted.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error:", error);
+                        // Tampilkan SweetAlert error jika terjadi kesalahan saat menghapus
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete data.',
+                            'error'
+                        );
+                    }
+                });
+            }
         });
     }
+
     $(".addPengelolaWeb").click(function () {
         $("#addPengelolaWebModal_").modal("show");
     });
@@ -134,9 +163,10 @@
             status: status
         };
 
-        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
-        var url = hostname + "InsertPengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertPengelolaWeb";
         var method = "POST";
+
 
         $.ajax({
             url: url,
@@ -144,14 +174,26 @@
             data: JSON.stringify(input),
             contentType: "application/json",
             success: function (data) {
-                window.location.href = '/PengelolaWeb/Index';
+                console.log(data.messages);
 
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika username sudah tersedia
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Username or Password already used!',
+                    });
+                } else {
+                    // Redirect hanya jika tidak ada error
+                    location.reload();
+                }
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);
             }
         });
     }
+
     $(".editPengelolaWeb").click(function () {
         var id_pengelola = $(this).data("id_pengelola");
         loadEditPengelolaWeb(id_pengelola);
@@ -205,11 +247,26 @@
         $.ajax({
             url: url,
             method: method,
-            data: data,
+            data: JSON.stringify(data),
             contentType: "application/json",
             success: function (data) {
-                window.location.href = '/PengelolaWeb/Index';
+                console.log(data.messages);
+
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika username sudah tersedia
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Username or Password already used!',
+                    });
+                } else {
+                    // Redirect hanya jika tidak ada error
+                    location.reload();
+                }
             },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
         });
     }
 </script>

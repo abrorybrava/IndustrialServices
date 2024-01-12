@@ -1,0 +1,338 @@
+﻿@{
+    ViewData["Title"] = "Type Product Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="pagetitle">
+    <h1>Type Product Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Type of Product</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Type of Product Data</h5>
+                    <a class="btn btn-secondary" asp-controller="DPP" asp-action="Index">Back</a>
+                    <a class="btn btn-primary addTipeProduk">+ Add New Type Product</a>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Type of Product</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTipeProduk">
+                            <!-- Tipe_Produk data will be added here -->
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    loadTipeProduk();
+
+    function loadTipeProduk() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllTipeProduk";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipeProdukList = data; // Assuming data is returned in the correct format
+                tipeProdukList.forEach(function (tipeProduk, index) {
+                    var statusText = (tipeProduk.status === 1) ? "Active" : "Inactive";
+                    var editButton = '';
+                    var deleteButton = '';
+
+                    if (tipeProduk.status === 1) {
+                        editButton = '<button class="btn btn-primary editTipeProduk" data-id_tipe_produk="' + tipeProduk.id_tipe_produk + '"><i class="fas fa-edit"></i></button>';
+                        deleteButton = '<button class="btn btn-danger" value="' + tipeProduk.id_tipe_produk + '" onclick="deleteTipeProduk(this.value)"><i class="fas fa-trash"></i></button>';
+                    }
+
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + tipeProduk.tipe_produk + '</td>' +
+                        '<td>' + statusText + '</td>' +
+                        '<td>' +
+                        editButton +
+                        deleteButton +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyTipeProduk').append(newRow);
+
+                    $('.editTipeProduk[data-id_tipe_produk="' + tipeProduk.id_tipe_produk + '"]').click(function () {
+                        var id_tipe_produk = $(this).data("id_tipe_produk");
+                        loadEditTipeProduk(id_tipe_produk);
+                    });
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function deleteTipeProduk(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeleteTipeProduk?id=" + id;
+        var method = "POST";
+
+        // Konfirmasi sebelum menghapus menggunakan SweetAlert2
+        Swal.fire({
+            title: 'Are you sure for deleting this Type of Product?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ajax untuk menghapus data Tipe_Produk
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire(
+                            'Success!',
+                            'Type of Product data deleted successfully.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error deleting type of product:", error);
+                        // Tangani kesalahan jika terjadi saat menghapus data Tipe_Produk
+                        Swal.fire(
+                            'Error!',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+
+    $(".addTipeProduk").click(function () {
+        $("#addTipeProdukModal").modal("show");
+    });
+
+    $(".editTipeProduk").click(function () {
+        var id_tipe_produk = $(this).data("id_tipe_produk");
+        loadEditTipeProduk(id_tipe_produk);
+    });
+
+    function loadEditTipeProduk(id_tipe_produk) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetTipeProduk?id=" + id_tipe_produk;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipeProduk = data; // Adjust the response structure based on your API
+
+                $('#edit_id_tipe_produk').val(tipeProduk.id_tipe_produk);
+                $('#edit_tipe_produk').val(tipeProduk.tipe_produk);
+                $('#edit_status_tipe_produk').val(tipeProduk.status);
+
+                // Show the Bootstrap modal
+                $('#editTipeProdukModal').modal('show');
+            }
+        });
+    }
+
+    function updateTipeProduk() {
+        var id_tipe_produk = document.getElementById("edit_id_tipe_produk").value;
+        var tipe_produk = document.getElementById("edit_tipe_produk").value;
+        var status_tipe_produk = document.getElementById("edit_status_tipe_produk").value;
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "UpdateTipeProduk"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            id_tipe_produk: id_tipe_produk,
+            tipe_produk: tipe_produk,
+            status: status_tipe_produk
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                // Handle the success response, if needed
+                window.location.href = '/TipeProduk/Index'; // Redirect to TipeProduk Index page
+            },
+            error: function (xhr, status, error) {
+                console.error("Error updating type of product:", error);
+                // Handle the error response, if needed
+            }
+        });
+    }
+
+    function cancelEditTipeProduk() {
+        // Reset or clear the form fields if needed
+        document.getElementById("edit_tipe_produk").value = "";
+    }
+
+    function simpanTipeProduk() {
+        var tipe_produk = document.getElementById("tipe_produk").value;
+        var status_tipe_produk = document.getElementById("status_tipe_produk").value;
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertTipeProduk";
+        var method = "POST";
+
+        var input = {
+            tipe_produk: tipe_produk,
+            status: status_tipe_produk
+        };
+
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                // Handle the success response, if needed
+                $('#addTipeProdukModal').modal('hide'); // Hide the modal
+                location.reload(); // Reload the page or update the data
+            },
+            error: function (xhr, status, error) {
+                console.error("Error saving type of product:", error);
+                // Handle the error response, if needed
+            }
+        });
+    }
+
+
+
+        // Add additional functions as needed, such as getStatusText, deleteTipeProduk, etc.
+</script>
+
+
+@*Modal*@
+<div class="modal fade" id="addTipeProdukModal" tabindex="-1" role="dialog" aria-labelledby="addTipeProduk" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Tipe Produk</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="tipe_produk" class="col-sm-2 col-form-label">Tipe Produk</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="tipe_produk" id="tipe_produk">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status_tipe_produk" name="status_tipe_produk" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelTipeProduk()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpanTipeProduk()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editTipeProdukModal" tabindex="-1" role="dialog" aria-labelledby="editTipeProduk" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Tipe Produk</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Edit it Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="edit_tipe_produk" class="col-sm-2 col-form-label">Tipe Produk</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="edit_tipe_produk" id="edit_tipe_produk">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="edit_status_tipe_produk" name="edit_status_tipe_produk" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelEditTipeProduk()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="updateTipeProduk()">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*Modal*@

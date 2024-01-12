@@ -1,6 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    ViewData["Title"] = "Edit Article";
+    ViewData["Title"] = "Article Details";
 }
 
 <div class="pagetitle">
@@ -43,12 +43,15 @@
                     <div class="row mb-3">
                         <label for="isi_artikel" class="col-sm-2 col-form-label">Article Content</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" name="isi_artikel" id="isi_artikel" rows="10" disabled></textarea>
+                            @Html.Raw("<p name='isi_artikel' id='isi_artikel'></p>")
+
+
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-10">
-                            <input class="form-control" id="status" name="status" value="1" hidden />
+                            <!-- Use hidden input for status -->
+                            <input type="hidden" class="form-control" id="status" name="status" value="1" />
                         </div>
                     </div>
                     <br />
@@ -62,7 +65,18 @@
 </section>
 
 <script>
-    loadArticleData();
+    document.addEventListener("DOMContentLoaded", function () {
+        var today = new Date();
+
+        // Mendapatkan tanggal dalam format yang dapat dimasukkan ke dalam database (yyyy-MM-dd)
+        var formattedDate = today.toISOString().split('T')[0]; // 'en-CA' adalah kode untuk format 'yyyy-MM-dd'
+
+        // Set nilai default pada input tanggal dengan id "tanggal_rilis"
+        document.getElementById('tanggal_rilis').value = formattedDate;
+
+        // Load article data after setting the default date
+        loadArticleData();
+    });
 
     function loadArticleData() {
         var id_artikel = document.getElementById("id_artikel");
@@ -73,7 +87,7 @@
         var status = document.getElementById("status");
 
         var hostname = "https://localhost:7033/";
-        var url = hostname + "GetArtikel?id=" + @ViewBag.Id;
+        var url = hostname + "GetArtikel?id=" + id_artikel.value;
         var method = "GET";
 
         $.ajax({
@@ -84,7 +98,7 @@
                 var article = data.data;
                 id_pengelola.value = article.id_pengelola;
                 judul_artikel.value = article.judul_artikel;
-                isi_artikel.value = article.isi_artikel;
+                isi_artikel.innerHTML = article.isi_artikel;
                 status.value = article.status;
 
                 // Tampilkan pratinjau gambar sampul artikel jika ada
@@ -95,13 +109,4 @@
             }
         });
     }
-    document.addEventListener("DOMContentLoaded", function () {
-        var today = new Date();
-
-        // Mendapatkan tanggal dalam format yang dapat dimasukkan ke dalam database (yyyy-MM-dd)
-        var formattedDate = today.toLocaleDateString('en-CA'); // 'en-CA' adalah kode untuk format 'yyyy-MM-dd'
-
-        // Set nilai default pada input tanggal dengan id "tanggal_rilis"
-        document.getElementById('tanggal_rilis').value = formattedDate;
-    });
 </script>

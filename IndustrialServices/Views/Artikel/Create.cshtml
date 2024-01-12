@@ -18,7 +18,6 @@
                     <br />
 
                     <!-- Form to add article data -->
-                    <form method="post" enctype="multipart/form-data" id="articleForm">
                         <input type="text" class="form-control" name="id_pengelola" id="id_pengelola" value=3 hidden>
                         <div class="row mb-3">
                             <label for="tanggal_rilis" class="col-sm-2 col-form-label">Date of Release</label>
@@ -41,7 +40,7 @@
                         <div class="row mb-3">
                             <label for="isi_artikel" class="col-sm-2 col-form-label">Article Content</label>
                             <div class="col-sm-10">
-                                <textarea class="form-control" name="isi_artikel" id="isi_artikel" rows="10"></textarea>
+                                <textarea class="form-control" name="isi_artikel" id="summernote" rows="10"></textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -58,7 +57,6 @@
                                 <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
                             </div>
                         </div>
-                    </form>
                 </div>
             </div>
         </div>
@@ -66,12 +64,13 @@
 </section>
 
 
+
 <script>
     function simpan() {
         var check = 0;
         var id_pengelola = document.getElementById("id_pengelola").value;
         var judul_artikel = document.getElementById("judul_artikel").value;
-        var isi_artikel = document.getElementById("isi_artikel").value;
+        var isi_artikel = document.getElementsByName("isi_artikel")[0].value;
         var sampul_artikel = document.getElementById("sampul_artikel").value;
         var status = document.getElementById("status").value;
         var tanggal_rilis = document.getElementById("tanggal_rilis").value;
@@ -99,7 +98,6 @@
                 check = 1;
 
                 if (check == 1) {
-
                     uploadFoto(sampulartikel);
                 }
             },

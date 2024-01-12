@@ -1,0 +1,333 @@
+﻿@{
+    ViewData["Title"] = "Type Training Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="pagetitle">
+    <h1>Type Training Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Type of Training</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Type of Training Data</h5>
+                    <a class="btn btn-secondary" asp-controller="DPP" asp-action="Index">Back</a>
+                    <a class="btn btn-primary addTipePelatihan">+ Add New Type Training</a>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Type of Training</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTipePelatihan">
+                            <!-- Tipe_Pelatihan data will be added here -->
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    loadTipePelatihan();
+
+    function loadTipePelatihan() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllTipePelatihan";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipePelatihanList = data; // Assuming data is returned in the correct format
+                tipePelatihanList.forEach(function (tipePelatihan, index) {
+                    var statusText = (tipePelatihan.status === 1) ? "Active" : "Inactive";
+                    var editButton = '';
+                    var deleteButton = '';
+
+                    if (tipePelatihan.status === 1) {
+                        editButton = '<button class="btn btn-primary editTipePelatihan" data-id_tipe_pelatihan="' + tipePelatihan.id_tipe_pelatihan + '"><i class="fas fa-edit"></i></button>';
+                        deleteButton = '<button class="btn btn-danger" value="' + tipePelatihan.id_tipe_pelatihan + '" onclick="deleteTipePelatihan(this.value)"><i class="fas fa-trash"></i></button>';
+                    }
+
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + tipePelatihan.tipe_pelatihan + '</td>' +
+                        '<td>' + statusText + '</td>' +
+                        '<td>' +
+                        editButton +
+                        deleteButton +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyTipePelatihan').append(newRow);
+
+                    $('.editTipePelatihan[data-id_tipe_pelatihan="' + tipePelatihan.id_tipe_pelatihan + '"]').click(function () {
+                        var id_tipe_pelatihan = $(this).data("id_tipe_pelatihan");
+                        loadEditTipePelatihan(id_tipe_pelatihan);
+                    });
+                });
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function deleteTipePelatihan(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeleteTipePelatihan?id=" + id;
+        var method = "POST";
+
+        // Konfirmasi sebelum menghapus menggunakan SweetAlert2
+        Swal.fire({
+            title: 'Are you sure for deleting this Type of Training?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ajax untuk menghapus data Tipe_Pelatihan
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire(
+                            'Success!',
+                            'Type of Training data deleted successfully.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error deleting type of training:", error);
+                        // Tangani kesalahan jika terjadi saat menghapus data Tipe_Pelatihan
+                        Swal.fire(
+                            'Error!',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+
+    $(".addTipePelatihan").click(function () {
+        $("#addTipePelatihanModal").modal("show");
+    });
+
+    $(".editTipePelatihan").click(function () {
+        var id_tipe_pelatihan = $(this).data("id_tipe_pelatihan");
+        loadEditTipePelatihan(id_tipe_pelatihan);
+    });
+
+    function loadEditTipePelatihan(id_tipe_pelatihan) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetTipePelatihan?id=" + id_tipe_pelatihan;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipePelatihan = data; // Adjust the response structure based on your API
+
+                $('#edit_id_tipe_pelatihan').val(tipePelatihan.id_tipe_pelatihan);
+                $('#edit_tipe_pelatihan').val(tipePelatihan.tipe_pelatihan);
+                $('#edit_status_tipe_pelatihan').val(tipePelatihan.status);
+
+                // Show the Bootstrap modal
+                $('#editTipePelatihanModal').modal('show');
+            }
+        });
+    }
+
+    function updateTipePelatihan() {
+        var id_tipe_pelatihan = document.getElementById("edit_id_tipe_pelatihan").value;
+        var tipe_pelatihan = document.getElementById("edit_tipe_pelatihan").value;
+        var status_tipe_pelatihan = document.getElementById("edit_status_tipe_pelatihan").value;
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "UpdateTipePelatihan"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            id_tipe_pelatihan: id_tipe_pelatihan,
+            tipe_pelatihan: tipe_pelatihan,
+            status: status_tipe_pelatihan
+        };
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                // Handle the success response, if needed
+                window.location.href = '/TipePelatihan/Index'; // Redirect to TipePelatihan Index page
+            },
+            error: function (xhr, status, error) {
+                console.error("Error updating type of training:", error);
+                // Handle the error response, if needed
+            }
+        });
+    }
+
+    function cancelEditTipePelatihan() {
+        // Reset or clear the form fields if needed
+        document.getElementById("edit_tipe_pelatihan").value = "";
+    }
+
+    function simpanTipePelatihan() {
+        var tipe_pelatihan = document.getElementById("tipe_pelatihan").value;
+        var status_tipe_pelatihan = document.getElementById("status_tipe_pelatihan").value;
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertTipePelatihan";
+        var method = "POST";
+
+        var input = {
+            tipe_pelatihan: tipe_pelatihan,
+            status: status_tipe_pelatihan
+        };
+
+        var data = JSON.stringify(input);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                // Handle the success response, if needed
+                $('#addTipePelatihanModal').modal('hide'); // Hide the modal
+                location.reload(); // Reload the page or update the data
+            },
+            error: function (xhr, status, error) {
+                console.error("Error saving type of training:", error);
+                // Handle the error response, if needed
+            }
+        });
+    }
+
+</script>
+
+@*Modal*@
+<div class="modal fade" id="addTipePelatihanModal" tabindex="-1" role="dialog" aria-labelledby="addTipePelatihan" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Tipe Pelatihan</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="tipe_pelatihan" class="col-sm-2 col-form-label">Tipe Pelatihan</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="tipe_pelatihan" id="tipe_pelatihan">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status_tipe_pelatihan" name="status_tipe_pelatihan" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelTipePelatihan()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpanTipePelatihan()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editTipePelatihanModal" tabindex="-1" role="dialog" aria-labelledby="editTipePelatihan" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Tipe Pelatihan</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Edit it Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <input type="text" class="form-control" name="edit_id_tipe_pelatihan" id="edit_id_tipe_pelatihan" hidden>
+                                <div class="row mb-3">
+                                    <label for="edit_tipe_pelatihan" class="col-sm-2 col-form-label">Tipe Pelatihan</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="edit_tipe_pelatihan" id="edit_tipe_pelatihan">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="edit_status_tipe_pelatihan" name="edit_status_tipe_pelatihan" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelEditTipePelatihan()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="updateTipePelatihan()">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*Modal*@

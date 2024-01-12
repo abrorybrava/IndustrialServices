@@ -57,6 +57,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Product Data</h5>
                         <a class="btn btn-primary addProduct">+ Add New Product</a>
+                         <a class="btn btn-success" asp-action="Index" asp-controller="TipeProduk">Manage Type of Products</a>
                         <table class="table datatable">
                             <thead>
                                 <tr>
@@ -93,6 +94,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Facilities Data</h5>
                         <a class="btn btn-primary addFasilitas">+ Add New Facility</a>
+                        <a class="btn btn-success" asp-controller="TipeFasilitas" asp-action="Index">Manage Type of Facility</a>
                         <table class="table datatable">
 
                             <thead>
@@ -128,6 +130,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Training Data</h5>
                         <a class="btn btn-primary addPelatihan">+ Add New Training</a>
+                        <a class="btn btn-success" asp-controller="TipePelatihan" asp-action="Index">Manage Type of Training</a>
                         <table class="table datatable">
 
                             <thead>
@@ -815,6 +818,7 @@ var fotoArray = [
 
                         // Event listener untuk tombol edit
                         $('.editPelatihan[data-id_pelatihan="' + pelatihan.id_pelatihan + '"]').click(function () {
+                                    $('.form-group-edited').remove();
                             var id_pelatihan = $(this).data("id_pelatihan");
                             loadEditPelatihan(id_pelatihan);
                         });
@@ -987,7 +991,6 @@ var fotoArray = [
     });
 
     console.log(dataDropdown);
-    alert('  ');
     
     $.ajax({
         url: url,
@@ -1023,7 +1026,7 @@ var fotoArray = [
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetPelatihan?id=" + id_pelatihan;
         var method = "GET";
-
+        loadEditPengajarPelatihan(id_pelatihan);
         $.ajax({
             url: url,
             method: method,
@@ -1043,12 +1046,43 @@ var fotoArray = [
                 $('#editjenis_pelatihan').val(pelatihan.jenis_pelatihan);
                 $('#editdeskripsi_pelatihan').val(pelatihan.deskripsi_pelatihan);
                 $('#editstatus_pelatihan').val(pelatihan.status);
-                console.log(pelatihan.tanggal_pelatihan);
                 // Menampilkan modal pop-up untuk edit
                 $('#editPelatihanModal').modal('show');
             }
         });
     }
+
+    function loadEditPengajarPelatihan(id_pelatihan) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetPengajarPelatihan?id=" + id_pelatihan;
+        var method = "GET";
+
+        // Assuming populateEditFacultyMembersinPelatihan is a function that sets up the initial state
+        populateEditFacultyMembersinPelatihan();
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pengajarList = data;
+
+                // Clear the content inside the span
+                $('#editid_pengajar').empty();
+
+                // Assuming 'fotoPelatihan' is a variable that should be 'pengajarList'
+                $.each(pengajarList, function (index, pengajarItem) {
+                    // Assuming 'fotoHtml' is a variable that should be 'optionHtml'
+                    var spanContent = (index + 1) + '. ' + '<span data-value="' + pengajarItem.id_pengajar + '">' + pengajarItem.nama_pengajar + '</span><br/>';
+
+                    // Append the span content
+                    $('#editid_pengajar').append(spanContent);
+                });
+            }
+        });
+    }
+
+
 
     function updatePelatihan() {
         var id_pelatihan = document.getElementById("editid_pelatihan").value;
@@ -1204,24 +1238,24 @@ var fotoArray = [
         populateFacultyMembers();
         populateEditFacultyMembersinPelatihan();
 
-    function tambahDropdown() {
+    function tambahDropdownadd() {
         var dropdownClone = $('#id_pengajar').clone(); // Clone dropdown
         dropdownClone.removeAttr('id'); // Hapus atribut 'id' dari dropdown clone
 
         // Tambahkan dropdown clone beserta tombol hapusnya
-        $('.form-group').last().after(
+        $('#form-group-add').last().after(
             `<div class="form-group-added row mb-3">
                     <div class="col-sm-10">
                         ${dropdownClone[0].outerHTML}
                     </div>
                     <div class="col-sm-2">
-                        <button type="button" class="btn btn-danger" onclick="hapusDropdown(this)">Delete</button>
+                        <button type="button" class="btn btn-danger" onclick="hapusDropdownadd(this)">Delete</button>
                     </div>
                 </div>`
         );
     }
 
-    function hapusDropdown(btn) {
+    function hapusDropdownadd(btn) {
         $(btn).closest('.form-group-added').remove(); // Hapus dropdown terkait dengan tombol hapus yang ditekan
     }
 
@@ -1699,10 +1733,10 @@ var fotoArray = [
                                 <hr />
                                 <br />
                                 <div class="col-sm-2">
-                                    <button type="button" class="btn btn-success" onclick="tambahDropdown()">Tambah</button>
+                                    <button type="button" class="btn btn-success" onclick="tambahDropdownadd()">+ Add More</button>
                                 </div>
-                                <div class="form-group row mb-3">
-                                    <label for="faculty_member" class="col-sm-6 col-form-label">Add Faculty Member for Training</label>
+                                <div class="form-group row mb-3" id="form-group-add">
+                                    <label for="faculty_member" class="col-sm-6 col-form-label">Add Faculty Member for Training (Make sure add it correctly!)</label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="id_pengajar" id="id_pengajar">
                                             <!-- Opsi Dropdown -->
@@ -1827,6 +1861,14 @@ var fotoArray = [
                                     <label for="editdeskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control" id="editdeskripsi_pelatihan" rows="5" placeholder="Training Description"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <label for="editid_pengajar" class="col-sm-6 col-form-label">Faculty Member for Training (Uneditable)</label>
+                                    <div class="col-sm-10">
+                                        <span id="editid_pengajar">
+
+                                        </span>
                                     </div>
                                 </div>
                                 <hr />
