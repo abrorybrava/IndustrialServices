@@ -189,8 +189,17 @@
             data: data,
             contentType: "application/json",
             success: function (data) {
-                // Handle the success response, if needed
-                window.location.href = '/TipePelatihan/Index'; // Redirect to TipePelatihan Index page
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika NPK sudah digunakan
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Type of Training was already used!',
+                    });
+                } else {
+                    $('#editTipePelatihanModal').modal('hide'); // Hide the modal
+                    location.reload(); // Reload the page or update the data
+                }
             },
             error: function (xhr, status, error) {
                 console.error("Error updating type of training:", error);
@@ -225,9 +234,17 @@
             data: data,
             contentType: "application/json",
             success: function (data) {
-                // Handle the success response, if needed
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika NPK sudah digunakan
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Type of Training was already used!',
+                    });
+                } else {
                 $('#addTipePelatihanModal').modal('hide'); // Hide the modal
                 location.reload(); // Reload the page or update the data
+                }
             },
             error: function (xhr, status, error) {
                 console.error("Error saving type of training:", error);
@@ -243,7 +260,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Tipe Pelatihan</h1>
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Type of Training</h1>
             </div>
             <div class="modal-body">
                 <section class="section">
@@ -256,7 +273,7 @@
 
                                 <!-- General Form Elements -->
                                 <div class="row mb-3">
-                                    <label for="tipe_pelatihan" class="col-sm-2 col-form-label">Tipe Pelatihan</label>
+                                    <label for="tipe_pelatihan" class="col-sm-2 col-form-label">Type of Training</label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="tipe_pelatihan" id="tipe_pelatihan">
                                     </div>
@@ -288,7 +305,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Tipe Pelatihan</h1>
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Type of Training</h1>
             </div>
             <div class="modal-body">
                 <section class="section">
@@ -302,7 +319,7 @@
                                 <!-- General Form Elements -->
                                 <input type="text" class="form-control" name="edit_id_tipe_pelatihan" id="edit_id_tipe_pelatihan" hidden>
                                 <div class="row mb-3">
-                                    <label for="edit_tipe_pelatihan" class="col-sm-2 col-form-label">Tipe Pelatihan</label>
+                                    <label for="edit_tipe_pelatihan" class="col-sm-2 col-form-label">Type of Training</label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="edit_tipe_pelatihan" id="edit_tipe_pelatihan">
                                     </div>

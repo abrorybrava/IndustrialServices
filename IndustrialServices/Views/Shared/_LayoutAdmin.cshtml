@@ -61,7 +61,7 @@
         <header id="header" class="header fixed-top d-flex align-items-center">
 
             <div class="d-flex align-items-center justify-content-between">
-                <a href="index.html" class="logo d-flex align-items-center">
+            <a asp-action="Index" asp-controller="DashboardCRUD" class="logo d-flex align-items-center">
                 <img src="~/assets/img/AstraTech.png" style="height: 50px; width:auto;" >
                     <span class="d-none d-lg-block">Industrial Services</span>
                 </a>
@@ -95,7 +95,7 @@
 
             <li class="nav-item">
                 <a class="nav-link collapsed" asp-action="Index" asp-controller="PengelolaWeb">
-                    <i class="bi bi-people-fill"></i>
+                    <i class="ri-admin-line"></i>
                     <span>Web Manager</span>
                 </a>
             </li>
@@ -109,7 +109,7 @@
 
             <li class="nav-item">
                 <a class="nav-link collapsed" asp-action="Index" asp-controller="Artikel">
-                    <i class="fa-regular fa-newspaper"></i>
+                    <i class="ri-article-line"></i>
                     <span>Article</span>
                 </a>
             </li>
@@ -129,12 +129,14 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#">
+                <a class="nav-link collapsed" asp-action="Index" asp-controller="TestiCM">
                     <i class="bi bi-chat-right-text"></i>
                     <span>Testimonials and Customer Mapping</span>
                 </a>
             </li>
             </ul>
+
+            
 
         </aside><!-- End Sidebar-->
 
@@ -148,6 +150,7 @@
         position: relative;
         top: 30px;
     }
+
 </style>
     <script src="~/assets/vendor/apexcharts/apexcharts.min.js"></script>
     <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

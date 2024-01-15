@@ -18,8 +18,6 @@
                     <h5 class="card-title">Training</h5>
 
                 <div class="list-group">
-                    <button type="button" class="list-group-item list-group-item-action latihanSertifikasi">Certification Training</button>
-                    <button type="button" class="list-group-item list-group-item-action tailorMade">Tailor Made Training</button>
                     <button type="button" class="list-group-item list-group-item-action training">Training</button>
                 </div><!-- End List group with Links and buttons -->
 
@@ -163,56 +161,71 @@
     loadProducts()
     loadFasilitas()
     loadPelatihan()
-    function loadProducts() {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllProduk";
-        var method = "GET";
+function loadProducts() {
+    var hostname = "https://localhost:7033/";
+    var url = hostname + "GetAllProduk";
+    var method = "GET";
 
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                // Pastikan respons memiliki properti yang sesuai dengan struktur data
-                var productList = data;
-                if (Array.isArray(productList)) {
-                    productList.forEach(function (product, index) {
-                        var newRow = '<tr>' +
-                            '<td>' + (index + 1) + '</td>' +
-                            '<td>' + product.nama_produk + '</td>' +
-                            '<td>' + product.tipe_produk + '</td>' +
-                            '<td>' + product.pesanan + '</td>' +
-                            '<td>' + product.deskripsi_produk + '</td>' +
-                            '<td>' +
-                            '<button class="btn btn-success showFotoProduk" data-id_produk="' + product.id_produk + '"><i class="fa-regular fa-image"></i></button>' +
-                            '<button class="btn btn-primary editProduct" data-id_produk="' + product.id_produk + '"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-danger" value="' + product.id_produk + '" onclick="hapusProduk(this.value)"><i class="fas fa-trash"></i></button>' +
-                            '</td>' +
-                            '</tr>';
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: "application/json",
+        success: function (data) {
+            // Check if the response data is an array
+            if (Array.isArray(data)) {
+                // Iterate through each product in the response
+                data.forEach(function (product, index) {
+                    // Fetch additional details for the Tipe_Produk based on id_tipe_produk
+                    $.ajax({
+                        url: hostname + "GetTipeProduk?id=" + product.id_tipe_produk,
+                        method: "GET",
+                        contentType: "application/json",
+                        success: function (tipeProdukDetails) {
+                            // Assuming tipeProdukDetails contains the necessary data
+                            var tipe_produk = tipeProdukDetails.tipe_produk;
 
-                        $('#tbodyProducts').append(newRow);
+                            // Build the table row
+                            var newRow = '<tr>' +
+                                '<td>' + (index + 1) + '</td>' +
+                                '<td>' + product.nama_produk + '</td>' +
+                                '<td>' + tipe_produk + '</td>' +
+                                '<td>' + product.pesanan + '</td>' +
+                                '<td>' + product.deskripsi_produk + '</td>' +
+                                '<td>' +
+                                '<button class="btn btn-success showFotoProduk" data-id_produk="' + product.id_produk + '"><i class="fa-regular fa-image"></i></button>' +
+                                '<button class="btn btn-primary editProduct" data-id_produk="' + product.id_produk + '"><i class="fas fa-edit"></i></button>' +
+                                '<button class="btn btn-danger" value="' + product.id_produk + '" onclick="hapusProduk(this.value)"><i class="fas fa-trash"></i></button>' +
+                                '</td>' +
+                                '</tr>';
 
-                        // Event listener for edit button
-                        $('.editProduct[data-id_produk="' + product.id_produk + '"]').click(function () {
-                            var id_produk = $(this).data("id_produk");
-                            loadEditProduct(id_produk);
-                        });
+                            // Append the row to the table body
+                            $('#tbodyProducts').append(newRow);
 
+                            // Attach event listener for the edit button
+                            $('.editProduct[data-id_produk="' + product.id_produk + '"]').click(function () {
+                                var id_produk = $(this).data("id_produk");
+                                loadEditProduct(id_produk);
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching Tipe_Produk details:", error);
+                        }
                     });
-                } else {
-                    console.error("Invalid data format");
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error:", error);
+                });
+            } else {
+                console.error("Invalid data format");
             }
-        });
-    }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+        }
+    });
+}
 
 
     function simpanProduk() {
         var nama_produk = document.getElementById("nama_produk").value;
-        var tipe_produk = document.getElementById("tipe_produk").value;
+        var id_tipe_produk = document.getElementById("id_tipe_produk").value;
         var pesanan = document.getElementById("pesanan").value;
         var deskripsi_produk = document.getElementById("deskripsi_produk").value;
         var status = document.getElementById("status").value;
@@ -275,7 +288,7 @@
         // Data untuk pengiriman informasi produk
         var productData = {
             nama_produk: nama_produk,
-            tipe_produk: tipe_produk,
+            id_tipe_produk: id_tipe_produk,
             pesanan: pesanan,
             deskripsi_produk: deskripsi_produk,
             status: status
@@ -377,7 +390,7 @@ function uploadPhoto(formDataArray) {
     function updateProduct() {
         var id_produk = document.getElementById("editid_produk").value;
         var nama_produk = document.getElementById("editnama_produk").value;
-        var tipe_produk = document.getElementById("edittipe_produk").value;
+        var id_tipe_produk = document.getElementById("editid_tipe_produk").value;
         var pesanan = document.getElementById("editpesanan").value;
         var deskripsi_produk = document.getElementById("editdeskripsi_produk").value;
         var status = document.getElementById("editstatus_produk").value;
@@ -388,7 +401,7 @@ function uploadPhoto(formDataArray) {
         var input = {
             id_produk: id_produk,
             nama_produk: nama_produk,
-            tipe_produk: tipe_produk,
+            id_tipe_produk: id_tipe_produk,
             pesanan: pesanan,
             deskripsi_produk: deskripsi_produk,
             status: status
@@ -426,7 +439,7 @@ function uploadPhoto(formDataArray) {
                 var product = data;
                 $('#editid_produk').val(product.id_produk);
                 $('#editnama_produk').val(product.nama_produk);
-                $('#edittipe_produk').val(product.tipe_produk);
+                $('#editid_tipe_produk').val(product.id_tipe_produk);
                 $('#editpesanan').val(product.pesanan);
                 $('#editdeskripsi_produk').val(product.deskripsi_produk);
                 $('#editstatus_produk').val(product.status);
@@ -484,15 +497,10 @@ function uploadPhoto(formDataArray) {
     $('.addProduct').click(function () {
         $("#addProductModal").modal("show");
     });
-
-    //End Products DOM JQUERY
-
-
-    // Start Fasilitas DOM JQUERY
-
-    function loadFasilitas() {
+loadTipeProdukOptions();
+    function loadTipeProdukOptions() {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllFasilitas";
+        var url = hostname + "GetAllTipeProduk"; // Sesuaikan dengan endpoint Anda
         var method = "GET";
 
         $.ajax({
@@ -500,32 +508,23 @@ function uploadPhoto(formDataArray) {
             method: method,
             contentType: "application/json",
             success: function (data) {
-                var fasilitasList = data;
-                if (Array.isArray(fasilitasList)) {
-                    fasilitasList.forEach(function (fasilitas, index) {
-                        var newRow = '<tr>' +
-                            '<td>' + (index + 1) + '</td>' +
-                            '<td>' + fasilitas.nama_fasilitas + '</td>' +
-                            '<td>' + fasilitas.jenis_fasilitas + '</td>' +
-                            '<td>' + fasilitas.deskripsi_fasilitas + '</td>' +
-                            '<td>' +
-                            '<button class="btn btn-success showPhotoFasilitas" data-id_fasilitas="' + fasilitas.id_fasilitas + '"><i class="fa-regular fa-image"></i></button>' +
-                            '<button class="btn btn-primary editFasilitas" data-id_fasilitas="' + fasilitas.id_fasilitas + '"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-danger" value="' + fasilitas.id_fasilitas + '" onclick="hapusFasilitas(this.value)"><i class="fas fa-trash"></i></button>' +
-                            '</td>' +
-                            '</tr>';
+                var tipeProdukList = data;
 
-                        $('#tbodyFasilitas').append(newRow);
+                // Kosongkan opsi pada elemen <select>
+                $('#id_tipe_produk').empty();
+                $('#editid_tipe_produk').empty();
+                $('#id_tipe_produk').append($('<option></option>').text('Select Type of Product'));
+                $('#editid_tipe_produk').append($('<option></option>').text('Select Type of Product'));
 
-                        // Event listener untuk tombol edit
-                        $('.editFasilitas[data-id_fasilitas="' + fasilitas.id_fasilitas + '"]').click(function () {
-                            var id_fasilitas = $(this).data("id_fasilitas");
-                            loadEditFasilitas(id_fasilitas);
-                        });
-                    });
-                } else {
-                    console.error("Format data tidak valid");
-                }
+                // Tambahkan opsi dari data tipe_produk
+                tipeProdukList.forEach(function (tipeProduk) {
+                    var option = '<option value="' + tipeProduk.id_tipe_produk + '">' + tipeProduk.tipe_produk + '</option>';
+                    $('#id_tipe_produk').append(option);
+                });
+                                tipeProdukList.forEach(function (tipeProduk) {
+                    var option = '<option value="' + tipeProduk.id_tipe_produk + '">' + tipeProduk.tipe_produk + '</option>';
+                    $('#editid_tipe_produk').append(option);
+                });
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);
@@ -533,10 +532,76 @@ function uploadPhoto(formDataArray) {
         });
     }
 
+    //End Products DOM JQUERY
+
+
+    // Start Fasilitas DOM JQUERY
+
+function loadFasilitas() {
+    var hostname = "https://localhost:7033/";
+    var url = hostname + "GetAllFasilitas";
+    var method = "GET";
+
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: "application/json",
+        success: function (data) {
+            // Check if the response data is an array
+            if (Array.isArray(data)) {
+                // Iterate through each fasilitas in the response
+                data.forEach(function (fasilitas, index) {
+                    // Fetch additional details for the Tipe_Fasilitas based on id_tipe_fasilitas
+                    $.ajax({
+                        url: hostname + "GetTipeFasilitas?id=" + fasilitas.id_tipe_fasilitas,
+                        method: "GET",
+                        contentType: "application/json",
+                        success: function (tipeFasilitasDetails) {
+                            // Assuming tipeFasilitasDetails contains the necessary data
+                            var tipe_fasilitas = tipeFasilitasDetails.tipe_fasilitas;
+
+                            // Build the table row
+                            var newRow = '<tr>' +
+                                '<td>' + (index + 1) + '</td>' +
+                                '<td>' + fasilitas.nama_fasilitas + '</td>' +
+                                '<td>' + tipe_fasilitas + '</td>' +
+                                '<td>' + fasilitas.deskripsi_fasilitas + '</td>' +
+                                '<td>' +
+                                '<button class="btn btn-success showPhotoFasilitas" data-id_fasilitas="' + fasilitas.id_fasilitas + '"><i class="fa-regular fa-image"></i></button>' +
+                                '<button class="btn btn-primary editFasilitas" data-id_fasilitas="' + fasilitas.id_fasilitas + '"><i class="fas fa-edit"></i></button>' +
+                                '<button class="btn btn-danger" value="' + fasilitas.id_fasilitas + '" onclick="hapusFasilitas(this.value)"><i class="fas fa-trash"></i></button>' +
+                                '</td>' +
+                                '</tr>';
+
+                            // Append the row to the table body
+                            $('#tbodyFasilitas').append(newRow);
+
+                            // Attach event listener for the edit button
+                            $('.editFasilitas[data-id_fasilitas="' + fasilitas.id_fasilitas + '"]').click(function () {
+                                var id_fasilitas = $(this).data("id_fasilitas");
+                                loadEditFasilitas(id_fasilitas);
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching Tipe_Fasilitas details:", error);
+                        }
+                    });
+                });
+            } else {
+                console.error("Invalid data format");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+        }
+    });
+}
+
+
     // Fungsi untuk menyimpan mesin baru
     function simpanFasilitas() {
         var nama_fasilitas = document.getElementById("nama_fasilitas").value;
-        var jenis_fasilitas = document.getElementById("jenis_fasilitas").value;
+        var id_tipe_fasilitas = document.getElementById("id_tipe_fasilitas").value;
         var deskripsi_fasilitas = document.getElementById("deskripsi_fasilitas").value;
         var status = document.getElementById("status_fasilitas").value;
 
@@ -566,13 +631,14 @@ function uploadPhoto(formDataArray) {
         }
 
         // Ambil file untuk setiap input foto
-var fotoArray = [
-    document.getElementById("photoFasilitas1").files[0],
-    document.getElementById("photoFasilitas2").files[0],
-    document.getElementById("photoFasilitas3").files[0],
-    document.getElementById("photoFasilitas4").files[0],
-    document.getElementById("photoFasilitas5").files[0]
-];
+var fotoArray = [];
+
+    var foto1 = document.getElementById("photoFasilitas1").files[0];
+    var foto2 = document.getElementById("photoFasilitas2").files[0];
+    var foto3 = document.getElementById("photoFasilitas3").files[0];
+    var foto4 = document.getElementById("photoFasilitas4").files[0];
+    var foto5 = document.getElementById("photoFasilitas5").files[0];
+
 
         if (foto1) {
             fotoArray.push(foto1);
@@ -597,7 +663,7 @@ var fotoArray = [
         // Data yang akan dikirim
         var fasilitasData = {
             nama_fasilitas: nama_fasilitas,
-            jenis_fasilitas: jenis_fasilitas,
+            id_tipe_fasilitas: id_tipe_fasilitas,
             deskripsi_fasilitas: deskripsi_fasilitas,
             status: status
         };
@@ -682,7 +748,7 @@ var fotoArray = [
                 var fasilitas = data;
                 $('#editid_fasilitas').val(fasilitas.id_fasilitas);
                 $('#editnama_fasilitas').val(fasilitas.nama_fasilitas);
-                $('#editjenis_fasilitas').val(fasilitas.jenis_fasilitas);
+                $('#editid_tipe_fasilitas').val(fasilitas.id_tipe_fasilitas);
                 $('#editdeskripsi_fasilitas').val(fasilitas.deskripsi_fasilitas);
                 $('#editstatus_fasilitas').val(fasilitas.status);
 
@@ -696,7 +762,7 @@ var fotoArray = [
     function updateFasilitas() {
         var id_fasilitas = document.getElementById("editid_fasilitas").value;
         var nama_fasilitas = document.getElementById("editnama_fasilitas").value;
-        var jenis_fasilitas = document.getElementById("editjenis_fasilitas").value;
+        var id_tipe_fasilitas = document.getElementById("editid_tipe_fasilitas").value;
         var deskripsi_fasilitas = document.getElementById("editdeskripsi_fasilitas").value;
         var status = document.getElementById("editstatus_fasilitas").value;
 
@@ -706,7 +772,7 @@ var fotoArray = [
         var input = {
             id_fasilitas: id_fasilitas,
             nama_fasilitas: nama_fasilitas,
-            jenis_fasilitas: jenis_fasilitas,
+            id_tipe_fasilitas: id_tipe_fasilitas,
             deskripsi_fasilitas: deskripsi_fasilitas,
             status: status
         };
@@ -775,12 +841,10 @@ var fotoArray = [
         });
     });
 
-    //End Fasilitas DOM JQUERY
-
-    //Start Pelatihan DOM JQUERY
-    function loadPelatihan() {
+    loadTipeFasilitasOptions();
+    function loadTipeFasilitasOptions() {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllPelatihan";
+        var url = hostname + "GetAllTipeFasilitas"; // Sesuaikan dengan endpoint Anda
         var method = "GET";
 
         $.ajax({
@@ -788,50 +852,105 @@ var fotoArray = [
             method: method,
             contentType: "application/json",
             success: function (data) {
-                var pelatihanList = data;
-                if (Array.isArray(pelatihanList)) {
-                    pelatihanList.forEach(function (pelatihan, index) {
-                        // Konversi tanggal_pelatihan ke objek Date
-                        var tanggalPelatihan1 = new Date(pelatihan.tanggal_pelatihan_awal);
-                        var tanggalPelatihan2 = new Date(pelatihan.tanggal_pelatihan_akhir);
-                        tanggalPelatihan1.setDate(tanggalPelatihan1.getDate() + 1);
-                                                tanggalPelatihan2.setDate(tanggalPelatihan2.getDate() + 1);
-                        // Konversi tanggal ke format yang diinginkan
-                        var tanggalAwalFinal = tanggalPelatihan1.toISOString().split('T')[0];
-                        var tanggalAkhirFinal = tanggalPelatihan2.toISOString().split('T')[0];
+                var tipeFasilitasList = data;
 
-                        var newRow = '<tr>' +
-                            '<td>' + (index + 1) + '</td>' +
-                            '<td>' + pelatihan.nama_pelatihan + '</td>' +
-                            '<td>' + tanggalAwalFinal + '</td>' +
-                            '<td>' + tanggalAkhirFinal + '</td>' +
-                            '<td>' + pelatihan.jenis_pelatihan + '</td>' +
-                            '<td>' + pelatihan.deskripsi_pelatihan + '</td>' +
-                            '<td>' +
-                            '<button class="btn btn-success showPhotoPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fa-regular fa-image"></i></button>' +
-                            '<button class="btn btn-primary editPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fas fa-edit"></i></button>' +
-                            '<button class="btn btn-danger" value="' + pelatihan.id_pelatihan + '" onclick="hapusPelatihan(this.value)"><i class="fas fa-trash"></i></button>' +
-                            '</td>' +
-                            '</tr>';
+                // Kosongkan opsi pada elemen <select>
+                $('#id_tipe_fasilitas').empty();
+                $('#editid_tipe_fasilitas').empty();
+                $('#id_tipe_fasilitas').append($('<option></option>').text('Select Type of Facility'));
+                $('#editid_tipe_fasilitas').append($('<option></option>').text('Select Type of Facility'));
 
-                        $('#tbodyTraining').append(newRow);
-
-                        // Event listener untuk tombol edit
-                        $('.editPelatihan[data-id_pelatihan="' + pelatihan.id_pelatihan + '"]').click(function () {
-                                    $('.form-group-edited').remove();
-                            var id_pelatihan = $(this).data("id_pelatihan");
-                            loadEditPelatihan(id_pelatihan);
-                        });
-                    });
-                } else {
-                    console.error("Format data tidak valid");
-                }
+                // Tambahkan opsi dari data tipe_produk
+                tipeFasilitasList.forEach(function (tipeFasilitas) {
+                    var option = '<option value="' + tipeFasilitas.id_tipe_fasilitas + '">' + tipeFasilitas.tipe_fasilitas + '</option>';
+                    $('#id_tipe_fasilitas').append(option);
+                });
+                                tipeFasilitasList.forEach(function (tipeFasilitas) {
+                    var option = '<option value="' + tipeFasilitas.id_tipe_fasilitas + '">' + tipeFasilitas.tipe_fasilitas + '</option>';
+                    $('#editid_tipe_fasilitas').append(option);
+                });
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);
             }
         });
     }
+
+    //End Fasilitas DOM JQUERY
+
+    //Start Pelatihan DOM JQUERY
+function loadPelatihan() {
+    var hostname = "https://localhost:7033/";
+    var url = hostname + "GetAllPelatihan";
+    var method = "GET";
+
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: "application/json",
+        success: function (data) {
+            // Check if the response data is an array
+            if (Array.isArray(data)) {
+                // Iterate through each pelatihan in the response
+                data.forEach(function (pelatihan, index) {
+                    // Fetch additional details for the Tipe_Pelatihan based on id_tipe_pelatihan
+                    $.ajax({
+                        url: hostname + "GetTipePelatihan?id=" + pelatihan.id_tipe_pelatihan,
+                        method: "GET",
+                        contentType: "application/json",
+                        success: function (tipePelatihanDetails) {
+                            // Assuming tipePelatihanDetails contains the necessary data
+                            var tipe_pelatihan = tipePelatihanDetails.tipe_pelatihan;
+
+                            // Konversi tanggal_pelatihan ke objek Date
+                            var tanggalPelatihan1 = new Date(pelatihan.tanggal_pelatihan_awal);
+                            var tanggalPelatihan2 = new Date(pelatihan.tanggal_pelatihan_akhir);
+                            tanggalPelatihan1.setDate(tanggalPelatihan1.getDate() + 1);
+                            tanggalPelatihan2.setDate(tanggalPelatihan2.getDate() + 1);
+                            // Konversi tanggal ke format yang diinginkan
+                            var tanggalAwalFinal = tanggalPelatihan1.toISOString().split('T')[0];
+                            var tanggalAkhirFinal = tanggalPelatihan2.toISOString().split('T')[0];
+
+                            // Build the table row
+                            var newRow = '<tr>' +
+                                '<td>' + (index + 1) + '</td>' +
+                                '<td>' + pelatihan.nama_pelatihan + '</td>' +
+                                '<td>' + tanggalAwalFinal + '</td>' +
+                                '<td>' + tanggalAkhirFinal + '</td>' +
+                                '<td>' + tipe_pelatihan + '</td>' +
+                                '<td>' + pelatihan.deskripsi_pelatihan + '</td>' +
+                                '<td>' +
+                                '<button class="btn btn-success showPhotoPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fa-regular fa-image"></i></button>' +
+                                '<button class="btn btn-primary editPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fas fa-edit"></i></button>' +
+                                '<button class="btn btn-danger" value="' + pelatihan.id_pelatihan + '" onclick="hapusPelatihan(this.value)"><i class="fas fa-trash"></i></button>' +
+                                '</td>' +
+                                '</tr>';
+
+                            // Append the row to the table body
+                            $('#tbodyTraining').append(newRow);
+
+                            // Attach event listener for the edit button
+                            $('.editPelatihan[data-id_pelatihan="' + pelatihan.id_pelatihan + '"]').click(function () {
+                                $('.form-group-edited').remove();
+                                var id_pelatihan = $(this).data("id_pelatihan");
+                                loadEditPelatihan(id_pelatihan);
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error fetching Tipe_Pelatihan details:", error);
+                        }
+                    });
+                });
+            } else {
+                console.error("Invalid data format");
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error:", error);
+        }
+    });
+}
+
 
 
 
@@ -842,9 +961,19 @@ var fotoArray = [
         var nama_pelatihan = document.getElementById("nama_pelatihan").value;
         var tanggal_pelatihan_awal = document.getElementById("tanggal_pelatihan_awal").value;
         var tanggal_pelatihan_akhir = document.getElementById("tanggal_pelatihan_akhir").value;
-        var jenis_pelatihan = document.getElementById("jenis_pelatihan").value;
+        var id_tipe_pelatihan = document.getElementById("id_tipe_pelatihan").value;
         var deskripsi_pelatihan = document.getElementById("deskripsi_pelatihan").value;
         var status = document.getElementById("status_pelatihan").value;
+
+        // Validasi tanggal akhir harus lebih besar dari tanggal awal
+        if (new Date(tanggal_pelatihan_akhir) < new Date(tanggal_pelatihan_awal)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Date Input',
+                text: "End Date can't be less than the Start Date.",
+            });
+            return; // Hentikan eksekusi jika validasi gagal
+        }
 
         var id_pengajar = document.getElementById("id_pengajar").value;
 
@@ -921,7 +1050,7 @@ var fotoArray = [
             nama_pelatihan: nama_pelatihan,
             tanggal_pelatihan_awal: tanggal_pelatihan_awal,
             tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
-            jenis_pelatihan: jenis_pelatihan,
+            id_tipe_pelatihan: id_tipe_pelatihan,
             deskripsi_pelatihan: deskripsi_pelatihan,
             status: status
         };
@@ -1043,7 +1172,7 @@ var fotoArray = [
                 var formattedDate2 = date2.toISOString().split('T')[0];
                 $('#edittanggal_pelatihan_awal').val(formattedDate1);
                 $('#edittanggal_pelatihan_akhir').val(formattedDate2);
-                $('#editjenis_pelatihan').val(pelatihan.jenis_pelatihan);
+                $('#editid_tipe_pelatihan').val(pelatihan.id_tipe_pelatihan);
                 $('#editdeskripsi_pelatihan').val(pelatihan.deskripsi_pelatihan);
                 $('#editstatus_pelatihan').val(pelatihan.status);
                 // Menampilkan modal pop-up untuk edit
@@ -1089,7 +1218,7 @@ var fotoArray = [
         var nama_pelatihan = document.getElementById("editnama_pelatihan").value;
         var tanggal_pelatihan_awal = document.getElementById("edittanggal_pelatihan_awal").value;
         var tanggal_pelatihan_akhir = document.getElementById("edittanggal_pelatihan_akhir").value;
-        var jenis_pelatihan = document.getElementById("editjenis_pelatihan").value;
+        var id_tipe_pelatihan = document.getElementById("editid_tipe_pelatihan").value;
         var deskripsi_pelatihan = document.getElementById("editdeskripsi_pelatihan").value;
         var status = document.getElementById("editstatus_pelatihan").value;
 
@@ -1101,7 +1230,7 @@ var fotoArray = [
             nama_pelatihan: nama_pelatihan,
             tanggal_pelatihan_awal: tanggal_pelatihan_awal,
             tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
-            jenis_pelatihan: jenis_pelatihan,
+            id_tipe_pelatihan: id_tipe_pelatihan,
             deskripsi_pelatihan: deskripsi_pelatihan,
             status: status
         };
@@ -1259,6 +1388,41 @@ var fotoArray = [
         $(btn).closest('.form-group-added').remove(); // Hapus dropdown terkait dengan tombol hapus yang ditekan
     }
 
+    loadTipePelatihanOptions();
+    function loadTipePelatihanOptions() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllTipePelatihan"; // Sesuaikan dengan endpoint Anda
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var tipePelatihanList = data;
+
+                // Kosongkan opsi pada elemen <select>
+                $('#id_tipe_pelatihan').empty();
+                $('#editid_tipe_pelatihan').empty();
+                $('#id_tipe_pelatihan').append($('<option></option>').text('Select Type of Training'));
+                $('#editid_tipe_pelatihan').append($('<option></option>').text('Select Type of Training'));
+
+                // Tambahkan opsi dari data tipe_produk
+                tipePelatihanList.forEach(function (tipePelatihan) {
+                    var option = '<option value="' + tipePelatihan.id_tipe_pelatihan + '">' + tipePelatihan.tipe_pelatihan + '</option>';
+                    $('#id_tipe_pelatihan').append(option);
+                });
+                                tipePelatihanList.forEach(function (tipePelatihan) {
+                    var option = '<option value="' + tipePelatihan.id_tipe_pelatihan + '">' + tipePelatihan.tipe_pelatihan + '</option>';
+                    $('#editid_tipe_pelatihan').append(option);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
 
 
 
@@ -1314,7 +1478,9 @@ var fotoArray = [
                                 <div class="row mb-3">
                                     <label for="tipe_produk" class="col-sm-2 col-form-label">Product Type</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="tipe_produk" id="tipe_produk">
+                                        <select class="form-select" name="id_tipe_produk" id="id_tipe_produk">
+
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -1412,7 +1578,9 @@ var fotoArray = [
                                 <div class="row mb-3">
                                     <label for="edittipe_produk" class="col-sm-2 col-form-label">Product Type</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="edittipe_produk" placeholder="Product Type">
+                                        <select class="form-select" id="editid_tipe_produk" placeholder="Product Type">
+
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -1504,9 +1672,11 @@ var fotoArray = [
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="jenis_fasilitas" class="col-sm-2 col-form-label">Facility Type</label>
+                                    <label for="id_tipe_fasilitas" class="col-sm-2 col-form-label">Facility Type</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="jenis_fasilitas" id="jenis_fasilitas">
+                                        <select class="form-select" name="id_tipe_fasilitas" id="id_tipe_fasilitas">
+
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -1598,9 +1768,11 @@ var fotoArray = [
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="editjenis_fasilitas" class="col-sm-2 col-form-label">Facility Type</label>
+                                    <label for="editid_tipe_fasilitas" class="col-sm-2 col-form-label">Facility Type</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" id="editjenis_fasilitas" placeholder="Facility Type">
+                                        <select class="form-select" name="editid_tipe_fasilitas" id="editid_tipe_fasilitas">
+
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -1703,22 +1875,10 @@ var fotoArray = [
 
                                 <!-- Tambahkan input untuk jenis_pelatihan -->
                                 <div class="row mb-3">
-                                    <label for="jenis_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
+                                    <label for="id_tipe_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
                                     <div class="col-sm-10">
-                                        <select class="form-select" name="jenis_pelatihan" id="jenis_pelatihan">
-                                            <option>Select Training Type</option>
-                                            <option value="Automotive Advance Technology">Automotive Advance Technology</option>
-                                            <option value="Civil & Construction">Civil & Construction</option>
-                                            <option value="Design">Design</option>
-                                            <option value="Electrical & Automation">Electrical & Automation</option>
-                                            <option value="Heavy Equipment">Heavy Equipment</option>
-                                            <option value="Information Technology">Information Technology</option>
-                                            <option value="Lean Manufacturing">Lean Manufacturing</option>
-                                            <option value="Machining">Machining</option>
-                                            <option value="Maintenance">Maintenance</option>
-                                            <option value="Mechatronics">Mechatronics</option>
-                                            <option value="Quality Control">Quality Control</option>
-                                            <option value="Supply Chains Manufacturing and Certification">Supply Chains Manufacturing and Certification</option>
+                                        <select class="form-select" name="id_tipe_pelatihan" id="id_tipe_pelatihan">
+
                                         </select>
                                     </div>
                                 </div>
@@ -1837,24 +1997,12 @@ var fotoArray = [
                                         <input type="date" class="form-control" id="edittanggal_pelatihan_akhir">
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <label for="editjenis_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
-                                    <div class="col-sm-10">
-                                        <select class="form-select" name="editjenis_pelatihan" id="editjenis_pelatihan">
-                                            <option>Select Training Type</option>
-                                            <option value="Automotive Advance Technology">Automotive Advance Technology</option>
-                                            <option value="Civil & Construction">Civil & Construction</option>
-                                            <option value="Design">Design</option>
-                                            <option value="Electrical & Automation">Electrical & Automation</option>
-                                            <option value="Heavy Equipment">Heavy Equipment</option>
-                                            <option value="Information Technology">Information Technology</option>
-                                            <option value="Lean Manufacturing">Lean Manufacturing</option>
-                                            <option value="Machining">Machining</option>
-                                            <option value="Maintenance">Maintenance</option>
-                                            <option value="Mechatronics">Mechatronics</option>
-                                            <option value="Quality Control">Quality Control</option>
-                                            <option value="Supply Chains Manufacturing and Certification">Supply Chains Manufacturing and Certification</option>
-                                        </select>
+                                        <div class="row mb-3">
+                                            <label for="editid_tipe_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
+                                            <div class="col-sm-10">
+                                                <select class="form-select" name="editid_tipe_pelatihan" id="editid_tipe_pelatihan">
+                                                </select>
+                                            </div>
                                     </div>
                                 </div>
                                 <div class="row mb-3">

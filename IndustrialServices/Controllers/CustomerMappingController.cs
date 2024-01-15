@@ -2,10 +2,10 @@
 
 namespace IndustrialServices.Controllers
 {
-    public class TestiCMController : Controller
+    public class CustomerMappingController : Controller
     {
         private readonly IWebHostEnvironment _webhost;
-        public TestiCMController(IWebHostEnvironment webhost)
+        public CustomerMappingController(IWebHostEnvironment webhost)
         {
             _webhost = webhost;
         }
@@ -14,12 +14,12 @@ namespace IndustrialServices.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> UploadPhoto(IFormFile foto)
+        public async Task<IActionResult> UploadPhoto(IFormFile fotopengajar)
         {
-            var imgext = Path.GetExtension(foto.FileName);
-            var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", foto.FileName);
+            var imgext = Path.GetExtension(fotopengajar.FileName);
+            var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotopengajar.FileName);
 
-            if (foto == null)
+            if (fotopengajar == null)
             {
                 return Ok("File kosong");
             }
@@ -31,7 +31,7 @@ namespace IndustrialServices.Controllers
                 {
                     using (var uploading = new FileStream(saveimg, FileMode.Create))
                     {
-                        await foto.CopyToAsync(uploading);
+                        await fotopengajar.CopyToAsync(uploading);
                         return Ok("Data berhasil diupload ke wwwroot");
                     }
                 }
@@ -45,6 +45,5 @@ namespace IndustrialServices.Controllers
                 return Ok("Format foto tidak valid. Harap unggah file dengan format .jpg atau .png");
             }
         }
-
     }
 }

@@ -79,11 +79,22 @@
             data: JSON.stringify(input),
             contentType: "application/json",
             success: function (data) {
-                check = 1;
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika username sudah tersedia
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'NPK was already used!',
+                    });
+                } else {
+                    check = 1;
 
-                if (check == 1) {
-                    uploadFoto(fotopengajar);
+                    if (check == 1) {
+                        uploadFoto(fotopengajar);
+                    }
+                    location.reload();
                 }
+
             },
             error: function (xhr, status, error) {
                 console.error(xhr.responseText);
@@ -237,18 +248,19 @@
     }
 
     function simpanedit() {
-        var id_pengajar = document.getElementById("editid_pengajar").value
-        var npk = document.getElementById("editnpk").value
-        var nama_pengajar = document.getElementById("editnama_pengajar").value
-        var bidang_keahlian = document.getElementById("editbidang_keahlian").value
-        var foto_pengajar = document.getElementById("editfoto_pengajar").value
-        var status = document.getElementById("editstatus").value
+        var id_pengajar = document.getElementById("editid_pengajar").value;
+        var npk = document.getElementById("editnpk").value;
+        var nama_pengajar = document.getElementById("editnama_pengajar").value;
+        var bidang_keahlian = document.getElementById("editbidang_keahlian").value;
+        var foto_pengajar = document.getElementById("editfoto_pengajar").value;
+        var status = document.getElementById("editstatus").value;
 
         var fotopengajar = document.getElementById("editfoto_pengajar").files[0];
 
-        var hostname = "https://localhost:7033/" // Ganti dengan URL API Anda
-        var url = hostname + "UpdateFacultyMember" // Sesuaikan dengan endpoint Anda
-        var method = "POST"
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "UpdateFacultyMember";
+        var method = "POST";
+
         var input = {
             id_pengajar: id_pengajar,
             npk: npk,
@@ -257,6 +269,7 @@
             foto_pengajar: foto_pengajar,
             status: status
         };
+
         var data = JSON.stringify(input);
 
         $.ajax({
@@ -265,23 +278,32 @@
             data: data,
             contentType: "application/json",
             success: function (data) {
-                check = 1;
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika NPK sudah digunakan
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'NPK was already used!',
+                    });
+                } else {
+                    var check = 1;
 
-                if(fotopengajar == null){
-                    check = 2
+                    if (fotopengajar == null) {
+                        check = 2;
+                    }
+
+                    if (check === 1) {
+                        uploadFoto(fotopengajar);
+                    }
+
+                    if (check === 2) {
+                        window.location.href = '/FacultyMember/Index';
+                    }
                 }
-
-                if (check == 1) {
-                    uploadFoto(fotopengajar);
-                }
-
-                if(check == 2){
-                    window.location.href = '/FacultyMember/Index';
-                }
-
             },
         });
     }
+
 
     function canceledit() {
         document.getElementById("editnpk").value = "";

@@ -3,3 +3,613 @@
 *@
 @{
 }
+
+<div class="pagetitle">
+    <h1>Testimonials & Customer Mapping Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Data</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Customer Mapping</h5>
+
+                    <button class="btn btn-primary addCM">+ Add Customer Mapping</button>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Logo Name</th>
+                                <th scope="col">Grade</th>
+                                <th scope="col">Logo</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyCM">
+                        </tbody>
+                    </table>
+                    <!-- End Table with stripped rows -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card" style="background-color: #3498db;">
+            <div class="card-body">
+                <h5 class="card-title text-white">Testimonials</h5>
+
+                <button class="btn btn-light addtesti">+ Add New Testimony</button>
+                <div class="container mt-5 mb-5">
+                    <div class="row g-2" id="testimonial-container">
+                        <!-- Testimonials will be dynamically added here using JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    loadCustomerMapping();
+
+    // Fungsi untuk memuat data Customer Mapping ke dalam tabel
+    function loadCustomerMapping() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllCustomerMapping";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var list = data.data;
+                list.forEach(function (customerMapping, index) {
+                    // Menggunakan ternary operator untuk menentukan teks status
+                    var statusText = customerMapping.status === 1 ? 'Active' : 'Inactive';
+
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + customerMapping.nama_logo + '</td>' +
+                        '<td>' + customerMapping.grade_logo + '</td>' +
+                        '<td><img src="/assets/img/' + customerMapping.path_logo + '" alt="Logo" width="70" height="70"></td>' +
+                        '<td>' + statusText + '</td>' +
+                        '<td>' +
+                        '<button class="btn btn-danger deleteCustomerMapping" data-id="' + customerMapping.id_customer_mapping + '"><i class="fas fa-trash"></i></button>' +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyCM').append(newRow);
+                });
+
+                // Menambahkan event listener untuk tombol delete
+                $('.deleteCustomerMapping').click(function () {
+                    var id = $(this).data('id');
+                    deleteCustomerMapping(id);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function deleteCustomerMapping(id) {
+        // Menampilkan konfirmasi SweetAlert
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Jika pengguna mengkonfirmasi, lanjutkan dengan penghapusan
+                var hostname = "https://localhost:7033/";
+                var url = hostname + "DeleteCustomerMapping";
+                var method = "POST";
+
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    data: JSON.stringify({ id: id }),
+                    success: function (data) {
+                        // Reload data setelah penghapusan
+                        loadCustomerMapping();
+                        // Menampilkan pesan SweetAlert untuk sukses
+                        Swal.fire(
+                            'Deleted!',
+                            'Your data has been deleted.',
+                            'success'
+                        );
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error:", error);
+                        // Menampilkan pesan SweetAlert untuk error
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting data.',
+                            'error'
+                        );
+                    }
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                // Jika pengguna membatalkan, tampilkan pesan SweetAlert
+                Swal.fire(
+                    'Cancelled',
+                    'Your data is safe :)',
+                    'info'
+                );
+            }
+        });
+    }
+    $(".addCM").click(function () {
+        $("#addCustomerMappingModal").modal("show");
+    });
+
+    function simpan() {
+        var check = 0;
+        var nama_logo = document.getElementById("nama_logo").value;
+        var grade_logo = document.getElementById("grade_logo").value;
+        var path_logo = document.getElementById("logo").value;
+        var status = document.getElementById("status").value;
+
+        var logo = document.getElementById("logo").files[0];
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "InsertCustomerMapping"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            nama_logo: nama_logo,
+            grade_logo: grade_logo,
+            path_logo: path_logo,
+            status: status
+        };
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: JSON.stringify(input),
+            contentType: "application/json",
+            success: function (data) {
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika username sudah tersedia
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Logo was already added!',
+                    });
+                } else {
+                    check = 1;
+
+                    if (check == 1) {
+                        uploadFoto(logo);
+                    }
+                    location.reload();
+                }
+
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+                // Handle error
+            }
+        });
+    }
+
+    function uploadFoto(file) {
+        var formData = new FormData();
+        formData.append('logo', file);
+
+        $.ajax({
+            url: '/TestiCM/UploadPhoto',
+            method: 'POST',
+            data: formData,
+            contentType: false, // false agar FormData menentukan Content-Type
+            processData: false, // false agar FormData tidak diproses
+            success: function (response) {
+                window.location.href = '/TestiCM/Index';
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+
+
+    // Testimoni
+
+
+    $(".addtesti").click(function () {
+        $("#addTestimonyModal").modal("show");
+    });
+    function loadTestimonials() {
+        var testimonialContainer = $("#testimonial-container");
+
+        // Clear existing testimonials
+        testimonialContainer.empty();
+        var hostname = "https://localhost:7033/";
+        var urlTestimonies = hostname + "GetAllTestimonies";
+
+        // Fetch testimonials from API
+        $.ajax({
+            url: urlTestimonies,
+            method: "GET",
+            success: function (data) {
+                // Check if 'data' is defined and has a property named 'data'
+                if (data && data.data) {
+                    var testimonials = data.data;
+
+                    testimonials.forEach(function (testimonial) {
+                        // Fetch nama_pelatihan based on id_pelatihan
+                        var urlPelatihan = hostname + "GetPelatihan?id=" + testimonial.id_pelatihan;
+
+                        $.ajax({
+                            url: urlPelatihan,
+                            method: "GET",
+                            success: function (pelatihanData) {
+                                var namaPelatihan = pelatihanData.nama_pelatihan;
+
+                                var testimonialHtml =
+                                    '<div class="col-md-3">' +
+                                    '<div class="card p-3 text-center px-4 position-relative">' +
+                                    '<button type="button" class="btn btn-light btn-sm position-absolute top-0 end-0 mt-2 me-2" value="' + testimonial.id_testimoni + '"onclick="deleteTestimonial(this.value)" > <i class="fas fa-trash" > </i></button > ' +
+                                    '<div class="user-image">' +
+                                    '<img src="/assets/img/' + testimonial.foto_peserta + '" class="rounded-circle" width="80">' +
+                                    '</div>' +
+                                    '<br />' +
+                                    '<p>"' + testimonial.testimoni_peserta + '"</p>' +
+                                    '<h5 class="mb-0" style="font-weight: bold; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-size:18px;">' + testimonial.nama_peserta + '</h5>' +
+                                    '<span style="color:grey; font-size:14px; padding-bottom:10px;">' + testimonial.asal_instansi + '</span>' +
+                                    '<span style="color:grey; font-size:16px;font-weight: bold;">' + namaPelatihan + '</span>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>';
+
+                                testimonialContainer.append(testimonialHtml);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("Error:", error);
+                            }
+                        });
+                    });
+
+                    $('.deleteTesti').click(function () {
+                        var id = $(this).data('id');
+                        deleteTestimonial(id);
+                    });
+                } else {
+                    console.error("Error: Invalid data format");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+
+
+// Add a deleteTestimonial function
+    function deleteTestimonial(id) {
+        // Menampilkan konfirmasi SweetAlert
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Jika pengguna mengkonfirmasi, lanjutkan dengan penghapusan
+                var hostname = "https://localhost:7033/";
+                var url = hostname + "DeleteTestimony?id=" + id;
+                var method = "POST";
+
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        // Reload data setelah penghapusan
+                        loadTestimonials();
+                        // Menampilkan pesan SweetAlert untuk sukses
+                        Swal.fire(
+                            'Deleted!',
+                            'The testimonial has been deleted.',
+                            'success'
+                        );
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error:", error);
+                        // Menampilkan pesan SweetAlert untuk error
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the testimonial.',
+                            'error'
+                        );
+                    }
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                // Jika pengguna membatalkan, tampilkan pesan SweetAlert
+                Swal.fire(
+                    'Cancelled',
+                    'The testimonial is safe :)',
+                    'info'
+                );
+            }
+        });
+    }
+
+
+
+    // Call the function to load testimonials
+    loadTestimonials();
+
+
+    function simpanTestimony() {
+        var namaPeserta = document.getElementById("nama_peserta").value;
+        var asalInstansi = document.getElementById("asal_instansi").value;
+        var id_pelatihan = document.getElementById("id_pelatihan").value;
+        var testimoni = document.getElementById("testimoni_peserta").value;
+        var foto_peserta = document.getElementById("foto_peserta").value;
+
+
+        var foto = document.getElementById("foto_peserta").files[0];
+        // Pastikan semua field diisi
+        if (!namaPeserta || !asalInstansi || !testimoni) {
+            alert("Please fill in all fields.");
+            return;
+        }
+
+        var testimonialData = {
+            nama_peserta: namaPeserta,
+            id_pelatihan: id_pelatihan,
+            asal_instansi: asalInstansi,
+            testimoni_peserta: testimoni,
+            foto_peserta: foto_peserta, // Ganti URL default gambar profil
+            status: 1 // Status aktif, sesuaikan dengan kebutuhan
+        };
+        console.log(testimonialData)
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertTestimony";
+
+
+        // Kirim data testimonial ke server
+        $.ajax({
+            url: url, // Ganti URL dengan endpoint yang sesuai
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(testimonialData),
+            success: function (data) {
+                uploadFotoTest(foto);
+                location.reload();
+
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function uploadFotoTest(file) {
+        var formData = new FormData();
+        formData.append('foto', file);
+
+        $.ajax({
+            url: '/TestiCM/UploadPhoto',
+            method: 'POST',
+            data: formData,
+            contentType: false, // false agar FormData menentukan Content-Type
+            processData: false, // false agar FormData tidak diproses
+            success: function (response) {
+                window.location.href = '/TestiCM/Index';
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+
+    loadPelatihanOptions();
+    function loadPelatihanOptions() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllPelatihan"; // Sesuaikan dengan endpoint Anda
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var PelatihanList = data;
+
+                // Kosongkan opsi pada elemen <select>
+                $('#id_pelatihan').empty();
+                $('#editid_pelatihan').empty();
+                $('#id_pelatihan').append($('<option></option>').text('Select Training'));
+                $('#editid_pelatihan').append($('<option></option>').text('Select Training'));
+
+                // Tambahkan opsi dari data tipe_produk
+                PelatihanList.forEach(function (Pelatihan) {
+                    var option = '<option value="' + Pelatihan.id_pelatihan + '">' + Pelatihan.nama_pelatihan + '</option>';
+                    $('#id_pelatihan').append(option);
+                });
+                PelatihanList.forEach(function (Pelatihan) {
+                    var option = '<option value="' + Pelatihan.id_pelatihan + '">' + Pelatihan.nama_pelatihan + '</option>';
+                    $('#editid_pelatihan').append(option);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+
+</script>
+
+
+
+@*Modal*@
+<div class="modal fade" id="addCustomerMappingModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerMappingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size:28px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Customer Mapping</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <div class="row mb-3">
+                                    <label for="nama_logo" class="col-sm-2 col-form-label">Logo Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="nama_logo" id="nama_logo">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="bidang_keahlian" class="col-sm-2 col-form-label">Grade Logo</label>
+                                    <div class="col-sm-10">
+                                        <select type="text" class="form-select" name="grade_logo" id="grade_logo">
+                                            <option>Select Grade of Logo</option>
+                                            <option value=1>1</option>
+                                            <option value=2>2</option>
+                                            <option value=3>3</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="logo" class="col-sm-2 col-form-label">Logo</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="logo" id="logo">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status" name="status" value=1 hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="addTestimonyModal" tabindex="-1" role="dialog" aria-labelledby="addTestimonyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size:28px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Testimony</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <div class="row mb-3">
+                                    <label for="nama_peserta" class="col-sm-2 col-form-label">Participant's Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="nama_peserta" id="nama_peserta">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="asal_instansi" class="col-sm-2 col-form-label">Institution/Company</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="asal_instansi" id="asal_instansi">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="foto_peserta" class="col-sm-12 col-form-label">Participant's Photo (Photo must be in 1:1 ratio and max size is 5 MB</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="foto_peserta" id="foto_peserta">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="id_pelatihan" class="col-sm-2 col-form-label">Training Name</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-select" name="id_pelatihan" id="id_pelatihan">
+                                            <!-- Opsi Dropdown -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="testimoni_peserta" class="col-sm-2 col-form-label">Participant's Testimony</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="testimoni_peserta" id="testimoni_peserta" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status_testimoni" name="status_testimoni" value=1 hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelTestimony()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpanTestimony()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Modal*@

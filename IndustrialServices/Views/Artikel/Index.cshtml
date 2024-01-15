@@ -81,12 +81,12 @@
                     }
 
                     if (window.location.href === "https://localhost:7240/Artikel/Index" && article.status === 2) {
-                        detailButton = '<a class="btn btn-primary" href="/Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-solid fa-bars"></i></i></a>';
+                        detailButton = '<a class="btn btn-primary" href="/Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-regular fa-eye"></i></a>';
                         deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
                     }
 
                     if (article.status === 2) {
-                        detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-solid fa-bars"></i></i></a>';
+                        detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-regular fa-eye"></i></a>';
                         deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
                     }
 
@@ -121,7 +121,7 @@
         // Konfirmasi sebelum menghapus menggunakan SweetAlert
         Swal.fire({
             title: 'Are you sure for deleting this Article?',
-            text: "You can't bring this data back.",
+            text: "This Article will be deleted too in the website.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
