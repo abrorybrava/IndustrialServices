@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Medilab Bootstrap Template - Index</title>
+    <title>@ViewData["Title"] - Industrial Services Astra Polytechnic</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -39,7 +39,7 @@
 </head>
 <body>
     <header id="header" class="fixed-top" style="padding:0; padding-top:40px;">
-        <div class="container d-flex align-items-center">
+        <div class="container d-flex align-items-center" style="padding-bottom:15px;">
                 <img class="logo me-auto" src="~/Content/img/AstraTech.png" style="height: 50px; position:relative; left:-90px;" />
                 <h1 style="font-weight:400; font-family: Poppins, sans-serif; font-size:28px; color: #005aa9; position:relative; left:-650px;">Pelayanan Industri</h1>
             <h1 style="font-weight:300; font-family: Poppins, sans-serif; font-size:20px; color: #005aa9; position:relative; left:-420px;">The Best Partner in Business Development</h1>
@@ -49,24 +49,21 @@
                     <div class="collapse navbar-collapse">
                     <nav id="navbar" class="navbar" style="right:-140px;">
                         <ul style="gap:20px;">
-                                <li><a class="nav-link scrollto active" href="#hero">Beranda</a></li>
+                                <li><a class="nav-link scrollto" asp-action="Index" asp-controller="Home">Beranda</a></li>
                                 <li><a class="nav-link scrollto" href="#about">Faculty Member</a></li>
                                 <li class="dropdown">
                                 <a class="nav-link scrollto" href="#services">Departemen Pelatihan dan Produksi <i class="bi bi-chevron-down"></i></a>
                                 <ul>
-                                        <li><a href="#">Drop Down 1</a></li>
-                                        <li><a href="#">Drop Down 2</a></li>
-                                        <li><a href="#">Drop Down 3</a></li>
-                                        <li><a href="#">Drop Down 4</a></li>
+                                        <li><a href="#">Facility</a></li>
+                                        <li><a href="#">Products</a></li>
+                                        <li><a href="#">Training</a></li>
                                     </ul>
                                 </li>
                             <li class="dropdown">
                                 <a class="nav-link scrollto o" href="#portfolio">Caledar of Event <i class="bi bi-chevron-down"></i></a>
                                 <ul>
-                                    <li><a href="#">Drop Down 1</a></li>
-                                    <li><a href="#">Drop Down 2</a></li>
-                                    <li><a href="#">Drop Down 3</a></li>
-                                    <li><a href="#">Drop Down 4</a></li>
+                                    <li><a href="#">Technical</a></li>
+                                    <li><a href="#">Non-Technical</a></li>
                                 </ul>
                             </li>
                                 <li><a class="nav-link scrollto" href="#team">Testimoni & Customer Map</a></li>
@@ -95,7 +92,7 @@
 <style>
     #main {
         position: relative;
-        top: 30px;
+        top: 60px;
     }
 </style>
 <!-- Vendor JS Files -->

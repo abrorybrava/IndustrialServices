@@ -1,6 +1,27 @@
 ﻿@{
     ViewData["Title"] = "Article Data";
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var httpcontext = ViewContext.HttpContext;
+    string role = httpcontext.Session.GetString("Role");
+    string id = httpcontext.Session.GetString("ID");
+    if (string.IsNullOrEmpty(role))
+    {
+        // Session is expired or role is not set, redirect to login layout
+        Layout = null;
+
+        <script>
+            window.location.href = '@Url.Action("Index", "Login")';
+        </script>
+
+        return;
+    }
+    if (role == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    if (role == "Contributor")
+    {
+        Layout = "~/Views/Shared/_LayoutContributor.cshtml";
+    }
 }
 
 <div class="pagetitle">
@@ -29,6 +50,7 @@
                             <tr>
                                 <th scope="col">No</th>
                                 <th scope="col">Article Title</th>
+                                <th scope="col">Contributor Name</th>
                                 <th scope="col">Release Date</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Action</th>
@@ -63,49 +85,55 @@
                 articles.forEach(function (article, index) {
                     var formattedDate = formatDate(article.tanggal_rilis);
                     var statusText = getStatusText(article.status);
-                    var editButton = '';
-                    var deleteButton = '';
-                    var doneButton = '';
-                    var detailButton = '';
 
-                    if (article.status === 1) {
-                        editButton = '<a class="btn btn-primary" href="Artikel/Draft?id=' + article.id_artikel + '"><i class="fas fa-edit"></i></a>';
-                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
-                        doneButton = '<button class="btn btn-success" value="' + article.id_artikel + '" onclick="doneArtikel(this.value)"><i class="fa-solid fa-check"></i></button>';
-                    }
+                    $.ajax({
+                        url: hostname + "GetPengelolaWebById?id=" + article.id_pengelola,
+                        method: "GET",
+                        contentType: "application/json",
+                        success: function (pengelola) {
+                            var nama = pengelola.data.nama_pengelola;
+                            var editButton = '';
+                            var deleteButton = '';
+                            var doneButton = '';
+                            var detailButton = '';
 
-                    if (window.location.href === "https://localhost:7240/Artikel/Index" && article.status === 1) {
-                        editButton = '<a class="btn btn-primary" href="/Artikel/Draft?id=' + article.id_artikel + '"><i class="fas fa-edit"></i></a>';
-                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
-                        doneButton = '<button class="btn btn-success" value="' + article.id_artikel + '" onclick="doneArtikel(this.value)"><i class="fa-solid fa-check"></i></button>';
-                    }
+                            if (window.location.href === "https://localhost:7240/Artikel/Index") {
+                                if (article.status === 1) {
+                                    editButton = '<a class="btn btn-primary" href="/Artikel/Draft?id=' + article.id_artikel + '"><i class="fas fa-edit"></i></a>';
+                                    deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
+                                    doneButton = '<button class="btn btn-success" value="' + article.id_artikel + '" onclick="doneArtikel(this.value)"><i class="fa-solid fa-check"></i></button>';
+                                } else if (article.status === 2) {
+                                    detailButton = '<a class="btn btn-primary" href="/Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-regular fa-eye"></i></a>';
+                                    deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
+                                }
+                            } else {
+                                if (article.status === 1) {
+                                    editButton = '<a class="btn btn-primary" href="Artikel/Draft?id=' + article.id_artikel + '"><i class="fas fa-edit"></i></a>';
+                                    deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
+                                    doneButton = '<button class="btn btn-success" value="' + article.id_artikel + '" onclick="doneArtikel(this.value)"><i class="fa-solid fa-check"></i></button>';
+                                } else if (article.status === 2) {
+                                    detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-regular fa-eye"></i></a>';
+                                    deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
+                                }
+                            }
 
-                    if (window.location.href === "https://localhost:7240/Artikel/Index" && article.status === 2) {
-                        detailButton = '<a class="btn btn-primary" href="/Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-regular fa-eye"></i></a>';
-                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
-                    }
+                            var newRow = '<tr>' +
+                                '<td>' + (index + 1) + '</td>' +
+                                '<td>' + article.judul_artikel + '</td>' +
+                                '<td>' + nama + '</td>' +
+                                '<td>' + formattedDate + '</td>' +
+                                '<td>' + statusText + '</td>' +
+                                '<td>' +
+                                editButton +
+                                deleteButton +
+                                doneButton +
+                                detailButton +
+                                '</td>' +
+                                '</tr>';
 
-                    if (article.status === 2) {
-                        detailButton = '<a class="btn btn-primary" href="Artikel/Detail?id=' + article.id_artikel + '"><i class="fa-regular fa-eye"></i></a>';
-                        deleteButton = '<button class="btn btn-danger" value="' + article.id_artikel + '" onclick="deleteArtikel(this.value)"><i class="fas fa-trash"></i></button>';
-                    }
-
-                    var newRow = '<tr>' +
-                        '<td>' + (index + 1) + '</td>' +
-                        '<td>' + article.judul_artikel + '</td>' +
-                        '<td>' + formattedDate + '</td>' +
-                        '<td>' + statusText + '</td>' +
-                        '<td>' +
-                        editButton +
-                        deleteButton +
-                        doneButton +
-                        detailButton +
-                        '</td>' +
-                        '</tr>';
-
-                    $('#tbodyArticle').append(newRow);
-
-                    // Event listener for edit button...
+                            $('#tbodyArticle').append(newRow);
+                        }
+                    });
                 });
             },
             error: function (xhr, status, error) {
@@ -113,6 +141,7 @@
             }
         });
     }
+
     function deleteArtikel(id) {
         var hostname = "https://localhost:7033/";
         var url = hostname + "DeleteArtikel?id=" + id;

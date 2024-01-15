@@ -1,6 +1,24 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Add Pengelola Web";
+    var httpcontext = ViewContext.HttpContext;
+    string role = httpcontext.Session.GetString("Role");
+    if (string.IsNullOrEmpty(role))
+    {
+        // Session is expired or role is not set, redirect to login layout
+        Layout = null;
+
+        <script>
+            window.location.href = '@Url.Action("Index", "Login")';
+        </script>
+
+        return;
+    }
+    if (role == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+
 }
 
 <div class="pagetitle">

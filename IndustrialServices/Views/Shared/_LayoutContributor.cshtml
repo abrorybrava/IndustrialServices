@@ -61,7 +61,7 @@
         <header id="header" class="header fixed-top d-flex align-items-center">
 
             <div class="d-flex align-items-center justify-content-between">
-            <a asp-action="Index" asp-controller="DashboardCRUD" class="logo d-flex align-items-center">
+            <a asp-action="Index" asp-controller="DashboardContributor" class="logo d-flex align-items-center">
                 <img src="~/assets/img/AstraTechPolos.png" style="height: 50px; width:auto;">
                     <span class="d-none d-lg-block">Industrial Services</span>
                 </a>
@@ -77,7 +77,7 @@
 
                         <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#">
                     <span class="d-none d-md-block" style="position:relative; right:20px;">Welcome! @Context.Session.GetString("Nama") (@Context.Session.GetString("Role"))</span>
-                        </a>
+                </a>
             </div>
         </div>
 
@@ -87,44 +87,16 @@
             <ul class="sidebar-nav" id="sidebar-nav">
 
                 <li class="nav-item">
-                    <a class="nav-link collapsed" asp-action="Index" asp-controller="DashboardCRUD">
+                    <a class="nav-link collapsed" asp-action="Index" asp-controller="DashboardContributor">
                     <i class="bi bi-house-door-fill"></i>
                     <span>Dashboard</span>
                     </a>
                 </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" asp-action="Index" asp-controller="PengelolaWeb">
-                    <i class="ri-admin-line"></i>
-                    <span>Web Manager</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" asp-action="Index" asp-controller="FacultyMember">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Faculty Member</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" onclick="artikel()">
+                <a class="nav-link collapsed" asp-action="Index" asp-controller="Artikel">
                     <i class="ri-article-line"></i>
                     <span>Article</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" asp-action="Index" asp-controller="DPP">
-                    <i class="bi bi-building"></i>
-                    <span>Department of Training and Production</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" asp-action="Index" asp-controller="TestiCM">
-                    <i class="bi bi-chat-right-text"></i>
-                    <span>Testimonials and Customer Mapping</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -133,6 +105,7 @@
                     <span>Logout</span>
                 </a>
             </li>
+
             </ul>
 
             
@@ -163,13 +136,3 @@
     <!-- Template Main JS File -->
     <script src="~/assets/js/main.js"></script>
 </html>
-
-<script>
-    function artikel(){
-            Swal.fire({
-                icon: 'warning',
-                title: 'Access Denied',
-                text: 'Only Contributors can access this feature.',
-            });
-        }
-</script>

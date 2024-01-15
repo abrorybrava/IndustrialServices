@@ -1,11 +1,23 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+});
 
+
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(1); // Adjust as needed
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+// Configure the HTTP request pipeline.
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -13,6 +25,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -22,6 +36,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=DashboardCRUD}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

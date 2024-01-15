@@ -1,6 +1,27 @@
 ﻿@{
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     ViewData["Title"] = "Article Details";
+    var httpcontext = ViewContext.HttpContext;
+    string role = httpcontext.Session.GetString("Role");
+    if (string.IsNullOrEmpty(role))
+    {
+        // Session is expired or role is not set, redirect to login layout
+        Layout = null;
+
+        <script>
+            window.location.href = '@Url.Action("Index", "Login")';
+        </script>
+
+        return;
+    }
+    if (role == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    if (role == "Contributor")
+    {
+        Layout = "~/Views/Shared/_LayoutContributor.cshtml";
+    }
+
 }
 
 <div class="pagetitle">
@@ -20,7 +41,6 @@
                     <!-- Form for editing article data -->
                     <div class="row mb-3">
                         <input type="text" class="form-control" name="id_artikel" id="id_artikel" value="@ViewBag.Id" hidden>
-                        <input type="text" class="form-control" name="id_pengelola" id="id_pengelola" hidden>
                     </div>
                     <div class="row mb-3">
                         <label for="tanggal_rilis" class="col-sm-2 col-form-label">Date of Release</label>
@@ -32,6 +52,12 @@
                         <label for="judul_artikel" class="col-sm-2 col-form-label">Article Title</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" name="judul_artikel" id="judul_artikel" disabled>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="nama_pengelola" class="col-sm-2 col-form-label">Added by</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="nama_pengelola" id="nama_pengelola" disabled>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -80,7 +106,7 @@
 
     function loadArticleData() {
         var id_artikel = document.getElementById("id_artikel");
-        var id_pengelola = document.getElementById("id_pengelola");
+        var nama_pengelola = document.getElementById("nama_pengelola");
         var judul_artikel = document.getElementById("judul_artikel");
         var sampul_artikel = document.getElementById("sampul_artikel");
         var isi_artikel = document.getElementById("isi_artikel");
@@ -96,17 +122,30 @@
             contentType: "application/json",
             success: function (data) {
                 var article = data.data;
-                id_pengelola.value = article.id_pengelola;
-                judul_artikel.value = article.judul_artikel;
-                isi_artikel.innerHTML = article.isi_artikel;
-                status.value = article.status;
 
-                // Tampilkan pratinjau gambar sampul artikel jika ada
-                if (article.sampul_artikel) {
-                    var imagePath = "/assets/img/" + article.sampul_artikel;
-                    $("#preview_image").attr("src", imagePath);
-                }
+                // Fetch pengelola data based on id_pengelola
+                $.ajax({
+                    url: hostname + "GetPengelolaWebById?id=" + article.id_pengelola,
+                    method: "GET",
+                    contentType: "application/json",
+                    success: function (pengelola) {
+                        console.log(pengelola)
+                        var nama = pengelola.data.nama_pengelola;
+                        nama_pengelola.value = nama;
+                        judul_artikel.value = article.judul_artikel;
+                        isi_artikel.innerHTML = article.isi_artikel;
+                        status.value = article.status;
+
+                        // Tampilkan pratinjau gambar sampul artikel jika ada
+                        if (article.sampul_artikel) {
+                            var imagePath = "/assets/img/" + article.sampul_artikel;
+                            $("#preview_image").attr("src", imagePath);
+                        }
+                    }
+                });
             }
         });
     }
+
+
 </script>
