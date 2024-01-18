@@ -17,7 +17,30 @@ namespace IndustrialServices.Controllers
         {
             return View();
         }
-
+        public IActionResult FacultyMember()
+        {
+            return View();
+        }
+        public IActionResult Fasilitas()
+        {
+            return View();
+        }
+        public IActionResult Produk()
+        {
+            return View();
+        }
+        public IActionResult Pelatihan()
+        {
+            return View();
+        }
+        public IActionResult KalenderTechnical()
+        {
+            return View();
+        }
+        public IActionResult KalenderNonTechnical()
+        {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();

@@ -1,0 +1,215 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Faculty Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<section id="hero">
+    <section id="home" class="home">
+        <div class="container" style="padding-bottom:15px;">
+            <p style="margin-bottom: -3px;color:darkgray;">Industrial Services</p>
+            <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 36px; margin-bottom: 20px;">Faculty Member</h5>
+        </div>
+        <div class="container-md">
+        <div class="row">
+            <div class="col-lg-12" >
+                <div class="card" style="background-color: #3498db;">
+                    <div class="card-body">
+                            <h5 class="card-title text-white" style="padding:30px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:24px;">Technical</h5>
+
+                        <div class="container mt-5 mb-5">
+                            <div class="row g-2">
+                                    <div class="row d-flex justify-content-center align-items-center h-100" id="technical-container">
+
+
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                    <br />
+                    <div class="col-lg-12">
+                        <div class="card" style="background-color: #3498db;">
+                            <div class="card-body">
+                                <h5 class="card-title text-white" style="padding:30px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:24px;">Non-Technical</h5>
+
+                                <div class="container mt-5 mb-5">
+                                    <div class="row g-2">
+
+                                        <div class="row d-flex justify-content-center align-items-center h-100" id="non-technical-container">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+
+
+
+        </div>
+            </div>
+        </div>
+
+
+        </section>
+</section>
+
+<footer id="footer" style="color:#ffffff;">
+    <div class="footer-top" style="background:#01529C;">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-3 col-md-6 footer-contact">
+                    <h3>Address</h3>
+                    <a href="https://maps.app.goo.gl/xG12byCagHAPUSuY9" target="_blank">
+                        <p style="color:white;">
+                            Cikarang Campus <br>
+                            Jl. Gaharu Blok F3 Delta Silicon II Cibatu,<br>
+                            South Cikarang, Bekasi Regency, <br>
+                            West Java 17530 <br><br>
+
+                        </p>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-contact">
+                    <h3>Contacts</h3>
+                    <p style="color:white;">
+                        <strong>Phone:</strong><a href="https://wa.me/6285156842086" style="color: white; text-decoration: underline;" target="_blank"> +62 888 7765 9821</a><br>
+                        <strong>Email:</strong> dpp@@astra.polytechnic.ac.id<br>
+                    </p>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-contact">
+                    <h3>Our Social Media</h3>
+                    <p style="color:white;">
+
+                    </p>
+                </div>
+
+            </div>
+        </div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-12 d-flex align-items-stretch text-center">
+                    <span style="position: relative; left: 50%; transform: translateX(-50%);color:darkgray;">Copyright © 2024 Department Training & Production Astra Polytechnic</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</footer><!-- End Footer -->
+<script>
+    loadTenagaPengajarTechnical()
+    loadTenagaPengajarNonTechnical()
+    function loadTenagaPengajarTechnical() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFacultyMembersTechnical";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var list = data.data;
+                list.forEach(function (pengajar, index) {
+                    var newRow = '<div class="col col-md-9 col-lg-7 col-xl-5" style="padding-bottom:20px;">' +
+                        '<div class="card" style="border-radius: 15px; background-color: rgba(255, 255, 255, 0.5); border:none;">' +
+                        '<div class="card-body p-4">' +
+                        '<div class="d-flex text-black">' +
+                        '<div class="flex-shrink-0">' +
+                        '<img src="/assets/img/' + pengajar.foto_pengajar + '" alt="Generic placeholder image" class="img-fluid" style="width: 180px; border-radius: 10px;">' +
+                        '</div>' +
+                        '<div class="flex-grow-1 ms-3">' +
+                        '<h5 class="mb-1">' + pengajar.nama_pengajar + '</h5>' +
+                        '<p class="mb-2 pb-1" style="color: gray;">' + pengajar.bidang_keahlian + '</p>' +
+                        '<div class="d-flex justify-content-start rounded-3 p-2 mb-2" style="background-color: rgba(255, 255, 255, 0.8)">' +
+                        '<div>' +
+                        '<p class="small text-muted mb-1">Training</p>' +
+                        '<p class="mb-0">' + pengajar.jumlah_pelatihan + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="d-flex pt-1">' +
+                        '<button class="btn btn-primary flex-grow-1 detailsFacultyMember" data-id_pengajar="' + pengajar.id_pengajar + '">Details</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+
+                    $('#technical-container').append(newRow);
+
+                    // Event listener for edit button
+                    $('.editFacultyMember[data-id_pengajar="' + pengajar.id_pengajar + '"]').click(function () {
+                        var id_pengajar = $(this).data("id_pengajar");
+                        loadEditTenagaPengajar(id_pengajar);
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function loadTenagaPengajarNonTechnical() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFacultyMembersNonTechnical";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var list = data.data;
+                list.forEach(function (pengajar, index) {
+                    var newRow = '<div class="col col-md-9 col-lg-7 col-xl-5" style="padding-bottom:20px;">' +
+                        '<div class="card" style="border-radius: 15px; background-color: rgba(255, 255, 255, 0.5); border:none;">' +
+                        '<div class="card-body p-4">' +
+                        '<div class="d-flex text-black">' +
+                        '<div class="flex-shrink-0">' +
+                        '<img src="/assets/img/' + pengajar.foto_pengajar + '" alt="Generic placeholder image" class="img-fluid" style="width: 180px; border-radius: 10px;">' +
+                        '</div>' +
+                        '<div class="flex-grow-1 ms-3">' +
+                        '<h5 class="mb-1">' + pengajar.nama_pengajar + '</h5>' +
+                        '<p class="mb-2 pb-1" style="color: gray;">' + pengajar.bidang_keahlian + '</p>' +
+                        '<div class="d-flex justify-content-start rounded-3 p-2 mb-2" style="background-color: rgba(255, 255, 255, 0.8)">' +
+                        '<div>' +
+                        '<p class="small text-muted mb-1">Training</p>' +
+                        '<p class="mb-0">' + pengajar.jumlah_pelatihan + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="d-flex pt-1">' +
+                        '<button class="btn btn-primary flex-grow-1 detailsFacultyMember" data-id_pengajar="' + pengajar.id_pengajar + '">Details</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+
+                    $('#non-technical-container').append(newRow);
+
+                    // Event listener for edit button
+                    $('.editFacultyMember[data-id_pengajar="' + pengajar.id_pengajar + '"]').click(function () {
+                        var id_pengajar = $(this).data("id_pengajar");
+                        loadEditTenagaPengajar(id_pengajar);
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+</script>

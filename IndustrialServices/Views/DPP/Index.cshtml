@@ -1314,44 +1314,48 @@ function loadPelatihan() {
             });
         });
     });
+    $(document).on('change', '#bidang_keahlian', function () {
+        var selectedBidangKeahlian = $(this).val();
+        console.log(selectedBidangKeahlian);
+        populateFacultyMembers(selectedBidangKeahlian);
+    });
 
+function populateFacultyMembers(bidang_keahlian) {
+    var hostname = "https://localhost:7033/";
+    var url = hostname + "GetAllFacultyMembersbyBK?bidang_keahlian=" + bidang_keahlian;
 
-    function populateFacultyMembers() {
+    $.ajax({
+        url: url,
+        method: "GET",
+        contentType: "application/json",
+        success: function (data) {
+            var facultyMembers = data.data;
+            console.log(facultyMembers)
+
+            // Get the dropdown list element
+            var dropdown = $('#id_pengajar');
+
+            // Remove all existing options before adding new ones
+            dropdown.empty();
+
+            // Add a default option
+            dropdown.append($('<option></option>').text('Select Faculty Member'));
+
+            // Add the list of faculty members to the dropdown list
+            facultyMembers.forEach(function (pengajar) {
+                dropdown.append($('<option></option>').attr('value', pengajar.id_pengajar).text(pengajar.nama_pengajar));
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching FacultyMembers:", error);
+            // Handle errors if any
+        }
+    });
+}
+
+    function populateEditFacultyMembersinPelatihan(bidang_keahlian) {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllFacultyMembers"; // Ganti dengan URL endpoint yang sesuai
-
-        $.ajax({
-            url: url,
-            method: "GET",
-            contentType: "application/json",
-            success: function (data) {
-                var facultyMembers = data.data;
-
-                // Mendapatkan elemen dropdown list
-                var dropdown = $('#id_pengajar');
-
-                // Menghapus semua opsi sebelum menambahkan opsi yang baru
-                dropdown.empty();
-
-                // Menambahkan opsi default
-                dropdown.append($('<option></option>').text('Select Faculty Member'));
-
-                // Menambahkan daftar FacultyMember ke dalam dropdown list
-                facultyMembers.forEach(function (pengajar) {
-                    dropdown.append($('<option></option>').attr('value', pengajar.id_pengajar).text(pengajar.nama_pengajar));
-
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching FacultyMembers:", error);
-                // Tangani error jika ada
-            }
-        });
-    }
-
-        function populateEditFacultyMembersinPelatihan() {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllFacultyMembers"; // Ganti dengan URL endpoint yang sesuai
+         var url = hostname + "GetAllFacultyMembersbyBK?bidang_keahlian=" + bidang_keahlian;
 
         $.ajax({
             url: url,
@@ -1519,7 +1523,7 @@ function loadPelatihan() {
                                 </div>
                                 <br/>
                                 <div class="row mb-3">
-                                    <label for="addphoto1" class="col-sm-2 col-form-label">Add Photo 1</label>
+                                    <label for="addphoto1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 3:4 ratio)</label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="addphoto1" required>
                                     </div>
@@ -1709,7 +1713,7 @@ function loadPelatihan() {
                                 </div>
                                 <br />
                                 <div class="row mb-3">
-                                    <label for="photoFasilitas1" class="col-sm-2 col-form-label">Add Photo 1</label>
+                                    <label for="photoFasilitas1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 3:4 ratio)</label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="photoFasilitas1" required>
                                     </div>
@@ -1886,9 +1890,16 @@ function loadPelatihan() {
                                     </div>
                                 </div>
 
-                                <!-- Tambahkan input untuk durasi_pelatihan -->
+                                <br />
                                 <div class="row mb-3">
-
+                                    <label for="bidang_keahlian" class="col-sm-2 col-form-label">Training Section</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="bidang_keahlian" id="bidang_keahlian">
+                                            <option>Select Training Section</option>
+                                            <option value="Technical">Technical</option>
+                                            <option value="Non-Technical">Non-Technical</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <!-- Tambahkan input untuk jenis_pelatihan -->
@@ -1928,7 +1939,7 @@ function loadPelatihan() {
                                 </div>
                                                                 <br />
                                 <div class="row mb-3">
-                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1</label>
+                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 3:4 ratio)</label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="photoPelatihan1">
                                     </div>
@@ -2053,12 +2064,11 @@ function loadPelatihan() {
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </section>
+                                    </div>
             </div>
         </div>
     </div>
-</div>
 
 <div class="modal fade" id="showPhotoPelatihanModal" tabindex="-1" role="dialog" aria-labelledby="showPhotoPelatihanModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
