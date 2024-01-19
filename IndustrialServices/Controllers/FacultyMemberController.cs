@@ -1,11 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IndustrialServices.Controllers
 {
     public class FacultyMemberController : Controller
     {
         private readonly IWebHostEnvironment _webhost;
-        public FacultyMemberController (IWebHostEnvironment webhost)
+
+        public FacultyMemberController(IWebHostEnvironment webhost)
         {
             _webhost = webhost;
         }
@@ -14,6 +21,7 @@ namespace IndustrialServices.Controllers
         {
             return View();
         }
+
         public IActionResult Create()
         {
             return View();
@@ -24,36 +32,40 @@ namespace IndustrialServices.Controllers
             ViewBag.Id = id;
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> UploadPhoto(IFormFile fotopengajar)
         {
-            var imgext = Path.GetExtension(fotopengajar.FileName);
-            var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotopengajar.FileName);
-
-            if(fotopengajar == null)
+            try
             {
-                return Ok("File kosong");
-            }
-
-            if (imgext == ".jpg" || imgext == ".png" || imgext == ".jpeg")
-            {
-                // Check if the file with the same name exists in the directory
-                if (!System.IO.File.Exists(saveimg))
+                if (fotopengajar == null || fotopengajar.Length == 0)
                 {
-                    using (var uploading = new FileStream(saveimg, FileMode.Create))
-                    {
-                        await fotopengajar.CopyToAsync(uploading);
-                        return Ok("Data berhasil diupload ke wwwroot");
-                    }
+                    return BadRequest("File kosong");
                 }
-                else
+
+                var imgext = Path.GetExtension(fotopengajar.FileName);
+                var saveimgDirectory = Path.Combine(_webhost.WebRootPath, "assets", "img");
+
+                // Pastikan folder "assets/img" sudah ada, jika belum, buat folder tersebut
+                if (!Directory.Exists(saveimgDirectory))
                 {
-                    return Ok("File dengan nama yang sama sudah ada di direktori");
+                    Directory.CreateDirectory(saveimgDirectory);
+                }
+
+                var saveimg = Path.Combine(saveimgDirectory, fotopengajar.FileName);
+
+                // ... (kode sebelumnya)
+
+                using (var uploading = new FileStream(saveimg, FileMode.Create))
+                {
+                    await fotopengajar.CopyToAsync(uploading);
+                    return Ok("Data berhasil diupload ke wwwroot");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return Ok("Format foto tidak valid. Harap unggah file dengan format .jpg atau .png");
+                // Tangani kesalahan dengan lebih baik dan kirim status kode 500
+                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
             }
         }
     }

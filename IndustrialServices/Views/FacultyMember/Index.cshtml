@@ -24,7 +24,13 @@
     }
 
 }
-
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#summernote').summernote();
+    });
+</script>
 <div class="pagetitle">
     <h1>Faculty Member Data</h1>
     <nav>
@@ -71,57 +77,60 @@
 
 <script>
     function simpan() {
-        var check = 0;
         var npk = document.getElementById("npk").value;
         var nama_pengajar = document.getElementById("nama_pengajar").value;
         var bidang_keahlian = document.getElementById("bidang_keahlian").value;
-        var foto_pengajar = document.getElementById("foto_pengajar").value;
+        var deskripsi_pengajar = document.getElementsByName("deskripsi_pengajar")[0].value;
         var status = document.getElementById("status").value;
 
         var fotopengajar = document.getElementById("foto_pengajar").files[0];
 
-        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
-        var url = hostname + "InsertFacultyMember"; // Sesuaikan dengan endpoint Anda
-        var method = "POST";
-        var input = {
-            npk: npk,
-            nama_pengajar: nama_pengajar,
-            bidang_keahlian: bidang_keahlian,
-            foto_pengajar: foto_pengajar,
-            status: status
-        };
+        // Jika foto_pengajar tidak null, upload foto
+        if (fotopengajar != null) {
+            uploadFoto(fotopengajar, function () {
+                // Setelah foto diupload, lanjutkan dengan menyimpan data
+                var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+                var url = hostname + "InsertFacultyMember"; // Sesuaikan dengan endpoint Anda
+                var method = "POST";
+                var input = {
+                    npk: npk,
+                    nama_pengajar: nama_pengajar,
+                    bidang_keahlian: bidang_keahlian,
+                    foto_pengajar: fotopengajar.name, // Ubah ini sesuai dengan kebutuhan Anda
+                    deskripsi_pengajar: deskripsi_pengajar,
+                    status: status
+                };
 
-        $.ajax({
-            url: url,
-            method: method,
-            data: JSON.stringify(input),
-            contentType: "application/json",
-            success: function (data) {
-                if (data.status === 500) {
-                    // Tampilkan SweetAlert jika username sudah tersedia
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Warning!',
-                        text: 'NPK was already used!',
-                    });
-                } else {
-                    check = 1;
-
-                    if (check == 1) {
-                        uploadFoto(fotopengajar);
-                    }
-                    location.reload();
-                }
-
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                // Handle error
-            }
-        });
+                $.ajax({
+                    url: url,
+                    method: method,
+                    data: JSON.stringify(input),
+                    contentType: "application/json",
+                    success: function (data) {
+                        if (data.status === 500) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Warning!',
+                                text: 'NPK has already been used!',
+                            });
+                        } else {
+                            console.log("Data berhasil diupload");
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        // Handle error
+                    },
+                });
+            });
+        } else {
+            // Jika foto_pengajar null, langsung menyimpan data tanpa mengunggah foto
+            saveData();
+        }
     }
 
-    function uploadFoto(file) {
+    function uploadFoto(file, callback) {
         var formData = new FormData();
         formData.append('fotopengajar', file);
 
@@ -129,15 +138,23 @@
             url: '/FacultyMember/UploadPhoto',
             method: 'POST',
             data: formData,
-            contentType: false, // false agar FormData menentukan Content-Type
-            processData: false, // false agar FormData tidak diproses
-            success: function (response) {
-                window.location.href = '/FacultyMember/Index';
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                console.log(data);
+                // Panggil callback setelah foto diupload
+                callback();
             },
             error: function (error) {
                 console.log(error);
+                // Handle error
             }
         });
+    }
+
+    function saveData() {
+        alert('warning')
+        console.log("Simpan data tanpa foto");
     }
 
 
@@ -245,6 +262,7 @@
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetFacultyMember?id=" + id_pengajar;
         var method = "GET";
+        var deskripsi_pengajar = document.getElementsByName("deskripsi_pengajar")[0];
 
         $.ajax({
             url: url,
@@ -257,6 +275,7 @@
                 $('#editnpk').val(faculty.npk);
                 $('#editnama_pengajar').val(faculty.nama_pengajar);
                 $('#editbidang_keahlian').val(faculty.bidang_keahlian);
+                deskripsi_pengajar.innerHTML = faculty.deskripsi_pengajar
                 $('#editstatus').val(faculty.status);
 
                 // Show the Bootstrap modal
@@ -271,6 +290,7 @@
         var nama_pengajar = document.getElementById("editnama_pengajar").value;
         var bidang_keahlian = document.getElementById("editbidang_keahlian").value;
         var foto_pengajar = document.getElementById("editfoto_pengajar").value;
+        var deskripsi_pengajar = document.getElementsByName("editdeskripsi_pengajar")[0].value;
         var status = document.getElementById("editstatus").value;
 
         var fotopengajar = document.getElementById("editfoto_pengajar").files[0];
@@ -285,6 +305,7 @@
             nama_pengajar: nama_pengajar,
             bidang_keahlian: bidang_keahlian,
             foto_pengajar: foto_pengajar,
+                        deskripsi_pengajar: deskripsi_pengajar,
             status: status
         };
 
@@ -369,6 +390,7 @@
                                             <option>Select Areas of expertise</option>
                                                 <option value="Technical">Technical</option>
                                             <option value="Non-Technical">Non-Technical</option>
+                                                                                        <option value="Technical and Non-Technical">Technical & Non-Technical</option>
                                             </select>
                                         </div>
                                     </div>
@@ -378,6 +400,12 @@
                                             <input class="form-control" type="file" name="fotopengajar" id="foto_pengajar">
                                         </div>
                                     </div>
+                                <div class="row mb-3">
+                                    <label for="deskripsi_pengajar" class="col-sm-2 col-form-label">Product Description</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="deskripsi_pengajar" id="summernote" rows="5"></textarea>
+                                    </div>
+                                </div>
                                     <div class="row mb-3">
                                         <div class="col-sm-10">
                                             <input class="form-control" id="status" name="status" value=1 hidden />
@@ -443,6 +471,7 @@
                                             <option>Select Areas of expertise</option>
                                                 <option value="Technical">Technical</option>
                                             <option value="Non-Technical">Non-Technical</option>
+                                            <option value="Technical and Non-Technical">Technical & Non-Technical</option>
                                             </select>
                                         </div>
                                     </div>
@@ -452,6 +481,12 @@
                                         <input class="form-control" type="file" name="editfotopengajar" id="editfoto_pengajar">
                                         </div>
                                     </div>
+                                <div class="row mb-3">
+                                    <label for="editdeskripsi_pengajar" class="col-sm-2 col-form-label">Product Description</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="editdeskripsi_pengajar" id="summernote" rows="5"></textarea>
+                                    </div>
+                                </div>
                                     <div class="row mb-3">
                                         <div class="col-sm-10">
                                         <input class="form-control" id="editstatus" name="editstatus" value=1 hidden />

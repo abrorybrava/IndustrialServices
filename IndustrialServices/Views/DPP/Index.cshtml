@@ -20,6 +20,14 @@
     }
 
 }
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.summernote').summernote();
+    });
+</script>
+
 
 <div class="container-md d-flex justify-content-center align-items-center" style="padding-bottom:30px;">
     <div class="container-fluid text-center">
@@ -81,7 +89,6 @@
                                     <th scope="col">Product Name</th>
                                     <th scope="col">Product Type</th>
                                     <th scope="col">Ordered by</th>
-                                    <th scope="col">Product Description</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -118,7 +125,6 @@
                                     <th scope="col">No</th>
                                     <th scope="col">Facilities Name</th>
                                     <th scope="col">Type of Facilities</th>
-                                    <th scope="col">Facilities Description</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -156,7 +162,6 @@
                                     <th scope="col">Training Start Date</th>
                                     <th scope="col">Training End Date</th>
                                     <th scope="col">Training Type</th>
-                                    <th scope="col">Training Description</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -175,7 +180,8 @@
 </section>
 
 <script>
-        //Start Products DOM JQUERY
+    $('.summernote').summernote();
+    //Start Products DOM JQUERY
     loadProducts()
     loadFasilitas()
     loadPelatihan()
@@ -208,7 +214,6 @@ function loadProducts() {
                                 '<td>' + product.nama_produk + '</td>' +
                                 '<td>' + tipe_produk + '</td>' +
                                 '<td>' + product.pesanan + '</td>' +
-                                '<td>' + product.deskripsi_produk + '</td>' +
                                 '<td>' +
                                 '<button class="btn btn-success showFotoProduk" data-id_produk="' + product.id_produk + '"><i class="fa-regular fa-image"></i></button>' +
                                 '<button class="btn btn-primary editProduct" data-id_produk="' + product.id_produk + '"><i class="fas fa-edit"></i></button>' +
@@ -245,7 +250,7 @@ function loadProducts() {
         var nama_produk = document.getElementById("nama_produk").value;
         var id_tipe_produk = document.getElementById("id_tipe_produk").value;
         var pesanan = document.getElementById("pesanan").value;
-        var deskripsi_produk = document.getElementById("deskripsi_produk").value;
+        var deskripsi_produk = document.getElementById("deskripsi_produk")[0].value;
         var status = document.getElementById("status").value;
 
         var fotoPaths = [];
@@ -410,7 +415,7 @@ function uploadPhoto(formDataArray) {
         var nama_produk = document.getElementById("editnama_produk").value;
         var id_tipe_produk = document.getElementById("editid_tipe_produk").value;
         var pesanan = document.getElementById("editpesanan").value;
-        var deskripsi_produk = document.getElementById("editdeskripsi_produk").value;
+        var deskripsi_produk = document.getElementById("editdeskripsi_produk")[0].value;
         var status = document.getElementById("editstatus_produk").value;
 
         var hostname = "https://localhost:7033/";
@@ -448,7 +453,8 @@ function uploadPhoto(formDataArray) {
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetProduk?id=" + id_produk;
         var method = "GET";
-
+        var elements = document.getElementsByName("editdeskripsi_produk")[0];
+        $('.summernote').summernote('destroy');
         $.ajax({
             url: url,
             method: method,
@@ -459,10 +465,10 @@ function uploadPhoto(formDataArray) {
                 $('#editnama_produk').val(product.nama_produk);
                 $('#editid_tipe_produk').val(product.id_tipe_produk);
                 $('#editpesanan').val(product.pesanan);
-                $('#editdeskripsi_produk').val(product.deskripsi_produk);
+                elements.innerHTML = product.deskripsi_produk;
+                $('.summernote').summernote();
                 $('#editstatus_produk').val(product.status);
-
-                // Show the Bootstrap modal
+                // Menampilkan modal pop-up untuk edit
                 $('#editProductModal').modal('show');
             }
         });
@@ -583,7 +589,6 @@ function loadFasilitas() {
                                 '<td>' + (index + 1) + '</td>' +
                                 '<td>' + fasilitas.nama_fasilitas + '</td>' +
                                 '<td>' + tipe_fasilitas + '</td>' +
-                                '<td>' + fasilitas.deskripsi_fasilitas + '</td>' +
                                 '<td>' +
                                 '<button class="btn btn-success showPhotoFasilitas" data-id_fasilitas="' + fasilitas.id_fasilitas + '"><i class="fa-regular fa-image"></i></button>' +
                                 '<button class="btn btn-primary editFasilitas" data-id_fasilitas="' + fasilitas.id_fasilitas + '"><i class="fas fa-edit"></i></button>' +
@@ -620,7 +625,7 @@ function loadFasilitas() {
     function simpanFasilitas() {
         var nama_fasilitas = document.getElementById("nama_fasilitas").value;
         var id_tipe_fasilitas = document.getElementById("id_tipe_fasilitas").value;
-        var deskripsi_fasilitas = document.getElementById("deskripsi_fasilitas").value;
+        var deskripsi_fasilitas = document.getElementById("deskripsi_fasilitas")[0].value;
         var status = document.getElementById("status_fasilitas").value;
 
         var fotoPaths = [];
@@ -753,35 +758,38 @@ var fotoArray = [];
     }
 
     // Fungsi untuk memuat data fasilitas yang akan diubah ke dalam form edit
-    function loadEditFasilitas(id_fasilitas) {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "GetFasilitas?id=" + id_fasilitas;
-        var method = "GET";
+function loadEditFasilitas(id_fasilitas) {
+    var hostname = "https://localhost:7033/";
+    var url = hostname + "GetFasilitas?id=" + id_fasilitas;
+    var method = "GET";
+    var elements = document.getElementsByName("editdeskripsi_fasilitas")[0];
+        $('.summernote').summernote('destroy');
 
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                var fasilitas = data;
-                $('#editid_fasilitas').val(fasilitas.id_fasilitas);
-                $('#editnama_fasilitas').val(fasilitas.nama_fasilitas);
-                $('#editid_tipe_fasilitas').val(fasilitas.id_tipe_fasilitas);
-                $('#editdeskripsi_fasilitas').val(fasilitas.deskripsi_fasilitas);
-                $('#editstatus_fasilitas').val(fasilitas.status);
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: "application/json",
+        success: function (data) {
+            var fasilitas = data;
+            $('#editid_fasilitas').val(fasilitas.id_fasilitas);
+            $('#editnama_fasilitas').val(fasilitas.nama_fasilitas);
+            $('#editid_tipe_fasilitas').val(fasilitas.id_tipe_fasilitas);
+            elements.innerHTML = fasilitas.deskripsi_fasilitas;
+            $('#editstatus_fasilitas').val(fasilitas.status);
+                        $('.summernote').summernote();
 
-                // Menampilkan modal pop-up untuk edit
-                $('#editFasilitasModal').modal('show');
-            }
-        });
-    }
+            // Menampilkan modal pop-up untuk edit
+            $('#editFasilitasModal').modal('show');
+        }
+    });
+}
 
     // Fungsi untuk mengupdate fasilitas
     function updateFasilitas() {
         var id_fasilitas = document.getElementById("editid_fasilitas").value;
         var nama_fasilitas = document.getElementById("editnama_fasilitas").value;
         var id_tipe_fasilitas = document.getElementById("editid_tipe_fasilitas").value;
-        var deskripsi_fasilitas = document.getElementById("editdeskripsi_fasilitas").value;
+        var deskripsi_fasilitas = document.getElementById("editdeskripsi_fasilitas")[0].value;
         var status = document.getElementById("editstatus_fasilitas").value;
 
         var hostname = "https://localhost:7033/";
@@ -936,7 +944,6 @@ function loadPelatihan() {
                                 '<td>' + tanggalAwalFinal + '</td>' +
                                 '<td>' + tanggalAkhirFinal + '</td>' +
                                 '<td>' + tipe_pelatihan + '</td>' +
-                                '<td>' + pelatihan.deskripsi_pelatihan + '</td>' +
                                 '<td>' +
                                 '<button class="btn btn-success showPhotoPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fa-regular fa-image"></i></button>' +
                                 '<button class="btn btn-primary editPelatihan" data-id_pelatihan="' + pelatihan.id_pelatihan + '"><i class="fas fa-edit"></i></button>' +
@@ -949,6 +956,7 @@ function loadPelatihan() {
 
                             // Attach event listener for the edit button
                             $('.editPelatihan[data-id_pelatihan="' + pelatihan.id_pelatihan + '"]').click(function () {
+                                    $('#summernote').summernote();
                                 $('.form-group-edited').remove();
                                 var id_pelatihan = $(this).data("id_pelatihan");
                                 loadEditPelatihan(id_pelatihan);
@@ -980,7 +988,7 @@ function loadPelatihan() {
         var tanggal_pelatihan_awal = document.getElementById("tanggal_pelatihan_awal").value;
         var tanggal_pelatihan_akhir = document.getElementById("tanggal_pelatihan_akhir").value;
         var id_tipe_pelatihan = document.getElementById("id_tipe_pelatihan").value;
-        var deskripsi_pelatihan = document.getElementById("deskripsi_pelatihan").value;
+        var deskripsi_pelatihan = document.getElementsByName("deskripsi_pelatihan")[0].value;
         var status = document.getElementById("status_pelatihan").value;
 
         // Validasi tanggal akhir harus lebih besar dari tanggal awal
@@ -1170,16 +1178,25 @@ function loadPelatihan() {
     }
 
     function loadEditPelatihan(id_pelatihan) {
+        $('.summernote').summernote();
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetPelatihan?id=" + id_pelatihan;
         var method = "GET";
+        var elements = document.getElementsByName("editdeskripsi_pelatihan")[0];
+
         loadEditPengajarPelatihan(id_pelatihan);
+
         $.ajax({
             url: url,
             method: method,
             contentType: "application/json",
             success: function (data) {
                 var pelatihan = data;
+
+                // Destroy Summernote before changing content
+                $('.summernote').summernote('destroy');
+
+                // Set values for other fields
                 $('#editid_pelatihan').val(pelatihan.id_pelatihan);
                 $('#editnama_pelatihan').val(pelatihan.nama_pelatihan);
                 var date1 = new Date(pelatihan.tanggal_pelatihan_awal);
@@ -1191,10 +1208,20 @@ function loadPelatihan() {
                 $('#edittanggal_pelatihan_awal').val(formattedDate1);
                 $('#edittanggal_pelatihan_akhir').val(formattedDate2);
                 $('#editid_tipe_pelatihan').val(pelatihan.id_tipe_pelatihan);
-                $('#editdeskripsi_pelatihan').val(pelatihan.deskripsi_pelatihan);
+
+                // Set HTML content using innerHTML
+                elements.innerHTML = pelatihan.deskripsi_pelatihan;
+
+                // Initialize Summernote again
+                $('.summernote').summernote();
+
                 $('#editstatus_pelatihan').val(pelatihan.status);
-                // Menampilkan modal pop-up untuk edit
+
+                // Show the modal
                 $('#editPelatihanModal').modal('show');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
             }
         });
     }
@@ -1237,7 +1264,7 @@ function loadPelatihan() {
         var tanggal_pelatihan_awal = document.getElementById("edittanggal_pelatihan_awal").value;
         var tanggal_pelatihan_akhir = document.getElementById("edittanggal_pelatihan_akhir").value;
         var id_tipe_pelatihan = document.getElementById("editid_tipe_pelatihan").value;
-        var deskripsi_pelatihan = document.getElementById("editdeskripsi_pelatihan").value;
+        var deskripsi_pelatihan = document.getElementsByName("editdeskripsi_pelatihan")[0].value;
         var status = document.getElementById("editstatus_pelatihan").value;
 
         var hostname = "https://localhost:7033/";
@@ -1471,6 +1498,7 @@ function populateFacultyMembers(bidang_keahlian) {
         $('.tableProduct').hide();
         $('.tableTraining').hide(); 
     });
+
 </script>
 
 
@@ -1514,7 +1542,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="deskripsi_produk" class="col-sm-2 col-form-label">Product Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" name="deskripsi_produk" id="deskripsi_produk" rows="5"></textarea>
+                                        <textarea class="form-control summernote" name="deskripsi_produk" id="summernote" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <hr/>
@@ -1614,7 +1642,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="editdeskripsi_produk" class="col-sm-2 col-form-label">Product Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" id="editdeskripsi_produk" rows="5" placeholder="Product Description"></textarea>
+                                        <textarea class="form-control summernote" id="editdeskripsi_produk" name="editdeskripsi_produk" rows="5" placeholder="Product Description"></textarea>
                                     </div>
                                 </div>
                                 <hr/>
@@ -1704,7 +1732,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="deskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" name="deskripsi_fasilitas" id="deskripsi_fasilitas" rows="5"></textarea>
+                                        <textarea class="form-control summernote" name="deskripsi_fasilitas" id="summernote" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -1800,7 +1828,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="editdeskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" id="editdeskripsi_fasilitas" rows="5" placeholder="Facility Description"></textarea>
+                                        <textarea class="form-control summernote" name="editdeskripsi_fasilitas" id="summernote" rows="5" placeholder="Facility Description"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -1916,7 +1944,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="deskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" name="deskripsi_pelatihan" id="deskripsi_pelatihan" rows="5"></textarea>
+                                        <textarea class="form-control summernote" name="deskripsi_pelatihan" id="summernote" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -2014,18 +2042,18 @@ function populateFacultyMembers(bidang_keahlian) {
                                         <input type="text" class="form-control" id="editnama_pelatihan" placeholder="Training Name">
                                     </div>
                                 </div>
-                                <div class="row mb-3">
+
+                                <div class="form-group row mb-6">
                                     <label for="edittanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date</label>
-                                    <div class="col-sm-10">
-                                        <input type="date" class="form-control" id="edittanggal_pelatihan_awal">
+                                    <div class="col-sm-3">
+                                        <input type="date" class="form-control" name="edittanggal_pelatihan_awal" id="edittanggal_pelatihan_awal">
+                                    </div>
+                                     <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training End Date</label>
+                                    <div class="col-sm-3">
+                                        <input type="date" class="form-control" name="edittanggal_pelatihan_akhir" id="edittanggal_pelatihan_akhir">
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <label for="edittanggal_pelatihan_akhir" class="col-sm-2 col-form-label">Training End Date</label>
-                                    <div class="col-sm-10">
-                                        <input type="date" class="form-control" id="edittanggal_pelatihan_akhir">
-                                    </div>
-                                </div>
+                                                                <br />
                                         <div class="row mb-3">
                                             <label for="editid_tipe_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
                                             <div class="col-sm-10">
@@ -2037,10 +2065,10 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="editdeskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" id="editdeskripsi_pelatihan" rows="5" placeholder="Training Description"></textarea>
+                                    <textarea class="form-control summernote" name="editdeskripsi_pelatihan" id="summernote" rows="10"></textarea>
                                     </div>
                                 </div>
-                                <div class="form-group row mb-3">
+                                <div class="row mb-3">
                                     <label for="editid_pengajar" class="col-sm-6 col-form-label">Faculty Member for Training (Uneditable)</label>
                                     <div class="col-sm-10">
                                         <span id="editid_pengajar">
