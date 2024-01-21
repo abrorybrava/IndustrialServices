@@ -15,19 +15,41 @@
             </div>
         </div>
         <div class="container-lg">
-            <div class="row g-4">
+            <div class="row g-12">
                 <div class="col-sm-6 text-white">
                     <div class="post-body">
                     <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 20px; margin-bottom: 20px;">
                         Deskripsi Pelatihan
                     </h5>
                         @Html.Raw("<div id='load-detail-pelatihan' style='text-align:justify;'>")
-
                     </p>
                         </div>
                 </div>
+
+        </div>
+            <div class="col-lg-6">
+                <div class="card" style="background-color: #3498db;">
+                    <div class="card-body">
+                        <h5 class="card-title text-white" style="padding:20px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:20px;">Training Photos</h5>
+                        <div class="container-sm" id="load-photo">
+
+                            <!-- Tambahkan card lainnya di sini sesuai kebutuhan -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+        <br />
+        <br />
+        <div class="row">
+            <div class="col-lg-12">
+                <h5 class="card-title text-white" style="padding:20px; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:20px;">Testimonials</h5>
+                        <div class="container mt-5 mb-5">
+                            <div class="row g-2" id="testimonial-container">
+
+                            </div>
+                        </div>
+            </div>
         </div>
         </section>
         </section>
@@ -83,7 +105,6 @@
     loadPelatihanTechnical(); // Memuat data pelatihan saat halaman dimuat
     function loadPelatihanTechnical() {
         var id = @ViewBag.Id;
-        console.log(id);
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetPelatihanTechnical?id=" + id;
         var method = "GET";
@@ -94,7 +115,6 @@
             contentType: "application/json",
             success: function (data) {
                 var pelatihanList = data;
-                console.log(pelatihanList);
 
                 pelatihanList.forEach(function (pelatihan) {
                     $.ajax({
@@ -109,8 +129,6 @@
 
                             var headerRow = '<h5 style="color: rgba(255,255,255,0.4); font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-weight: 300; font-size: 24px; margin-bottom: 0px;">Training - Technical - ' + tipe_pelatihan + '</h5>' +
                                 '<h6 style="color: white; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 36px; margin-bottom: 20px;">' + pelatihan.nama_pelatihan + '</h6>';
-                            console.log(headerRow);
-                            console.log(deskripsiPelatihan);
 
                             $('#load-header-pelatihan').append(headerRow);
                             $('#load-detail-pelatihan').append(deskripsiPelatihan);
@@ -120,6 +138,108 @@
                         }
                     });
                 });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    loadPhotoPelatihan();
+
+    function loadPhotoPelatihan() {
+        var id = @ViewBag.Id;
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetPhotoPelatihan?id=" + id;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pelatihanList = data;
+
+                pelatihanList.forEach(function (pelatihan) {
+                    // Assuming you don't need tipe_pelatihan here, as it's not defined in your code
+                    var headerRow = '<div class="row justify-content-center">' +
+                        '<img class="shadow-light-lg img-fluid m-1" src="/assets/img/' + pelatihan.path_foto_pelatihan + '" style="width: 250px; height: auto;" />' +
+                        '</div>';
+
+                    $('#load-photo').append(headerRow);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    } 
+    loadTestimonials();
+    function loadTestimonials() {
+        var testimonialContainer = $("#testimonial-container");
+
+        // Clear existing testimonials
+        testimonialContainer.empty();
+        var hostname = "https://localhost:7033/";
+        var urlTestimonies = hostname + "GetTestimonyByPelatihan?id=" + @ViewBag.Id;
+
+        // Fetch testimonials from API
+        $.ajax({
+            url: urlTestimonies,
+            method: "GET",
+            success: function (data) {
+                // Check if 'data' is defined and has a property named 'data'
+                var testimonials = data.data;
+                if(testimonials.length > 0) {
+
+                    testimonials.forEach(function (testimonial) {
+                        // Fetch nama_pelatihan based on id_pelatihan
+                        var urlPelatihan = hostname + "GetPelatihan?id=" + testimonial.id_pelatihan;
+
+                        $.ajax({
+                            url: urlPelatihan,
+                            method: "GET",
+                            success: function (pelatihanData) {
+                                var namaPelatihan = pelatihanData.nama_pelatihan;
+
+                                var testimonialHtml =
+                                    '<div class="col-md-3">' +
+                                    '<div class="card p-3 text-center px-4 position-relative">' +
+                                    '<div class="user-image">' +
+                                    '<img src="/assets/img/' + testimonial.foto_peserta + '" class="rounded-circle" width="80">' +
+                                    '</div>' +
+                                    '<br />' +
+                                    '<p>"' + testimonial.testimoni_peserta + '"</p>' +
+                                    '<h5 class="mb-0" style="font-weight: bold; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-size:18px;">' + testimonial.nama_peserta + '</h5>' +
+                                    '<span style="color:grey; font-size:14px; padding-bottom:10px;">' + testimonial.asal_instansi + '</span>' +
+                                    '<span style="color:grey; font-size:16px;font-weight: bold;">' + namaPelatihan + '</span>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>';
+
+                                testimonialContainer.append(testimonialHtml);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("Error:", error);
+                            }
+                        });
+                    });
+
+                } else {
+                    // No testimonials found, append a card with label
+                    var noTestimonialHtml = '<div class="row d-flex justify-center-content align-items-center">' +
+                        '<div class="col-4 text-center">' +
+                        '<div class="card" style="border-radius: 15px; background-color: rgba(255, 255, 255, 0.5); border:none;">' +
+                        '<div class="card-body p-4">' +
+                        '<p class="mb-2 pb-1 text-center" style="color: gray;">No testimonials available.</p>' +
+                        '</div>' +  
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                    testimonialContainer.append(noTestimonialHtml);
+                }
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);

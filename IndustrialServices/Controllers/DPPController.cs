@@ -17,38 +17,44 @@ namespace IndustrialServices.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadPhoto(List<IFormFile> foto)
         {
-            foreach (var fotofoto in foto)
+            try
             {
-                var imgext = Path.GetExtension(fotofoto.FileName);
-                var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotofoto.FileName);
-
-                if (foto == null)
+                foreach (var fotofoto in foto)
                 {
-                    return Ok("File kosong");
-                }
+                    var imgext = Path.GetExtension(fotofoto.FileName);
+                    var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotofoto.FileName);
 
-                if (imgext == ".jpg" || imgext == ".png" || imgext == ".jpeg")
-                {
+                    // Periksa apakah file kosong
+                    if (foto == null || foto.Count == 0)
+                    {
+                        return BadRequest("File kosong");
+                    }
+
+                    // Validasi format file
+                    if (imgext != ".jpg" && imgext != ".png" && imgext != ".jpeg")
+                    {
+                        return BadRequest("Format foto tidak valid. Harap unggah file dengan format .jpg, .png, atau .jpeg");
+                    }
+
                     // Check if the file with the same name exists in the directory
-                    if (!System.IO.File.Exists(saveimg))
+                    if (System.IO.File.Exists(saveimg))
                     {
-                        using (var uploading = new FileStream(saveimg, FileMode.Create))
-                        {
-                            await fotofoto.CopyToAsync(uploading);
-                            return Ok("Data berhasil diupload ke wwwroot");
-                        }
+                        return BadRequest("File dengan nama yang sama sudah ada di direktori");
                     }
-                    else
+
+                    // Simpan file
+                    using (var uploading = new FileStream(saveimg, FileMode.Create))
                     {
-                        return Ok("File dengan nama yang sama sudah ada di direktori");
+                        await fotofoto.CopyToAsync(uploading);
                     }
                 }
-                else
-                {
-                    return Ok("Format foto tidak valid. Harap unggah file dengan format .jpg atau .png");
-                }
+
+                return Ok("Data berhasil diupload ke wwwroot");
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
+            }
         }
     }
 }

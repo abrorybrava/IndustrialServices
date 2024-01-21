@@ -9,31 +9,114 @@
             <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 36px; margin-bottom: 20px;">Products</h5>
         </div>
         <div class="container-md">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card" style="background-color: #3498db;">
-                        <div class="card-body">
-
-                     </div>
-                    </div>
-                    </div>
-
-
+            <div class="row" id="data-list">
                 <div class="col-lg-4">
                     <div class="card" style="background-color: #3498db;">
                         <div class="card-body">
                         </div>
                     </div>
                 </div>
-
-                                <div class="col-lg-4">
+                <div class="col-lg-4">
                     <div class="card" style="background-color: #3498db;">
                         <div class="card-body">
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
+    </section>
 </section>
-</section>
+
+<footer id="footer" style="color:#ffffff;">
+    <div class="footer-top" style="background:#01529C;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 footer-contact">
+                    <h3>Address</h3>
+                    <a href="https://maps.app.goo.gl/xG12byCagHAPUSuY9" target="_blank">
+                        <p style="color:white;">
+                            Cikarang Campus <br>
+                            Jl. Gaharu Blok F3 Delta Silicon II Cibatu,<br>
+                            South Cikarang, Bekasi Regency, <br>
+                            West Java 17530 <br><br>
+                        </p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 footer-contact">
+                    <h3>Contacts</h3>
+                    <p style="color:white;">
+                        <strong>Phone:</strong><a href="https://wa.me/6285156842086" style="color: white; text-decoration: underline;" target="_blank"> +62 888 7765 9821</a><br>
+                        <strong>Email:</strong> dpp@@astra.polytechnic.ac.id<br>
+                    </p>
+                </div>
+                <div class="col-lg-3 col-md-6 footer-contact">
+                    <h3>Our Social Media</h3>
+                    <p style="color:white;">
+                        <!-- Isi dengan tautan sosial media jika diperlukan -->
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-12 d-flex align-items-stretch text-center">
+                    <span style="position: relative; left: 50%; transform: translateX(-50%);color:darkgray;">Copyright © 2024 Department Training & Production Astra Polytechnic</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer><!-- End Footer -->
+
+<script>
+    loadProduk();
+    function loadProduk() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllProdukInWeb";
+        var method = "GET";
+
+        $('#data-list').empty();
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var dataList = data;
+
+                dataList.forEach(function (produk) {
+                    $.ajax({
+                        url: hostname + "GetTipeProduk?id=" + produk.id_tipe_produk,
+                        method: "GET",
+                        contentType: "application/json",
+                        success: function (produkTypeDetails) {
+                            var produk_type = produkTypeDetails.tipe_produk;
+                            var cardHtml =
+                                '<div class="col-xs-12 col-sm-4">' +
+                                '<a href="/Home/DetailProduk?id=' + produk.id_produk + '"> ' +
+                                '<div class="card bg-dark text-white" style="border:none;">' +
+                                '<img src="/assets/img/' + produk.path_foto_produk + '" class="card-img img-fluid" alt="' + produk.nama_produk + '">' +
+                                '<div class="card-img-overlay d-flex flex-column">' +
+                                '<div class="card-category" style="font-size: 16px; font-weight: bold;">' + produk_type + '</div>' +
+                                '<div class="card-description flex-grow-1">' +
+                                '<h2 class="card-title" style="font-size: 24px; font-weight: bold;">' + produk.nama_produk + '</h2>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</a>' +
+                                '</div>';
+
+                            $('#data-list').append(cardHtml);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error:", error);
+                        }
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+</script>
+

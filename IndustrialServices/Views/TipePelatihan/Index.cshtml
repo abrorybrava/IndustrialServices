@@ -47,6 +47,7 @@
                             <tr>
                                 <th scope="col">No</th>
                                 <th scope="col">Type of Training</th>
+                                <th scope="col">Areas of expertise</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Action</th>
                             </tr>
@@ -90,6 +91,7 @@
                     var newRow = '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td>' + tipePelatihan.tipe_pelatihan + '</td>' +
+                        '<td>' + tipePelatihan.bidang_keahlian + '</td>' +
                         '<td>' + statusText + '</td>' +
                         '<td>' +
                         editButton +
@@ -178,6 +180,7 @@
 
                 $('#edit_id_tipe_pelatihan').val(tipePelatihan.id_tipe_pelatihan);
                 $('#edit_tipe_pelatihan').val(tipePelatihan.tipe_pelatihan);
+                $('#edit_bidang_keahlian').val(tipePelatihan.bidang_keahlian);
                 $('#edit_status_tipe_pelatihan').val(tipePelatihan.status);
 
                 // Show the Bootstrap modal
@@ -189,6 +192,7 @@
     function updateTipePelatihan() {
         var id_tipe_pelatihan = document.getElementById("edit_id_tipe_pelatihan").value;
         var tipe_pelatihan = document.getElementById("edit_tipe_pelatihan").value;
+        var bidang_keahlian = document.getElementById("edit_bidang_keahlian").value;
         var status_tipe_pelatihan = document.getElementById("edit_status_tipe_pelatihan").value;
 
         var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
@@ -197,6 +201,7 @@
         var input = {
             id_tipe_pelatihan: id_tipe_pelatihan,
             tipe_pelatihan: tipe_pelatihan,
+            bidang_keahlian: bidang_keahlian,
             status: status_tipe_pelatihan
         };
         var data = JSON.stringify(input);
@@ -233,6 +238,7 @@
 
     function simpanTipePelatihan() {
         var tipe_pelatihan = document.getElementById("tipe_pelatihan").value;
+        var bidang_keahlian = document.getElementById("bidang_keahlian").value;
         var status_tipe_pelatihan = document.getElementById("status_tipe_pelatihan").value;
 
         var hostname = "https://localhost:7033/";
@@ -241,6 +247,7 @@
 
         var input = {
             tipe_pelatihan: tipe_pelatihan,
+            bidang_keahlian: bidang_keahlian,
             status: status_tipe_pelatihan
         };
 
@@ -297,6 +304,16 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
+                                    <label for="bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
+                                    <div class="col-sm-10">
+                                        <select type="text" class="form-select" name="bidang_keahlian" id="bidang_keahlian">
+                                            <option>Select Areas of expertise</option>
+                                            <option value="Technical">Technical</option>
+                                            <option value="Non-Technical">Non-Technical</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
                                     <div class="col-sm-10">
                                         <input class="form-control" id="status_tipe_pelatihan" name="status_tipe_pelatihan" value="1" hidden />
                                     </div>
@@ -340,6 +357,16 @@
                                     <label for="edit_tipe_pelatihan" class="col-sm-2 col-form-label">Type of Training</label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="edit_tipe_pelatihan" id="edit_tipe_pelatihan">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="edit_bidang_keahlian" class="col-sm-2 col-form-label">Areas of expertise</label>
+                                    <div class="col-sm-10">
+                                        <select type="text" class="form-select" name="edit_bidang_keahlian" id="edit_bidang_keahlian">
+                                            <option>Select Areas of expertise</option>
+                                            <option value="Technical">Technical</option>
+                                            <option value="Non-Technical">Non-Technical</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row mb-3">

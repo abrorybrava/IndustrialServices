@@ -22,11 +22,6 @@
 }
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('.summernote').summernote();
-    });
-</script>
 
 
 <div class="container-md d-flex justify-content-center align-items-center" style="padding-bottom:30px;">
@@ -180,7 +175,7 @@
 </section>
 
 <script>
-    $('.summernote').summernote();
+
     //Start Products DOM JQUERY
     loadProducts()
     loadFasilitas()
@@ -250,7 +245,7 @@ function loadProducts() {
         var nama_produk = document.getElementById("nama_produk").value;
         var id_tipe_produk = document.getElementById("id_tipe_produk").value;
         var pesanan = document.getElementById("pesanan").value;
-        var deskripsi_produk = document.getElementById("deskripsi_produk")[0].value;
+        var deskripsi_produk = document.getElementsByName("deskripsi_produk")[0].value;
         var status = document.getElementById("status").value;
 
         var fotoPaths = [];
@@ -318,6 +313,8 @@ function loadProducts() {
         };
 
         // Kirim permintaan AJAX untuk menyimpan data produk dan foto-fotonya secara terpisah
+        if(fileInputs.length != 0){
+            uploadPhoto(fileInputs, function () {
         $.ajax({
             url: url,
             method: method,
@@ -325,7 +322,6 @@ function loadProducts() {
             data: JSON.stringify(productData),
             success: function (data) {
                 console.log("Data produk berhasil disimpan:", data);
-                uploadPhoto(fileInputs);
                 sendPhotoProduk(fotoPaths);
 
                 location.reload(); // Opsional: Jika Anda ingin memuat ulang halaman
@@ -335,12 +331,17 @@ function loadProducts() {
                 // Handle error
             }
         });
+            });
+        } else {
+            // Jika foto_pengajar null, langsung menyimpan data tanpa mengunggah foto
+            saveData();
+        }
     }
 
     // Fungsi untuk mengirimkan foto ke server
 
 
-function uploadPhoto(formDataArray) {
+function uploadPhoto(formDataArray, callback) {
     var url = '/DPP/UploadPhoto';
 
     formDataArray.forEach(function (data) {
@@ -356,6 +357,7 @@ function uploadPhoto(formDataArray) {
             success: function (response) {
                 console.log("Foto berhasil diunggah:", response);
                 // Lakukan tindakan lebih lanjut jika diperlukan setelah foto berhasil diunggah
+                callback();
             },
             error: function (xhr, status, error) {
                 console.error("Error uploading photo:", error);
@@ -364,6 +366,12 @@ function uploadPhoto(formDataArray) {
         });
     });
 }
+
+    function saveData() {
+        alert('warning')
+        console.log("Simpan data tanpa foto");
+    }
+
 
     function sendPhotoProduk(photoPaths) {
         var hostname = 'https://localhost:7033/'; // Ganti dengan URL untuk mengunggah foto
@@ -454,7 +462,7 @@ function uploadPhoto(formDataArray) {
         var url = hostname + "GetProduk?id=" + id_produk;
         var method = "GET";
         var elements = document.getElementsByName("editdeskripsi_produk")[0];
-        $('.summernote').summernote('destroy');
+        $('#editdeskripsi_produk').summernote('destroy');
         $.ajax({
             url: url,
             method: method,
@@ -466,8 +474,8 @@ function uploadPhoto(formDataArray) {
                 $('#editid_tipe_produk').val(product.id_tipe_produk);
                 $('#editpesanan').val(product.pesanan);
                 elements.innerHTML = product.deskripsi_produk;
-                $('.summernote').summernote();
                 $('#editstatus_produk').val(product.status);
+                $('#editdeskripsi_produk').summernote();
                 // Menampilkan modal pop-up untuk edit
                 $('#editProductModal').modal('show');
             }
@@ -625,7 +633,7 @@ function loadFasilitas() {
     function simpanFasilitas() {
         var nama_fasilitas = document.getElementById("nama_fasilitas").value;
         var id_tipe_fasilitas = document.getElementById("id_tipe_fasilitas").value;
-        var deskripsi_fasilitas = document.getElementById("deskripsi_fasilitas")[0].value;
+        var deskripsi_fasilitas = document.getElementsByName("deskripsi_fasilitas")[0].value;
         var status = document.getElementById("status_fasilitas").value;
 
         var fotoPaths = [];
@@ -678,7 +686,7 @@ var fotoArray = [];
         if (foto5) {
             fotoArray.push(foto5);
         }
-
+        console.log(fotoArray);
         var hostname = "https://localhost:7033/";
         var url = hostname + "InsertFasilitas";
         var method = "POST";
@@ -690,8 +698,11 @@ var fotoArray = [];
             deskripsi_fasilitas: deskripsi_fasilitas,
             status: status
         };
+        console.log(fasilitasData)
 
         // Mengirim permintaan AJAX untuk menyimpan data fasilitas
+        if (fotoArray.length != 0) {
+            uploadPhoto(fotoArray, function () {
         $.ajax({
             url: url,
             method: method,
@@ -699,7 +710,6 @@ var fotoArray = [];
             data: JSON.stringify(fasilitasData),
             success: function (data) {
                 console.log("Data fasilitas berhasil disimpan:", data);
-                uploadPhoto(fotoArray);
                 sendPhotoFasilitas(fotoPaths);
                 location.reload();
             },
@@ -708,6 +718,10 @@ var fotoArray = [];
                 // Tangani error
             }
         });
+                });
+    }else{
+        saveData();
+    }
     }
 
     function sendPhotoFasilitas(photoPaths) {
@@ -763,7 +777,7 @@ function loadEditFasilitas(id_fasilitas) {
     var url = hostname + "GetFasilitas?id=" + id_fasilitas;
     var method = "GET";
     var elements = document.getElementsByName("editdeskripsi_fasilitas")[0];
-        $('.summernote').summernote('destroy');
+        $('#editdeskripsi_fasilitas').summernote('destroy');
 
     $.ajax({
         url: url,
@@ -776,7 +790,7 @@ function loadEditFasilitas(id_fasilitas) {
             $('#editid_tipe_fasilitas').val(fasilitas.id_tipe_fasilitas);
             elements.innerHTML = fasilitas.deskripsi_fasilitas;
             $('#editstatus_fasilitas').val(fasilitas.status);
-                        $('.summernote').summernote();
+                $('#editdeskripsi_fasilitas').summernote();
 
             // Menampilkan modal pop-up untuk edit
             $('#editFasilitasModal').modal('show');
@@ -1081,7 +1095,10 @@ function loadPelatihan() {
             status: status
         };
 
+
         // Mengirim permintaan AJAX untuk menyimpan data pelatihan
+                        if(fotoPelatihanArray.length != 0){
+            uploadPhoto(fotoPelatihanArray, function () {
         $.ajax({
             url: url,
             method: method,
@@ -1089,7 +1106,6 @@ function loadPelatihan() {
             data: JSON.stringify(pelatihanData),
             success: function (data) {
                 console.log("Data pelatihan berhasil disimpan:", data);
-                uploadPhoto(fotoPelatihanArray);
                 sendPhotoPelatihan(fotoPaths);
                 detailPengajarPelatihan(pengajarArray);
                 location.reload();
@@ -1099,6 +1115,10 @@ function loadPelatihan() {
                 // Tangani error
             }
         });
+                });
+    }else{
+        saveData();
+    }
     }
 
     function sendPhotoPelatihan(photoPaths) {
@@ -1178,7 +1198,6 @@ function loadPelatihan() {
     }
 
     function loadEditPelatihan(id_pelatihan) {
-        $('.summernote').summernote();
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetPelatihan?id=" + id_pelatihan;
         var method = "GET";
@@ -1192,9 +1211,14 @@ function loadPelatihan() {
             contentType: "application/json",
             success: function (data) {
                 var pelatihan = data;
-
+                $.ajax({
+                    url: hostname + "GetTipePelatihan?id=" + pelatihan.id_tipe_pelatihan,
+                    method: "GET",
+                    contentType: "application/json",
+                    success: function (tipePelatihanDetails) {
+                        var tipe_pelatihan = tipePelatihanDetails.tipe_pelatihan;
                 // Destroy Summernote before changing content
-                $('.summernote').summernote('destroy');
+                $('#editdeskripsi_pelatihan').summernote('destroy');
 
                 // Set values for other fields
                 $('#editid_pelatihan').val(pelatihan.id_pelatihan);
@@ -1207,13 +1231,13 @@ function loadPelatihan() {
                 var formattedDate2 = date2.toISOString().split('T')[0];
                 $('#edittanggal_pelatihan_awal').val(formattedDate1);
                 $('#edittanggal_pelatihan_akhir').val(formattedDate2);
-                $('#editid_tipe_pelatihan').val(pelatihan.id_tipe_pelatihan);
+                        $('#editid_tipe_pelatihan').val(tipe_pelatihan);
 
                 // Set HTML content using innerHTML
                 elements.innerHTML = pelatihan.deskripsi_pelatihan;
 
                 // Initialize Summernote again
-                $('.summernote').summernote();
+                $('#editdeskripsi_pelatihan').summernote();
 
                 $('#editstatus_pelatihan').val(pelatihan.status);
 
@@ -1222,6 +1246,8 @@ function loadPelatihan() {
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);
+                            }
+        });
             }
         });
     }
@@ -1244,6 +1270,7 @@ function loadPelatihan() {
                 // Clear the content inside the span
                 $('#editid_pengajar').empty();
 
+
                 // Assuming 'fotoPelatihan' is a variable that should be 'pengajarList'
                 $.each(pengajarList, function (index, pengajarItem) {
                     // Assuming 'fotoHtml' is a variable that should be 'optionHtml'
@@ -1251,6 +1278,7 @@ function loadPelatihan() {
 
                     // Append the span content
                     $('#editid_pengajar').append(spanContent);
+                    $('#editbidang_keahlian').val(pengajarItem.bidang_keahlian);
                 });
             }
         });
@@ -1263,7 +1291,6 @@ function loadPelatihan() {
         var nama_pelatihan = document.getElementById("editnama_pelatihan").value;
         var tanggal_pelatihan_awal = document.getElementById("edittanggal_pelatihan_awal").value;
         var tanggal_pelatihan_akhir = document.getElementById("edittanggal_pelatihan_akhir").value;
-        var id_tipe_pelatihan = document.getElementById("editid_tipe_pelatihan").value;
         var deskripsi_pelatihan = document.getElementsByName("editdeskripsi_pelatihan")[0].value;
         var status = document.getElementById("editstatus_pelatihan").value;
 
@@ -1275,11 +1302,11 @@ function loadPelatihan() {
             nama_pelatihan: nama_pelatihan,
             tanggal_pelatihan_awal: tanggal_pelatihan_awal,
             tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
-            id_tipe_pelatihan: id_tipe_pelatihan,
             deskripsi_pelatihan: deskripsi_pelatihan,
             status: status
         };
-
+        console.log(input)
+        alert('   ')
         $.ajax({
             url: url,
             method: method,
@@ -1291,11 +1318,13 @@ function loadPelatihan() {
                 location.reload(); // Opsional: Jika ingin memuat ulang halaman setelah update
             },
             error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                // Tangani error
+                console.error("Gagal memperbarui data pelatihan. Kesalahan:", error);
+                console.error("Respons server:", xhr.responseText);
+                // Tangani error dengan lebih baik
             }
         });
     }
+
 
     $('.addPelatihan').click(function () {
         $('.form-group-added').remove();
@@ -1345,28 +1374,33 @@ function loadPelatihan() {
         var selectedBidangKeahlian = $(this).val();
         console.log(selectedBidangKeahlian);
         populateFacultyMembers(selectedBidangKeahlian);
+        loadTipePelatihanOptions(selectedBidangKeahlian);
+    });
+
+        $(document).on('change', '#editbidang_keahlian', function () {
+        var selectedBidangKeahlian = $(this).val();
+                            $('#editid_tipe_pelatihan').val(selectedBidangKeahlian);
     });
 
 function populateFacultyMembers(bidang_keahlian) {
     var hostname = "https://localhost:7033/";
     var url = hostname + "GetAllFacultyMembersbyBK?bidang_keahlian=" + bidang_keahlian;
+        var dropdown = $('#id_pengajar');
 
+        // Remove all existing options before adding new ones
+        dropdown.empty();
+
+        // Add a default option
+        dropdown.append($('<option></option>').text('Select Faculty Member'));
+    if(bidang_keahlian != null){
     $.ajax({
         url: url,
         method: "GET",
         contentType: "application/json",
         success: function (data) {
             var facultyMembers = data.data;
-            console.log(facultyMembers)
-
             // Get the dropdown list element
-            var dropdown = $('#id_pengajar');
 
-            // Remove all existing options before adding new ones
-            dropdown.empty();
-
-            // Add a default option
-            dropdown.append($('<option></option>').text('Select Faculty Member'));
 
             // Add the list of faculty members to the dropdown list
             facultyMembers.forEach(function (pengajar) {
@@ -1377,7 +1411,9 @@ function populateFacultyMembers(bidang_keahlian) {
             console.error("Error fetching FacultyMembers:", error);
             // Handle errors if any
         }
+
     });
+        }
 }
 
     function populateEditFacultyMembersinPelatihan(bidang_keahlian) {
@@ -1396,7 +1432,6 @@ function populateFacultyMembers(bidang_keahlian) {
 
                 // Menghapus semua opsi sebelum menambahkan opsi yang baru
                 dropdown.empty();
-
                 // Menambahkan opsi default
                 dropdown.append($('<option></option>').text('Select Faculty Member'));
 
@@ -1437,12 +1472,16 @@ function populateFacultyMembers(bidang_keahlian) {
         $(btn).closest('.form-group-added').remove(); // Hapus dropdown terkait dengan tombol hapus yang ditekan
     }
 
-    loadTipePelatihanOptions();
-    function loadTipePelatihanOptions() {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllTipePelatihan"; // Sesuaikan dengan endpoint Anda
-        var method = "GET";
 
+    function loadTipePelatihanOptions(bidang_keahlian) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllTipePelatihanbyBK?bidang_keahlian=" + bidang_keahlian; // Sesuaikan dengan endpoint Anda
+        var method = "GET";
+                        $('#id_tipe_pelatihan').empty();
+                $('#editid_tipe_pelatihan').empty();
+                $('#id_tipe_pelatihan').append($('<option></option>').text('Select Type of Training'));
+                $('#editid_tipe_pelatihan').append($('<option></option>').text('Select Type of Training'));
+        if(bidang_keahlian != null){
         $.ajax({
             url: url,
             method: method,
@@ -1451,10 +1490,7 @@ function populateFacultyMembers(bidang_keahlian) {
                 var tipePelatihanList = data;
 
                 // Kosongkan opsi pada elemen <select>
-                $('#id_tipe_pelatihan').empty();
-                $('#editid_tipe_pelatihan').empty();
-                $('#id_tipe_pelatihan').append($('<option></option>').text('Select Type of Training'));
-                $('#editid_tipe_pelatihan').append($('<option></option>').text('Select Type of Training'));
+
 
                 // Tambahkan opsi dari data tipe_produk
                 tipePelatihanList.forEach(function (tipePelatihan) {
@@ -1470,6 +1506,7 @@ function populateFacultyMembers(bidang_keahlian) {
                 console.error("Error:", error);
             }
         });
+        }
     }
 
 
@@ -1642,7 +1679,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="editdeskripsi_produk" class="col-sm-2 col-form-label">Product Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control summernote" id="editdeskripsi_produk" name="editdeskripsi_produk" rows="5" placeholder="Product Description"></textarea>
+                                        <textarea class="form-control" id="editdeskripsi_produk" name="editdeskripsi_produk" rows="5" placeholder="Product Description"></textarea>
                                     </div>
                                 </div>
                                 <hr/>
@@ -1732,7 +1769,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="deskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control summernote" name="deskripsi_fasilitas" id="summernote" rows="5"></textarea>
+                                        <textarea class="form-control" name="deskripsi_fasilitas" id="summernote" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -1828,7 +1865,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="editdeskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control summernote" name="editdeskripsi_fasilitas" id="summernote" rows="5" placeholder="Facility Description"></textarea>
+                                        <textarea class="form-control summernote" name="editdeskripsi_fasilitas" id="editdeskripsi_fasilitas" rows="5" placeholder="Facility Description"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -1922,7 +1959,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="bidang_keahlian" class="col-sm-2 col-form-label">Training Section</label>
                                     <div class="col-sm-10">
-                                        <select class="form-control" name="bidang_keahlian" id="bidang_keahlian">
+                                        <select class="form-select" name="bidang_keahlian" id="bidang_keahlian">
                                             <option>Select Training Section</option>
                                             <option value="Technical">Technical</option>
                                             <option value="Non-Technical">Non-Technical</option>
@@ -2057,15 +2094,14 @@ function populateFacultyMembers(bidang_keahlian) {
                                         <div class="row mb-3">
                                             <label for="editid_tipe_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
                                             <div class="col-sm-10">
-                                                <select class="form-select" name="editid_tipe_pelatihan" id="editid_tipe_pelatihan">
-                                                </select>
+                                                <input class="form-control" name="editid_tipe_pelatihan" id="editid_tipe_pelatihan" disabled />
                                             </div>
                                     </div>
-                                </div>
+
                                 <div class="row mb-3">
                                     <label for="editdeskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
                                     <div class="col-sm-10">
-                                    <textarea class="form-control summernote" name="editdeskripsi_pelatihan" id="summernote" rows="10"></textarea>
+                                    <textarea class="form-control" name="editdeskripsi_pelatihan" id="editdeskripsi_pelatihan" rows="10"></textarea>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -2090,6 +2126,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                         <button type="submit" class="btn btn-primary" onclick="updatePelatihan()">Save changes</button>
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         </div>
                 </section>

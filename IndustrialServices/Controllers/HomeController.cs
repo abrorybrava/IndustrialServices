@@ -46,6 +46,20 @@ namespace IndustrialServices.Controllers
             ViewBag.Id = id;
             return View();
         }
+        public IActionResult DetailPelatihanNonTechnical(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
+        public IActionResult ArtikelDetail(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
+        public IActionResult Artikel()
+        {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();

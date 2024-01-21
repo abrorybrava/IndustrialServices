@@ -60,7 +60,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label for="sampul_artikel" class="col-sm-2 col-form-label">Article Cover</label>
+                            <label for="sampul_artikel" class="col-sm-3 col-form-label">Article Cover (must be in 16:9 ratio)</label>
                             <div class="col-sm-10">
                                 <input class="form-control" type="file" name="sampul_artikel" id="sampul_artikel">
                             </div>
@@ -116,26 +116,28 @@
             status: status,
             tanggal_rilis: tanggal_rilis
         };
-
+        if(sampulartikel != null){
+            uploadFoto(sampulartikel, function () {
         $.ajax({
             url: url,
             method: method,
             data: JSON.stringify(input),
             contentType: "application/json",
             success: function (data) {
-                check = 1;
-
-                if (check == 1) {
-                    uploadFoto(sampulartikel);
-                }
+                        window.location.href = '/Artikel/Index';
             },
             error: function (xhr, status, error) {
                 alert("Terjadi kesalahan saat menyimpan artikel.");
             }
         });
+            });
+        }else{
+            // Jika sampulartikel null, langsung menyimpan data tanpa mengunggah foto
+            saveData();
+        }
     }
 
-    function uploadFoto(file) {
+        function uploadFoto(file, callback) {
         var formData = new FormData();
         formData.append('sampulartikel', file);
 
@@ -146,7 +148,7 @@
             contentType: false, // false agar FormData menentukan Content-Type
             processData: false, // false agar FormData tidak diproses
             success: function (response) {
-                alert('   ');   
+                callback();
                 window.location.href = '/Artikel/Index';
             },  
             error: function (error) {
@@ -160,7 +162,10 @@
         document.getElementById("isi_artikel").value = "";
     }
 
-
+    function saveData() {
+        alert('warning')
+        console.log("Simpan data tanpa foto");
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         var today = new Date();

@@ -68,7 +68,7 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label for="sampul_artikel" class="col-sm-2 col-form-label">Article Cover to Add (Optional)</label>
+                        <label for="sampul_artikel" class="col-sm-2 col-form-label">Article Cover (Optional for Edit & in 16:9 ratio)</label>
                             <div class="col-sm-10">
                                 <input class="form-control" type="file" name="sampul_artikel" id="sampul_artikel">
                             </div>
@@ -168,35 +168,30 @@
             tanggal_rilis: tanggal_rilis
         };
 
-        console.log(input);
 
+        if (sampulartikel != null) {
+            uploadFoto(sampulartikel, function () {
         $.ajax({
             url: url,
             method: method,
             data: JSON.stringify(input),
             contentType: "application/json",
             success: function (data) {
-                check = 1;
-
-                if(sampulartikel == null){
-                    check = 2;
-                }
-
-                if (check == 1) {
-
-                    uploadFoto(sampulartikel);
-                }
-
-                if(check == 2){
-                    window.location.href = '/Artikel/Index';
-                }
+                window.location.href = '/Artikel/Index';
             },
             error: function (error) {
                 console.log(error);
             }
         });
+            });
+        }else{
+            saveData();
+        }
     }
-
+    function saveData() {
+        alert('warning')
+        console.log("Simpan data tanpa foto");
+    }
     function uploadFoto(file) {
         var formData = new FormData();
         formData.append('sampulartikel', file);

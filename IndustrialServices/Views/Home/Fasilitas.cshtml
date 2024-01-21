@@ -9,13 +9,8 @@
             <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 36px; margin-bottom: 20px;">Facilities</h5>
         </div>
         <div class="container-md">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card" style="background-color: #3498db;">
-                        <div class="card-body">
-                        </div>
-                    </div>
-                </div>
+            <div class="row" id="data-list">
+
 
 
                 <div class="col-lg-4">
@@ -82,3 +77,57 @@
 
     </div>
 </footer><!-- End Footer -->
+
+
+                <script>
+    loadFasilitas();
+    function loadFasilitas() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFasilitasinWeb";
+        var method = "GET";
+
+        $('#data-list').empty();
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var dataList = data;
+
+                dataList.forEach(function (fasilitas) {
+                    $.ajax({
+                        url: hostname + "GetTipeFasilitas?id=" + fasilitas.id_tipe_fasilitas,
+                        method: "GET",
+                        contentType: "application/json",
+                        success: function (tipeFasilitasDetails) {
+                            var tipe_fasilitas = tipeFasilitasDetails.tipe_fasilitas;
+                            var cardHtml =
+                                '<div class="col-xs-12 col-sm-4">' +
+                                '<a href="/Home/DetailFasilitas?id=' + fasilitas.id_fasilitas + '"> ' +
+                                '<div class="card bg-dark text-white" style="border:none;">' +
+                                '<img src="/assets/img/' + fasilitas.path_foto_fasilitas + '" class="card-img img-fluid" alt="' + fasilitas.nama_fasilitas + '">' +
+                                '<div class="card-img-overlay d-flex flex-column">' +
+                                '<div class="card-category" style="font-size: 16px; font-weight: bold;">' + tipe_fasilitas + '</div>' +
+                                '<div class="card-description flex-grow-1">' +
+                                '<h2 class="card-title" style="font-size: 24px; font-weight: bold;">' + fasilitas.nama_fasilitas + '</h2>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>' +
+                                '</a>' +
+                                '</div>';
+
+                            $('#data-list').append(cardHtml);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error:", error);
+                        }
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+                </script>

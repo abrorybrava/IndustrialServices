@@ -52,7 +52,19 @@
         <div class="container d-flex align-items-center" style="padding-bottom:15px;">
                 <img class="logo me-auto" src="/assets/img/AstraTechPolos.png" style="height: 45px; position:relative; left:-85px;top:-5px;" />
                 <h1 style="font-weight:400; font-family: Poppins, sans-serif; font-size:28px; color: #005aa9; position:relative; left:-650px;">Industrial Services</h1>
-            <h1 style="font-weight:300; font-family: Poppins, sans-serif; font-size:20px; color: #005aa9; position:relative; left:-420px;">The Best Partner in Business Development</h1>
+            <h1 style="font-weight:300; font-family: Poppins, sans-serif; font-size:20px; color: #005aa9; position:relative; left:-400px;">The Best Partner in Business Development</h1>
+            <div class="search-box">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" id="searchInput" placeholder="Search" aria-label="Search" oninput="showSuggestions()">
+                    <div id="searchSuggestions" class="suggestions"></div>
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+
+
+
         </div>
         <div class="navbar shadow-sm navbar-expand-xl navbar-dark p-0" style="border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);   border-bottom: 1px solid #ccc;">
                 <div class="container">
@@ -66,7 +78,13 @@
                                 <ul>
                                     <li><a asp-action="Fasilitas" asp-controller="Home">Facility</a></li>
                                     <li><a asp-action="Produk" asp-controller="Home">Products</a></li>
-                                    <li><a asp-action="Pelatihan" asp-controller="Home">Training</a></li>
+                                    <li class="dropdown">
+                                        <a class="nav-link scrollto o" href="#portfolio">Training<i class="bi bi-chevron-down"></i></a>
+                                        <ul>
+                                            <li><a asp-action="KalenderTechnical" asp-controller="Home">Technical</a></li>
+                                            <li><a asp-action="KalenderNonTechnical" asp-controller="Home">Non-Technical</a></li>
+                                        </ul>
+                                    </li>
                                     </ul>
                                 </li>
                             <li class="dropdown">
@@ -76,7 +94,7 @@
                                     <li><a asp-action="KalenderNonTechnical" asp-controller="Home">Non-Technical</a></li>
                                 </ul>
                             </li>
-                                <li><a class="nav-link scrollto" href="#team">Releases</a></li>
+                                <li><a class="nav-link scrollto" asp-action="Artikel" asp-controller="Home">Releases</a></li>
 
                             </ul>
                             <i class="bi bi-list mobile-nav-toggle"></i>
@@ -98,6 +116,32 @@
         position: relative;
         top: 60px;
     }
+
+    .suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .suggestion-item {
+        padding: 8px;
+        cursor: pointer;
+        border-bottom: 1px solid #ccc;
+    }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f2f2f2;
+        }
 </style>
 <!-- Vendor JS Files -->
 <script src="~/Content/vendor/purecounter/purecounter_vanilla.js"></script>
@@ -109,3 +153,68 @@
 <!-- Template Main JS File -->
 <script src="~/Content/js/main.js"></script>
 </html>
+<script>
+    function showSuggestions() {
+        var input = document.getElementById('searchInput').value.trim().toLowerCase();
+
+        // Dummy data for suggestions
+        var suggestions = [
+            { label: 'Product 1', category: 'Products' },
+            { label: 'Product 2', category: 'Products' },
+            { label: 'Product 3', category: 'Products' },
+            { label: 'Service 1', category: 'Services' },
+            { label: 'Service 2', category: 'Services' },
+            { label: 'Training 1', category: 'Training' },
+            { label: 'Training 2', category: 'Training' }
+        ];
+
+        var filteredSuggestions = suggestions.filter(function (item) {
+            return item.label.toLowerCase().includes(input);
+        });
+
+        var suggestionsElement = document.getElementById('searchSuggestions');
+        suggestionsElement.innerHTML = '';
+
+        if (input !== '') {
+            var currentCategory = null;
+
+            filteredSuggestions.forEach(function (item) {
+                // Check if the category has changed
+                if (item.category !== currentCategory) {
+                    // Add header label for the new category
+                    var categoryHeader = document.createElement('div');
+                    categoryHeader.textContent = item.category;
+                    categoryHeader.classList.add('suggestion-category');
+                    suggestionsElement.appendChild(categoryHeader);
+
+                    // Update current category
+                    currentCategory = item.category;
+                }
+
+                var suggestionItem = document.createElement('div');
+                suggestionItem.classList.add('suggestion-item');
+
+                // Create a span for label
+                var labelSpan = document.createElement('span');
+                labelSpan.textContent = item.label;
+
+                suggestionItem.appendChild(labelSpan);
+
+                suggestionItem.onclick = function () {
+                    // Dummy action when suggestion is clicked
+                    alert('You selected: ' + item.label);
+                };
+
+                suggestionsElement.appendChild(suggestionItem);
+            });
+
+            // Display the suggestion panel
+            suggestionsElement.style.display = 'block';
+        } else {
+            // Hide the suggestion panel when input is empty
+            suggestionsElement.style.display = 'none';
+        }
+    }
+
+
+</script>

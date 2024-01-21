@@ -110,6 +110,7 @@
             </div>
 
             </div>
+
     </section>
 </section>
 
@@ -339,10 +340,10 @@
         // Jika bulan dan tahunnya sama
         if (awal.getFullYear() === akhir.getFullYear() && awal.getMonth() === akhir.getMonth()) {
             options.month = 'long';
-            return awal.getDate() + ' - ' + akhir.toLocaleDateString('en-US', options);
+            return awal.getDate() + ' - ' + akhir.toLocaleDateString('en-GB', options);
         } else {
             // Jika bulan dan tahunnya berbeda
-            return awal.toLocaleDateString('en-US', options) + ' - ' + akhir.toLocaleDateString('en-US', options);
+            return awal.toLocaleDateString('en-GB', options) + ' - ' + akhir.toLocaleDateString('en-GB', options);
         }
     }
     function loadPelatihanTechnical2(filter_tipe_pelatihan, filter_bulan, sortOption) {
@@ -382,18 +383,22 @@
                         contentType: "application/json",
                         success: function (tipePelatihanDetails) {
                             var tipe_pelatihan = tipePelatihanDetails.tipe_pelatihan;
-                            var cardHtml =
+                            var cardHtml = 
                                 '<div class="col-xs-12 col-sm-4">' +
-                                '<div class="card bg-dark text-white">' +
-                                '<img src="/assets/img/' + pelatihan.path_foto_pelatihan + '" class="card-img img-fluid" alt="' + pelatihan.nama_pelatihan + '">' +
+                                '<a href="/Home/DetailPelatihanTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
+                                '<div class="card bg-dark text-white" style="border:none;">' +
+                                '<div class="flex-shrink-0">' +
+                                '<img src="/assets/img/' + pelatihan.path_foto_pelatihan + '" style="width: 500px;height:auto;" class="card-img img-fluid" alt="' + pelatihan.nama_pelatihan + '">' +
+                                                                '</div>' +
                                 '<div class="card-img-overlay d-flex flex-column">' +
                                 '<div class="card-category" style="font-size: 16px; font-weight: bold;">' + tipe_pelatihan + '</div>' +
                                 '<div class="card-description flex-grow-1">' +
                                 '<h2 class="card-title" style="font-size: 24px; font-weight: bold;">' + pelatihan.nama_pelatihan + '</h2>' +
-                                '<p class="card-text" style="font-size: 14px;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
+                                '<p class="card-text" style="color:rgba(0,0,0,0.7);font-size: 14px;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
                                 '</div>' +
                                 '</div>' +
                                 '</div>' +
+                                                                '</a>'+
                                 '</div>';
 
                             $('#technical2-list').append(cardHtml);
@@ -412,6 +417,7 @@
     $(document).on('change', '#filter_bulan', function () {
         var bulan = $(this).val();
         var tipePelatihan = $('#tipe_pelatihan').val();
+        var sortOption = $('#filter').val();
         var hostname = "https://localhost:7033/";
         if (bulan == 0 && tipePelatihan == 0) {
             location.reload();
@@ -421,11 +427,14 @@
 
         // Periksa apakah salah satu filter memiliki nilai yang tidak sama dengan 0
         if (bulan != 0 || tipePelatihan != 0) {
+            if ($("#icon-link1").hasClass("text-white")) {
+                loadPelatihanTechnical2(tipePelatihan, bulan, filter);
+            }
             if ($("#icon-link").hasClass("text-white")) {
             $.ajax({
                 url: 'https://localhost:7033/GetAllPelatihanTechnical',
                 type: 'GET',
-                data: { filter_bulan: bulan, filter_tipe_pelatihan: tipePelatihan },
+                    data: { filter_bulan: bulan, filter_tipe_pelatihan: tipePelatihan, sortOption: sortOption },
                 contentType: 'application/json',
                 success: function (data) {
                     var pelatihanList = data;
@@ -490,6 +499,7 @@
     $(document).on('change', '#tipe_pelatihan', function () {
         var tipePelatihan = $(this).val();
         var bulan = $('#filter_bulan').val();
+                var sortOption = $('#filter').val();
         var hostname = "https://localhost:7033/";
         if (bulan == 0 && tipePelatihan == 0) {
             location.reload();
@@ -499,11 +509,14 @@
 
         // Periksa apakah salah satu filter memiliki nilai yang tidak sama dengan 0
         if (bulan != 0 || tipePelatihan != 0) {
+            if ($("#icon-link1").hasClass("text-white")) {
+                loadPelatihanTechnical2(tipePelatihan, bulan, filter);
+            }
             if ($("#icon-link").hasClass("text-white")) {
             $.ajax({
                 url: 'https://localhost:7033/GetAllPelatihanTechnical',
                 type: 'GET',
-                data: { filter_bulan: bulan, filter_tipe_pelatihan: tipePelatihan },
+                    data: { filter_bulan: bulan, filter_tipe_pelatihan: tipePelatihan, sortOption: sortOption },
                 contentType: 'application/json',
                 success: function (data) {
                     var pelatihanList = data;
@@ -562,44 +575,14 @@
                 }
             });
             }
-        }
+        }   
+
     });
 
     function clearfilters(){
         location.reload();
     }
 
-    $(document).on('change', '#filter_bulan', function () {
-        var bulan = $(this).val();
-        var tipePelatihan = $('#tipe_pelatihan').val();
-        var hostname = "https://localhost:7033/";
-
-        // Membersihkan isi #technical2-list
-        $('#technical2-list').empty();
-
-        // Periksa apakah salah satu filter memiliki nilai yang tidak sama dengan 0
-        if (bulan != 0 || tipePelatihan != 0) {
-            if ($("#icon-link1").hasClass("text-white")) {
-            loadPelatihanTechnical2(tipePelatihan, bulan);
-            }
-        }
-    });
-
-    $(document).on('change', '#tipe_pelatihan', function () {
-        var tipePelatihan = $(this).val();
-        var bulan = $('#filter_bulan').val();
-        var hostname = "https://localhost:7033/";
-
-        // Membersihkan isi #technical2-list
-        $('#technical2-list').empty();
-
-        // Periksa apakah salah satu filter memiliki nilai yang tidak sama dengan 0
-        if (bulan != 0 || tipePelatihan != 0) {
-                        if ($("#icon-link1").hasClass("text-white")) {
-            loadPelatihanTechnical2(tipePelatihan, bulan);
-                        }
-        }
-    });
 
     $(document).ready(function () {
         // Menangani perubahan pada elemen <select> dengan ID 'filter'
@@ -607,7 +590,9 @@
             var selectedOption = $(this).val();
                         if ($("#icon-link").hasClass("text-white")) {
             sortPelatihan(selectedOption);
-                        }
+                        } else if ($("#icon-link1").hasClass("text-white")) {
+                sortPelatihan2(selectedOption);
+            }
         });
 
         // Fungsi untuk melakukan penyortiran
@@ -636,44 +621,32 @@
             });
         }
 
-
-    function loadPelatihanTechnical2WithSort(sortOption) {
-        var method = "GET";
-
-        // Dapatkan nilai filter bulan dan tipe pelatihan
-            var filter_bulan = $('#filter_bulan').val();
+        function sortPelatihan2(sortOption) {
+            // Dapatkan nilai filter_tipe_pelatihan dan filter_bulan dari elemen yang sesuai
             var filter_tipe_pelatihan = $('#tipe_pelatihan').val();
+            var filter_bulan = $('#filter_bulan').val();
 
-
-        // Membersihkan isi #technical2-list
-
-        $.ajax({
-            url: 'https://localhost:7033/GetAllPelatihanTechnical2',
-            method: method,
-            data: {
-                filter_tipe_pelatihan: filter_tipe_pelatihan,
-                filter_bulan: filter_bulan,
-                sortOption: sortOption  // Kirim opsi sort sebagai parameter
-            },
-            contentType: "application/json",
-            success: function (data) {
+            // Lakukan AJAX request untuk mendapatkan data pelatihan berdasarkan filter dan opsi sort
+            $.ajax({
+                url: 'https://localhost:7033/GetAllPelatihanTechnical2',
+                type: 'GET',
+                data: {
+                    filter_tipe_pelatihan: filter_tipe_pelatihan,
+                    filter_bulan: filter_bulan,
+                    sortOption: sortOption  // Kirim opsi sort sebagai parameter
+                },
+                contentType: 'application/json',
+                success: function (data) {
+                    // Mengganti isi #technical-list dengan data yang baru setelah penyortiran
                     loadPelatihanTechnical2(filter_tipe_pelatihan, filter_bulan, sortOption);
-                
-            },
-            error: function (xhr, status, error) {
-                console.error("Error:", error);
-            }
-        });
-    }
-
-    // Fungsi untuk menangani perubahan opsi penyortiran
-    $(document).on('change', '#filter', function () {
-        var sortOption = $(this).val();
-        if ($("#icon-link1").hasClass("text-white")) {
-        loadPelatihanTechnical2WithSort(sortOption);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
         }
-        // Panggil fungsi loadPelatihanTechnical2WithSort dengan opsi penyortiran yang dipilih
+    // Fungsi untuk menangani perubahan opsi penyortiran
 
-    });
+
     });
 </script>
