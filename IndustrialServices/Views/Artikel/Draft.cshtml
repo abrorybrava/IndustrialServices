@@ -157,20 +157,21 @@
         var hostname = "https://localhost:7033/";
         var url = hostname + "UpdateArtikel";
         var method = "POST";
-        var input = {
-            id_artikel: id_artikel,
-            id_pengelola: id_pengelola,
-            tanggal_rilis: tanggal_rilis,
-            judul_artikel: judul_artikel,
-            isi_artikel: isi_artikel,
-            sampul_artikel: sampul_artikel,
-            status: status,
-            tanggal_rilis: tanggal_rilis
-        };
+
 
 
         if (sampulartikel != null) {
-            uploadFoto(sampulartikel, function () {
+            uploadFoto(sampulartikel, function (uniqueFileName) {
+                var input = {
+                    id_artikel: id_artikel,
+                    id_pengelola: id_pengelola,
+                    tanggal_rilis: tanggal_rilis,
+                    judul_artikel: judul_artikel,
+                    isi_artikel: isi_artikel,
+                    sampul_artikel: uniqueFileName,
+                    status: status,
+                    tanggal_rilis: tanggal_rilis
+                };
         $.ajax({
             url: url,
             method: method,
@@ -192,9 +193,22 @@
         alert('warning')
         console.log("Simpan data tanpa foto");
     }
-    function uploadFoto(file) {
+    function uploadFoto(file, callback) {
+        var maxSize = 7 * 1024 * 1024; // 10 MB
+
+        // Pengecekan ukuran file
+        if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Size Exceeded',
+                text: 'File size should not exceed 7 MB.'
+            });
+            // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+            location.reload();
+        }
         var formData = new FormData();
-        formData.append('sampulartikel', file);
+        var uniqueFileName = guid() + "_" + file.name;
+        formData.append('sampulartikel', file, uniqueFileName);
 
         $.ajax({
             url: '/Artikel/UploadPhoto',
@@ -203,11 +217,20 @@
             contentType: false, // false agar FormData menentukan Content-Type
             processData: false, // false agar FormData tidak diproses
             success: function (response) {
+                callback(uniqueFileName);
                 window.location.href = '/Artikel/Index';
             },
             error: function (error) {
                 console.log(error);
             }
+        });
+    }
+
+    function guid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
     }
 

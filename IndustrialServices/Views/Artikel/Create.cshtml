@@ -81,7 +81,7 @@
                         <div class="row mb-3">
                             <div class="col-sm-10">
                                 <a class="btn btn-secondary" asp-action="Index" asp-controller="Artikel">Back</a>
-                                <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                <button type="button" class="btn btn-danger" onclick="cancel()">Reset</button>
                                 <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
                             </div>
                         </div>
@@ -108,16 +108,17 @@
         var hostname = "https://localhost:7033/"; 
         var url = hostname + "InsertArtikel"; 
         var method = "POST";
-        var input = {
-            id_pengelola: id_pengelola,
-            judul_artikel: judul_artikel,
-            isi_artikel: isi_artikel,
-            sampul_artikel: sampul_artikel,
-            status: status,
-            tanggal_rilis: tanggal_rilis
-        };
+
         if(sampulartikel != null){
-            uploadFoto(sampulartikel, function () {
+            uploadFoto(sampulartikel, function (uniqueFileName) {
+                var input = {
+                    id_pengelola: id_pengelola,
+                    judul_artikel: judul_artikel,
+                    isi_artikel: isi_artikel,
+                    sampul_artikel: uniqueFileName,
+                    status: status,
+                    tanggal_rilis: tanggal_rilis
+                };
         $.ajax({
             url: url,
             method: method,
@@ -138,8 +139,21 @@
     }
 
         function uploadFoto(file, callback) {
+        var maxSize = 7 * 1024 * 1024; // 10 MB
+
+        // Pengecekan ukuran file
+        if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Size Exceeded',
+                text: 'File size should not exceed 7 MB.'
+            });
+            // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+            location.reload();
+        }
         var formData = new FormData();
-        formData.append('sampulartikel', file);
+        var uniqueFileName = guid() + "_" + file.name;
+        formData.append('sampulartikel', file, uniqueFileName);
 
         $.ajax({
             url: '/Artikel/UploadPhoto',
@@ -148,12 +162,20 @@
             contentType: false, // false agar FormData menentukan Content-Type
             processData: false, // false agar FormData tidak diproses
             success: function (response) {
-                callback();
+                callback(uniqueFileName); // Menyertakan uniqueFileName ke dalam callback
                 window.location.href = '/Artikel/Index';
             },  
             error: function (error) {
                 console.log(error);
             }
+        });
+    }
+
+    function guid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
     }
 

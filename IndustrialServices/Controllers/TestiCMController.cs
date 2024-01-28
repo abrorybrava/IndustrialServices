@@ -14,7 +14,7 @@ namespace IndustrialServices.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> UploadPhoto(IFormFile foto)
+        public async Task<IActionResult> UploadTestiCM(IFormFile foto)
         {
             var imgext = Path.GetExtension(foto.FileName);
             var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", foto.FileName);

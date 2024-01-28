@@ -7,9 +7,9 @@
 }
 <section id="hero">
     <section id="home" class="home">
-        <div class="container" style="padding-bottom:15px;">
+        <div class="container" style="padding-bottom:15px;font-family:Barlow;">
             <p style="margin-bottom: -3px;color:darkgray;">Industrial Services</p>
-            <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 36px; margin-bottom: 20px;">Article</h5>
+            <h5 style="color: black; font-family:Barlow; font-weight: 600; font-size: 36px; margin-bottom: 20px;">Article</h5>
         </div>
 
 
@@ -26,9 +26,10 @@
 
 
 <footer id="footer" style="color:#ffffff;">
+
     <div class="footer-top" style="background:#01529C;">
         <div class="container">
-            <div class="row">
+            <div class="row justify-content-center">
 
                 <div class="col-lg-3 col-md-6 footer-contact">
                     <h3>Address</h3>
@@ -52,10 +53,16 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6 footer-contact">
-                    <h3>Our Social Media</h3>
-                    <p style="color:white;">
-
-                    </p>
+                    <h3>Information</h3>
+                    <div class="row">
+                        <a>
+                            <p style="color:white;">
+                                About Industrial Services <br />
+                                Astra Polytechnic Main Website <br />
+                                Contact
+                            </p>
+                        </a>
+                    </div>
                 </div>
 
             </div>
@@ -97,7 +104,7 @@
                         year: 'numeric'
                     });
 
-                    var maxTitleLength = 75; // Set the maximum length for the title
+                    var maxTitleLength = 40; // Set the maximum length for the title
 
                     // Truncate the title if it exceeds the maximum length
                     var truncatedTitle = article.judul_artikel.length > maxTitleLength ?
@@ -106,13 +113,13 @@
 
                     var articleHtml =
                         '<div class="col-6 col-lg-4 mb-5 mb-md-5">' +
-                        '<a class="card-link" href="/Home/ArtikelDetail?id=' + article.id_artikel + '">' +
-                        '<div class="card sk-fade h-100">' +
+                        '<a class="card-link" class="card-img d-block sk-thumbnail img-ratio-3 rounded-bottom-0" href="/Home/ArtikelDetail?id=' + article.id_artikel + '">' +
+                        '<div class="card border rounded-3 sk-fade h-100">' +
                         '<div class="card-zoom position-relative rounded-bottom-0">' +
                         '<img class="shadow-light-lg img-fluid w-100 zoom-on-hover" src="/assets/img/' + article.sampul_artikel + '" alt="Article Image" />' +
                         '<div class="card-footer p-3">' +
-                        '<h6 class="fw-bolder line-clamp-2 mb-0">' + truncatedTitle + '</h6>' +
-                        '<span class="text-muted" style="font-size:14px;">' + formattedDate + '</span>' +
+                        '<h6 class="fw-bolder line-clamp-2 mb-0" style="font-family:Barlow;">' + truncatedTitle + '</h6>' +
+                        '<span class="text-muted" style="font-size:14px;font-family:Barlow;">' + formattedDate + '</span>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +

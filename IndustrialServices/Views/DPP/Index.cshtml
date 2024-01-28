@@ -248,60 +248,28 @@ function loadProducts() {
         var deskripsi_produk = document.getElementsByName("deskripsi_produk")[0].value;
         var status = document.getElementById("status").value;
 
+        // Array untuk menyimpan nama file unik yang dihasilkan oleh GUID
         var fotoPaths = [];
 
-        var foto_1 = document.getElementById("addphoto1").value;
-        var foto_2 = document.getElementById("addphoto2").value;
-        var foto_3 = document.getElementById("addphoto3").value;
-        var foto_4 = document.getElementById("addphoto4").value;
-        var foto_5 = document.getElementById("addphoto5").value;
+        var fileInputs = [
+            document.getElementById("addphoto1"),
+            document.getElementById("addphoto2"),
+            document.getElementById("addphoto3"),
+            document.getElementById("addphoto4"),
+            document.getElementById("addphoto5")
+        ];
 
-        // Menambahkan foto-foto yang tidak kosong ke dalam array fotoPaths
-        if (foto_1.trim() !== '') {
-            fotoPaths.push(foto_1);
-        }
-        if (foto_2.trim() !== '') {
-            fotoPaths.push(foto_2);
-        }
-        if (foto_3.trim() !== '') {
-            fotoPaths.push(foto_3);
-        }
-        if (foto_4.trim() !== '') {
-            fotoPaths.push(foto_4);
-        }
-        if (foto_5.trim() !== '') {
-            fotoPaths.push(foto_5);
-        }
-
+        fileInputs.forEach(function (fileInput) {
+            var file = fileInput.files[0];
+            if (file) {
+                var uniqueFileName = guid(32, file) + "_" + getFileNameFromPath(fileInput.value);
+                fotoPaths.push(uniqueFileName);
+            }
+        });
 
         var hostname = "https://localhost:7033/";
         var url = hostname + "InsertProduk";
         var method = "POST";
-
-        // Buat FormData untuk setiap foto yang akan dikirimkan
-        var fileInputs = [];
-
-        var file1 = document.getElementById("addphoto1").files[0];
-        var file2 = document.getElementById("addphoto2").files[0];
-        var file3 = document.getElementById("addphoto3").files[0];
-        var file4 = document.getElementById("addphoto4").files[0];
-        var file5 = document.getElementById("addphoto5").files[0];
-
-        if (file1) {
-            fileInputs.push(file1);
-        }
-        if (file2) {
-            fileInputs.push(file2);
-        }
-        if (file3) {
-            fileInputs.push(file3);
-        }
-        if (file4) {
-            fileInputs.push(file4);
-        }
-        if (file5) {
-            fileInputs.push(file5);
-        }
 
         // Data untuk pengiriman informasi produk
         var productData = {
@@ -313,64 +281,100 @@ function loadProducts() {
         };
 
         // Kirim permintaan AJAX untuk menyimpan data produk dan foto-fotonya secara terpisah
-        if(fileInputs.length != 0){
-            uploadPhoto(fileInputs, function () {
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            data: JSON.stringify(productData),
-            success: function (data) {
-                console.log("Data produk berhasil disimpan:", data);
-                sendPhotoProduk(fotoPaths);
+        if (fotoPaths.length != 0) {
+            uploadPhoto(fileInputs, function (uniqueFileNames) {
+                // Menggunakan nama file unik yang dihasilkan oleh GUID
+                productData.fotoPaths = uniqueFileNames;
 
-                location.reload(); // Opsional: Jika Anda ingin memuat ulang halaman
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                // Handle error
-            }
-        });
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    data: JSON.stringify(productData),
+                    success: function (data) {
+                        console.log("Data produk berhasil disimpan:", data);
+                        location.reload(); // Opsional: Jika Anda ingin memuat ulang halaman
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        // Handle error
+                    }
+                });
             });
         } else {
-            // Jika foto_pengajar null, langsung menyimpan data tanpa mengunggah foto
+            // Jika foto_produk null, langsung menyimpan data tanpa mengunggah foto
             saveData();
         }
     }
 
+    // Fungsi untuk mendapatkan nama file dari path lengkap
+    function getFileNameFromPath(path) {
+        return path.replace(/^.*[\\\/]/, '');
+    }
+
     // Fungsi untuk mengirimkan foto ke server
-
-
-function uploadPhoto(formDataArray, callback) {
-    var url = '/DPP/UploadPhoto';
-
-    formDataArray.forEach(function (data) {
-        var formData = new FormData(); // perbaikan: nama FormData harus huruf besar-besar
-        formData.append('foto', data);
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (response) {
-                console.log("Foto berhasil diunggah:", response);
-                // Lakukan tindakan lebih lanjut jika diperlukan setelah foto berhasil diunggah
-                callback();
-            },
-            error: function (xhr, status, error) {
-                console.error("Error uploading photo:", error);
-                // Tangani kesalahan jika ada
-            }
-        });
-    });
+function guid(length, file) {
+    return Array.from({ length }, (_, index) => {
+        const char = Math.floor(Math.random() * 36).toString(36);
+        return index < 8 || index === 9 || index === 14 || index === 19 ? char : '-';
+    }).join('');
 }
 
-    function saveData() {
-        alert('warning')
-        console.log("Simpan data tanpa foto");
+    // Modifikasi pada fungsi uploadPhoto
+    function uploadPhoto(fileInputs, callback) {
+        var url = '/DPP/UploadPhoto';
+        var uniqueFileNames = []; // Array to store unique filenames
+
+        var filesToUpload = fileInputs.filter(function (fileInput) {
+            return fileInput.files[0]; // Filter hanya file yang dipilih oleh pengguna
+        });
+
+        var uploadedCount = 0;
+
+        filesToUpload.forEach(function (fileInput) {
+            var file = fileInput.files[0];
+            var maxSize = 7 * 1024 * 1024; // 10 MB
+
+            // Pengecekan ukuran file
+            if (file.size > maxSize) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'File Size Exceeded',
+                    text: 'File size should not exceed 7 MB.'
+                });
+                // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+                location.reload();
+            }
+            var formData = new FormData();
+            var uniqueFileName = guid(32, file) + "_" + file.name; // Menggunakan GUID panjang 32 karakter
+            uniqueFileNames.push(uniqueFileName); // Store the unique filename
+            formData.append('foto', file, uniqueFileName);
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    console.log("Foto berhasil diunggah:", response);
+                    uploadedCount++;
+
+                    // Trigger callback setelah semua file diunggah
+                    if (uploadedCount === filesToUpload.length) {
+                        callback(uniqueFileNames.join(',')); // Convert array to a comma-separated string
+                        sendPhotoProduk(uniqueFileNames);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error uploading photo:", error);
+                    // Handle errors if needed
+                }
+            });
+        });
     }
+
+
 
 
     function sendPhotoProduk(photoPaths) {
@@ -402,6 +406,11 @@ function uploadPhoto(formDataArray, callback) {
                 // Handle error
             }
         });
+    }
+
+    function saveData() {
+        alert('warning')
+        console.log("Simpan data tanpa foto");
     }
 
     function hapusProduk(id) {
@@ -527,6 +536,8 @@ function uploadPhoto(formDataArray, callback) {
 
 
     $('.addProduct').click(function () {
+                $('#summernote').summernote('destroy');
+        $('#summernote').summernote();
         $("#addProductModal").modal("show");
     });
 loadTipeProdukOptions();
@@ -636,57 +647,27 @@ function loadFasilitas() {
         var deskripsi_fasilitas = document.getElementsByName("deskripsi_fasilitas")[0].value;
         var status = document.getElementById("status_fasilitas").value;
 
+        // Array untuk menyimpan nama file unik yang dihasilkan oleh GUID
         var fotoPaths = [];
 
-        var foto_1 = document.getElementById("photoFasilitas1").value;
-        var foto_2 = document.getElementById("photoFasilitas2").value;
-        var foto_3 = document.getElementById("photoFasilitas3").value;
-        var foto_4 = document.getElementById("photoFasilitas4").value;
-        var foto_5 = document.getElementById("photoFasilitas5").value;
+        // Array untuk menyimpan objek file
 
-        // Menambahkan foto-foto yang tidak kosong ke dalam array fotoPaths
-        if (foto_1.trim() !== '') {
-            fotoPaths.push(foto_1);
-        }
-        if (foto_2.trim() !== '') {
-            fotoPaths.push(foto_2);
-        }
-        if (foto_3.trim() !== '') {
-            fotoPaths.push(foto_3);
-        }
-        if (foto_4.trim() !== '') {
-            fotoPaths.push(foto_4);
-        }
-        if (foto_5.trim() !== '') {
-            fotoPaths.push(foto_5);
-        }
+        var fileInputs = [
+            document.getElementById("photoFasilitas1"),
+            document.getElementById("photoFasilitas2"),
+            document.getElementById("photoFasilitas3"),
+            document.getElementById("photoFasilitas4"),
+            document.getElementById("photoFasilitas5")
+        ];
 
-        // Ambil file untuk setiap input foto
-var fotoArray = [];
+        fileInputs.forEach(function (fileInput) {
+            var file = fileInput.files[0];
+            if (file) {
+                var uniqueFileName = guid(32, file) + "_" + getFileNameFromPath(fileInput.value);
+                fotoPaths.push(uniqueFileName);
+            }
+        });
 
-    var foto1 = document.getElementById("photoFasilitas1").files[0];
-    var foto2 = document.getElementById("photoFasilitas2").files[0];
-    var foto3 = document.getElementById("photoFasilitas3").files[0];
-    var foto4 = document.getElementById("photoFasilitas4").files[0];
-    var foto5 = document.getElementById("photoFasilitas5").files[0];
-
-
-        if (foto1) {
-            fotoArray.push(foto1);
-        }
-        if (foto2) {
-            fotoArray.push(foto2);
-        }
-        if (foto3) {
-            fotoArray.push(foto3);
-        }
-        if (foto4) {
-            fotoArray.push(foto4);
-        }
-        if (foto5) {
-            fotoArray.push(foto5);
-        }
-        console.log(fotoArray);
         var hostname = "https://localhost:7033/";
         var url = hostname + "InsertFasilitas";
         var method = "POST";
@@ -698,31 +679,84 @@ var fotoArray = [];
             deskripsi_fasilitas: deskripsi_fasilitas,
             status: status
         };
-        console.log(fasilitasData)
-
+        console.log(fasilitasData);
         // Mengirim permintaan AJAX untuk menyimpan data fasilitas
-        if (fotoArray.length != 0) {
-            uploadPhoto(fotoArray, function () {
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            data: JSON.stringify(fasilitasData),
-            success: function (data) {
-                console.log("Data fasilitas berhasil disimpan:", data);
-                sendPhotoFasilitas(fotoPaths);
-                location.reload();
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                // Tangani error
-            }
-        });
+        if (fotoPaths.length != 0) {
+            uploadPhoto2(fileInputs, function (uniqueFileNames) {
+                fasilitasData.path_foto_fasilitas = uniqueFileNames;
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    data: JSON.stringify(fasilitasData),
+                    success: function (data) {
+                        console.log("Data fasilitas berhasil disimpan:", data);
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        // Tangani error
+                    }
                 });
-    }else{
-        saveData();
+            });
+        } else {
+            saveData();
+        }
     }
+
+        function uploadPhoto2(fileInputs, callback) {
+        var url = '/DPP/UploadPhoto';
+        var uniqueFileNames = []; // Array to store unique filenames
+
+        var filesToUpload = fileInputs.filter(function (fileInput) {
+            return fileInput.files[0]; // Filter hanya file yang dipilih oleh pengguna
+        });
+
+        var uploadedCount = 0;
+
+        filesToUpload.forEach(function (fileInput) {
+            var file = fileInput.files[0];
+            var maxSize = 7 * 1024 * 1024; // 10 MB
+
+            // Pengecekan ukuran file
+            if (file.size > maxSize) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'File Size Exceeded',
+                    text: 'File size should not exceed 7 MB.'
+                });
+                // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+                location.reload();
+            }
+            var formData = new FormData();
+            var uniqueFileName = guid(32, file) + "_" + file.name; // Menggunakan GUID panjang 32 karakter
+            uniqueFileNames.push(uniqueFileName); // Store the unique filename
+            formData.append('foto', file, uniqueFileName);
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    console.log("Foto berhasil diunggah:", response);
+                    uploadedCount++;
+
+                    // Trigger callback setelah semua file diunggah
+                    if (uploadedCount === filesToUpload.length) {
+                        callback(uniqueFileNames.join(',')); // Convert array to a comma-separated string
+                        sendPhotoFasilitas(uniqueFileNames);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error uploading photo:", error);
+                    // Handle errors if needed
+                }
+            });
+        });
     }
+
 
     function sendPhotoFasilitas(photoPaths) {
         var hostname = 'https://localhost:7033/'; // Ganti dengan URL untuk mengunggah foto
@@ -738,7 +772,7 @@ var fotoArray = [];
 
             fotoFasilitasArray.push(fotoFasilitas);
         });
-        console.log(fotoFasilitasArray)
+        console.log('nama ' + fotoFasilitasArray)
 
         $.ajax({
             url: url,
@@ -836,6 +870,8 @@ function loadEditFasilitas(id_fasilitas) {
 
     // Event listener untuk tombol "Tambah Fasilitas"
     $('.addFasilitas').click(function () {
+                        $('#deskripsi_fasilitas').summernote('destroy');
+        $('#deskripsi_fasilitas').summernote();
         $("#addFasilitasModal").modal("show");
     });
 
@@ -993,132 +1029,149 @@ function loadPelatihan() {
 
 
 
+function simpanPelatihan() {
+    var nama_pelatihan = document.getElementById("nama_pelatihan").value;
+    var tanggal_pelatihan_awal = document.getElementById("tanggal_pelatihan_awal").value;
+    var tanggal_pelatihan_akhir = document.getElementById("tanggal_pelatihan_akhir").value;
+    var id_tipe_pelatihan = document.getElementById("id_tipe_pelatihan").value;
+    var deskripsi_pelatihan = document.getElementsByName("deskripsi_pelatihan")[0].value;
+    var status = document.getElementById("status_pelatihan").value;
 
+    // Validasi tanggal akhir harus lebih besar dari tanggal awal
+    if (new Date(tanggal_pelatihan_akhir) < new Date(tanggal_pelatihan_awal)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date Input',
+            text: "End Date can't be less than the Start Date.",
+        });
+        return; // Hentikan eksekusi jika validasi gagal
+    }
 
+    var id_pengajar = document.getElementById("id_pengajar").value;
 
+    var pengajarArray = [];
+    pengajarArray.push(id_pengajar);
+    $('.form-group-added').each(function (index, row) {
+        var id_pengajar_clone = $(row).find('select').val();
 
-    function simpanPelatihan() {
-        var nama_pelatihan = document.getElementById("nama_pelatihan").value;
-        var tanggal_pelatihan_awal = document.getElementById("tanggal_pelatihan_awal").value;
-        var tanggal_pelatihan_akhir = document.getElementById("tanggal_pelatihan_akhir").value;
-        var id_tipe_pelatihan = document.getElementById("id_tipe_pelatihan").value;
-        var deskripsi_pelatihan = document.getElementsByName("deskripsi_pelatihan")[0].value;
-        var status = document.getElementById("status_pelatihan").value;
+        // Check if id_pengajar_clone is not undefined or null before adding to array
+        if (id_pengajar_clone !== undefined && id_pengajar_clone !== null) {
+            var rowData = id_pengajar_clone;
+            pengajarArray.push(rowData); // Menambahkan data ke dalam array
+        }
+    });
 
-        // Validasi tanggal akhir harus lebih besar dari tanggal awal
-        if (new Date(tanggal_pelatihan_akhir) < new Date(tanggal_pelatihan_awal)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Date Input',
-                text: "End Date can't be less than the Start Date.",
+    var fotoPaths = [];
+
+    var fileInputs = [
+        document.getElementById("photoPelatihan1"),
+        document.getElementById("photoPelatihan2"),
+        document.getElementById("photoPelatihan3"),
+        document.getElementById("photoPelatihan4"),
+        document.getElementById("photoPelatihan5")
+    ];
+
+    fileInputs.forEach(function (fileInput) {
+        var file = fileInput.files[0];
+        if (file) {
+            var uniqueFileName = guid(32, file) + "_" + getFileNameFromPath(fileInput.value);
+            fotoPaths.push(uniqueFileName);
+        }
+    });
+
+    var hostname = "https://localhost:7033/";
+    var url = hostname + "InsertPelatihan";
+    var method = "POST";
+
+    // Data yang akan dikirim
+    var pelatihanData = {
+        nama_pelatihan: nama_pelatihan,
+        tanggal_pelatihan_awal: tanggal_pelatihan_awal,
+        tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
+        id_tipe_pelatihan: id_tipe_pelatihan,
+        deskripsi_pelatihan: deskripsi_pelatihan,
+        status: status
+    };
+
+    // Kirim permintaan AJAX untuk menyimpan data pelatihan dan foto-fotonya secara terpisah
+    if (fileInputs.length != 0) {
+        uploadPhoto3(fileInputs, function (uniqueFileNames) {
+            // Menggunakan nama file unik yang dihasilkan oleh GUID
+            pelatihanData.fotoPaths = uniqueFileNames;
+
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: "application/json",
+                data: JSON.stringify(pelatihanData),
+                success: function (data) {
+                    console.log("Data pelatihan berhasil disimpan:", data);
+                    detailPengajarPelatihan(pengajarArray);
+                    location.reload(); // Opsional: Jika Anda ingin memuat ulang halaman
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                    // Tangani error jika diperlukan
+                }
             });
-            return; // Hentikan eksekusi jika validasi gagal
-        }
-
-        var id_pengajar = document.getElementById("id_pengajar").value;
-
-        var pengajarArray = [];
-        pengajarArray.push(id_pengajar);
-        $('.form-group-added').each(function (index, row) {
-            var id_pengajar_clone = $(row).find('select').val();
-
-            // Check if id_pengajar_clone is not undefined or null before adding to array
-            if (id_pengajar_clone !== undefined && id_pengajar_clone !== null) {
-
-                    var rowData = id_pengajar_clone
-                    // Anda juga dapat menambahkan data lain ke dalam rowData sesuai kebutuhan
-
-
-                pengajarArray.push(rowData); // Menambahkan data ke dalam array
-            }
         });
-
-        console.log(pengajarArray);
-        alert('check')
-
-        var fotoPaths = [];
-
-        var foto_1 = document.getElementById("photoPelatihan1").value;
-        var foto_2 = document.getElementById("photoPelatihan2").value;
-        var foto_3 = document.getElementById("photoPelatihan3").value;
-        var foto_4 = document.getElementById("photoPelatihan4").value;
-        var foto_5 = document.getElementById("photoPelatihan5").value;
-
-        // Menambahkan foto-foto yang tidak kosong ke dalam array fotoPaths
-        if (foto_1.trim() !== '') {
-            fotoPaths.push(foto_1);
-        }
-        if (foto_2.trim() !== '') {
-            fotoPaths.push(foto_2);
-        }
-        if (foto_3.trim() !== '') {
-            fotoPaths.push(foto_3);
-        }
-        if (foto_4.trim() !== '') {
-            fotoPaths.push(foto_4);
-        }
-        if (foto_5.trim() !== '') {
-            fotoPaths.push(foto_5);
-        }
-
-        // Ambil file untuk setiap input foto
-        var fotoPelatihanArray = [];
-
-        // Mengumpulkan file foto dalam array jika tidak kosong
-        if (document.getElementById("photoPelatihan1").files.length > 0) {
-            fotoPelatihanArray.push(document.getElementById("photoPelatihan1").files[0]);
-        }
-        if (document.getElementById("photoPelatihan2").files.length > 0) {
-            fotoPelatihanArray.push(document.getElementById("photoPelatihan2").files[0]);
-        }
-        if (document.getElementById("photoPelatihan3").files.length > 0) {
-            fotoPelatihanArray.push(document.getElementById("photoPelatihan3").files[0]);
-        }
-        if (document.getElementById("photoPelatihan4").files.length > 0) {
-            fotoPelatihanArray.push(document.getElementById("photoPelatihan4").files[0]);
-        }
-        if (document.getElementById("photoPelatihan5").files.length > 0) {
-            fotoPelatihanArray.push(document.getElementById("photoPelatihan5").files[0]);
-        }
-
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "InsertPelatihan";
-        var method = "POST";
-
-        // Data yang akan dikirim
-        var pelatihanData = {
-            nama_pelatihan: nama_pelatihan,
-            tanggal_pelatihan_awal: tanggal_pelatihan_awal,
-            tanggal_pelatihan_akhir: tanggal_pelatihan_akhir,
-            id_tipe_pelatihan: id_tipe_pelatihan,
-            deskripsi_pelatihan: deskripsi_pelatihan,
-            status: status
-        };
-
-
-        // Mengirim permintaan AJAX untuk menyimpan data pelatihan
-                        if(fotoPelatihanArray.length != 0){
-            uploadPhoto(fotoPelatihanArray, function () {
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            data: JSON.stringify(pelatihanData),
-            success: function (data) {
-                console.log("Data pelatihan berhasil disimpan:", data);
-                sendPhotoPelatihan(fotoPaths);
-                detailPengajarPelatihan(pengajarArray);
-                location.reload();
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                // Tangani error
-            }
-        });
-                });
-    }else{
+    } else {
+        // Jika foto_pelatihan null, langsung menyimpan data tanpa mengunggah foto
         saveData();
     }
+}      
+
+        function uploadPhoto3(fileInputs, callback) {
+        var url = '/DPP/UploadPhoto';
+        var uniqueFileNames = []; // Array to store unique filenames
+
+        var filesToUpload = fileInputs.filter(function (fileInput) {
+            return fileInput.files[0]; // Filter hanya file yang dipilih oleh pengguna
+        });
+
+        var uploadedCount = 0;
+
+        filesToUpload.forEach(function (fileInput) {
+            var file = fileInput.files[0];
+                    var maxSize = 7 * 1024 * 1024; // 10 MB
+
+        // Pengecekan ukuran file
+        if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Size Exceeded',
+                text: 'File size should not exceed 7 MB.'
+            });
+            // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+            location.reload();
+        }
+            var formData = new FormData();
+            var uniqueFileName = guid(32, file) + "_" + file.name; // Menggunakan GUID panjang 32 karakter
+            uniqueFileNames.push(uniqueFileName); // Store the unique filename
+            formData.append('foto', file, uniqueFileName);
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    console.log("Foto berhasil diunggah:", response);
+                    uploadedCount++;
+
+                    // Trigger callback setelah semua file diunggah
+                    if (uploadedCount === filesToUpload.length) {
+                        callback(uniqueFileNames.join(',')); // Convert array to a comma-separated string
+                        sendPhotoPelatihan(uniqueFileNames);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error uploading photo:", error);
+                    // Handle errors if needed
+                }
+            });
+        });
     }
 
     function sendPhotoPelatihan(photoPaths) {
@@ -1305,8 +1358,6 @@ function loadPelatihan() {
             deskripsi_pelatihan: deskripsi_pelatihan,
             status: status
         };
-        console.log(input)
-        alert('   ')
         $.ajax({
             url: url,
             method: method,
@@ -1327,6 +1378,8 @@ function loadPelatihan() {
 
 
     $('.addPelatihan').click(function () {
+        $('#deskripsi_pelatihan').summernote('destroy');
+        $('#deskripsi_pelatihan').summernote();
         $('.form-group-added').remove();
         $("#addPelatihanModal").modal("show");
     });
@@ -1588,7 +1641,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 </div>
                                 <br/>
                                 <div class="row mb-3">
-                                    <label for="addphoto1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 3:4 ratio)</label>
+                                    <label for="addphoto1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)</label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="addphoto1" required>
                                     </div>
@@ -1769,7 +1822,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="deskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" name="deskripsi_fasilitas" id="summernote" rows="5"></textarea>
+                                        <textarea class="form-control" name="deskripsi_fasilitas" id="deskripsi_fasilitas" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -1778,7 +1831,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 </div>
                                 <br />
                                 <div class="row mb-3">
-                                    <label for="photoFasilitas1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 3:4 ratio)</label>
+                                    <label for="photoFasilitas1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)</label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="photoFasilitas1" required>
                                     </div>
@@ -1981,7 +2034,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 <div class="row mb-3">
                                     <label for="deskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control summernote" name="deskripsi_pelatihan" id="summernote" rows="5"></textarea>
+                                        <textarea class="form-control summernote" name="deskripsi_pelatihan" id="deskripsi_pelatihan" rows="5"></textarea>
                                     </div>
                                 </div>
                                 <hr />
@@ -2004,7 +2057,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 </div>
                                                                 <br />
                                 <div class="row mb-3">
-                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 3:4 ratio)</label>
+                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)</label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="photoPelatihan1">
                                     </div>

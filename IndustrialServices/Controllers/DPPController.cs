@@ -19,27 +19,27 @@ namespace IndustrialServices.Controllers
         {
             try
             {
+                // Check if the list of files is empty
+                if (foto == null || foto.Count == 0)
+                {
+                    return BadRequest("No files were uploaded");
+                }
+
                 foreach (var fotofoto in foto)
                 {
                     var imgext = Path.GetExtension(fotofoto.FileName);
                     var saveimg = Path.Combine(_webhost.WebRootPath, "assets", "img", fotofoto.FileName);
 
-                    // Periksa apakah file kosong
-                    if (foto == null || foto.Count == 0)
-                    {
-                        return BadRequest("File kosong");
-                    }
-
                     // Validasi format file
                     if (imgext != ".jpg" && imgext != ".png" && imgext != ".jpeg")
                     {
-                        return BadRequest("Format foto tidak valid. Harap unggah file dengan format .jpg, .png, atau .jpeg");
+                        return BadRequest("Invalid photo format. Please upload files with .jpg, .png, or .jpeg formats");
                     }
 
                     // Check if the file with the same name exists in the directory
                     if (System.IO.File.Exists(saveimg))
                     {
-                        return BadRequest("File dengan nama yang sama sudah ada di direktori");
+                        return BadRequest($"A file with the same name already exists in the directory: {fotofoto.FileName}");
                     }
 
                     // Simpan file
@@ -56,5 +56,6 @@ namespace IndustrialServices.Controllers
                 return StatusCode(500, $"Terjadi kesalahan: {ex.Message}");
             }
         }
+
     }
 }

@@ -8,15 +8,15 @@
 
 <section id="hero">
     <section id="home" class="home">
-        <div class="container" style="padding-bottom:15px;">
+        <div class="container" style="padding-bottom:15px;font-family:Barlow;">
             <p style="margin-bottom: -3px;color:darkgray;">Industrial Services</p>
-            <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 20px; margin-bottom: 20px;">Article</h5>
+            <h5 style="color: black;font-family:Barlow; font-weight: 600; font-size: 20px; margin-bottom: 20px;">Article</h5>
         </div>
         <div class="container-sm">
             <div class="row">
-                <div class="col-sm-12 text-white">
+                <div class="col-sm-12 text-black">
                     <div class="container-fluid">
-                    <div class="post-body" style="text-align:justify;">
+                        <div class="post-body" style="text-align:justify;font-family:Barlow;">
                         <div class="justify-content-center" id="data-header">
                         </div>
                         <br />
@@ -49,9 +49,10 @@
 </div>
 
 <footer id="footer" style="color:#ffffff;">
+
     <div class="footer-top" style="background:#01529C;">
         <div class="container">
-            <div class="row">
+            <div class="row justify-content-center">
 
                 <div class="col-lg-3 col-md-6 footer-contact">
                     <h3>Address</h3>
@@ -75,10 +76,16 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6 footer-contact">
-                    <h3>Our Social Media</h3>
-                    <p style="color:white;">
-
-                    </p>
+                    <h3>Information</h3>
+                    <div class="row">
+                        <a>
+                            <p style="color:white;">
+                                About Industrial Services <br />
+                                Astra Polytechnic Main Website <br />
+                                Contact
+                            </p>
+                        </a>
+                    </div>
                 </div>
 
             </div>
@@ -113,11 +120,11 @@
 
                 // Tambahkan data artikel ke elemen HTML
                 var dataHeader = '<div class="text-center">' +
-                    '<h5 style="color: white; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 32px; margin-bottom: 5px;">' + artikel.judul_artikel + '</h5>' +
-                    '<span class="post-date" style="color:rgba(255,255,255,0.4); font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 14px;">' + formatDateWithDay(artikel.tanggal_rilis) + ' - by ' + artikel.role + '</span>' +
+                    '<h5 style="color: black; font-family:Barlow; font-weight: 600; font-size: 32px; margin-bottom: 5px;">' + artikel.judul_artikel + '</h5>' +
+                    '<span class="post-date" style="color:rgba(0,0,0,0.4); font-family:Barlow; font-weight: 600; font-size: 14px;">' + formatDateWithDay(artikel.tanggal_rilis) + ' - by ' + artikel.role + '</span>' +
                     '</div>';
 
-                var sampul = '<img src="/assets/img/' + artikel.sampul_artikel + '" style="width: 50%; height: auto;">';
+                var sampul = '<img src="/assets/img/' + artikel.sampul_artikel + '" style="width: 50%; height: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">';
 
                 $('#data-header').html(dataHeader);
                 $('#data-sampul').html(sampul);
@@ -126,7 +133,7 @@
                 $('#load-detail-article').html('<div class="container">' +
                     '<div class="row">' +
                     '<div class="col-sm-9 mx-auto" >' + // Tambahkan kelas mx-auto di sini
-                    '<p style="font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: 20px;">' + artikel.isi_artikel + '</p>' +
+                    '<p style="color:black;font-family:Barlow; font-weight: 400; font-size: 24px;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">' + artikel.isi_artikel + '</p>' +
                     '</div>' +
                     '</div>' +
                     '</div>');
@@ -183,7 +190,7 @@
                         '<img class="shadow-light-lg img-fluid zoom-on-hover" src="/assets/img/' + article.sampul_artikel + '"/>' +
                         '<div class="card-footer p-3">' +
                         '<h6 class="fw-bolder line-clamp-2 mb-0">' + truncatedTitle + '</h6>' +
-                        '<span style="color:rgba(0,0,0,0.4);font-size:14px;">' + formattedDate + '</span>' +
+                        '<span style="color:rgba(0,0,0,0.8);font-size:14px;">' + formattedDate + '</span>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +

@@ -87,7 +87,7 @@
 
         // Jika foto_pengajar tidak null, upload foto
         if (fotopengajar != null) {
-            uploadFoto(fotopengajar, function () {
+            uploadFoto(fotopengajar, function (uniqueFileName) {
                 // Setelah foto diupload, lanjutkan dengan menyimpan data
                 var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
                 var url = hostname + "InsertFacultyMember"; // Sesuaikan dengan endpoint Anda
@@ -96,7 +96,7 @@
                     npk: npk,
                     nama_pengajar: nama_pengajar,
                     bidang_keahlian: bidang_keahlian,
-                    foto_pengajar: fotopengajar.name, // Ubah ini sesuai dengan kebutuhan Anda
+                    foto_pengajar: uniqueFileName, // Ubah ini sesuai dengan kebutuhan Anda
                     deskripsi_pengajar: deskripsi_pengajar,
                     status: status
                 };
@@ -132,7 +132,20 @@
 
     function uploadFoto(file, callback) {
         var formData = new FormData();
-        formData.append('fotopengajar', file);
+        var uniqueFileName = guid() + "_" + file.name;
+        formData.append('fotopengajar', file, uniqueFileName);
+        var maxSize = 7 * 1024 * 1024; // 10 MB
+
+        // Pengecekan ukuran file
+        if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Size Exceeded',
+                text: 'File size should not exceed 7 MB.'
+            });
+            // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+            location.reload();
+        }
 
         $.ajax({
             url: '/FacultyMember/UploadPhoto',
@@ -143,12 +156,21 @@
             success: function (data) {
                 console.log(data);
                 // Panggil callback setelah foto diupload
-                callback();
+                callback(uniqueFileName); 
             },
             error: function (error) {
                 console.log(error);
                 // Handle error
             }
+        });
+    }
+
+    // Fungsi untuk membuat GUID
+    function guid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
     }
 
@@ -262,8 +284,8 @@
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetFacultyMember?id=" + id_pengajar;
         var method = "GET";
-        var deskripsi_pengajar = document.getElementsByName("deskripsi_pengajar")[0];
-
+        var deskripsi_pengajar = document.getElementsByName("editdeskripsi_pengajar")[0];
+        $('#richtext').summernote('destroy');
         $.ajax({
             url: url,
             method: method,
@@ -275,9 +297,9 @@
                 $('#editnpk').val(faculty.npk);
                 $('#editnama_pengajar').val(faculty.nama_pengajar);
                 $('#editbidang_keahlian').val(faculty.bidang_keahlian);
-                deskripsi_pengajar.innerHTML = faculty.deskripsi_pengajar
+                deskripsi_pengajar.innerHTML = faculty.deskripsi_pengajar;
                 $('#editstatus').val(faculty.status);
-
+                $('#richtext').summernote();
                 // Show the Bootstrap modal
                 $('#editFacultyMemberModal_').modal('show');
             }
@@ -401,7 +423,7 @@
                                         </div>
                                     </div>
                                 <div class="row mb-3">
-                                    <label for="deskripsi_pengajar" class="col-sm-2 col-form-label">Product Description</label>
+                                    <label for="deskripsi_pengajar" class="col-sm-2 col-form-label">Teacher's Description</label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control" name="deskripsi_pengajar" id="summernote" rows="5"></textarea>
                                     </div>
@@ -415,7 +437,7 @@
                                     <br />
                                     <div class="row mb-3">
                                         <div class="col-sm-10">
-                                            <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                            <button type="button" class="btn btn-danger" onclick="cancel()">Reset</button>
                                             <button type="submit" class="btn btn-primary" onclick="simpan()">Submit</button>
                                         </div>
                                     </div>
@@ -482,9 +504,9 @@
                                         </div>
                                     </div>
                                 <div class="row mb-3">
-                                    <label for="editdeskripsi_pengajar" class="col-sm-2 col-form-label">Product Description</label>
+                                    <label for="editdeskripsi_pengajar" class="col-sm-2 col-form-label">Teacher's Description</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" name="editdeskripsi_pengajar" id="summernote" rows="5"></textarea>
+                                        <textarea class="form-control" name="editdeskripsi_pengajar" id="richtext" rows="5"></textarea>
                                     </div>
                                 </div>
                                     <div class="row mb-3">
@@ -496,7 +518,6 @@
                                     <br />
                                     <div class="row mb-3">
                                         <div class="col-sm-10">
-                                        <button type="button" class="btn btn-danger" onclick="canceledit()">Cancel</button>
                                         <button type="submit" class="btn btn-primary" onclick="simpanedit()">Submit</button>
                                         </div>
                                     </div>

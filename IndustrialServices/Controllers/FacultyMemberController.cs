@@ -54,7 +54,6 @@ namespace IndustrialServices.Controllers
 
                 var saveimg = Path.Combine(saveimgDirectory, fotopengajar.FileName);
 
-                // ... (kode sebelumnya)
 
                 using (var uploading = new FileStream(saveimg, FileMode.Create))
                 {

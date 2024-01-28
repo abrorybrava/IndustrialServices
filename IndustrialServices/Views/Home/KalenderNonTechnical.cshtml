@@ -6,25 +6,25 @@
 <section id="hero">
     <section id="home" class="home">
         <div class="container" style="padding-bottom:15px;">
-            <p style="margin-bottom: -3px;color:darkgray;">Industrial Services</p>
-            <h5 style="color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 600; font-size: 36px; margin-bottom: 20px;">Non-Technicals Calendar Training</h5>
+            <p style="margin-bottom: -3px;color:darkgray;font-family:Barlow;">Industrial Services</p>
+            <h5 style="color: black; font-weight: 600; font-size: 36px; margin-bottom: 20px;font-family:Barlow;">Non-Technicals Calendar Training</h5>
         </div>
         <div class="container-sm">
             <div class="row g-2">
                 <!-- Filter Card -->
                 <div class="col-lg-3">
-                    <div class="card" style="background-color:#013769 ;border:none;">
-                        <div class="card-body">
-                            <h6 style="color: white;">Filter Training by Categories</h6>
+                    <div class="card" style="background-color:#013769 ;border:none;font-family:Barlow;">
+                        <div class="card-body" style="font-family:Barlow;">
+                            <h6 style="color: white;font-family:Barlow;">Filter Training by Categories</h6>
                             <div class="row g-2">
                                 <div class="col-md-12">
-                                    <select type="text" class="form-control" name="tipe_pelatihan" id="tipe_pelatihan">
+                                    <select type="text" class="form-control" name="tipe_pelatihan" id="tipe_pelatihan" style="font-family:Barlow;">
                                     </select>
 
                                 </div>
                             </div>
                             <br />
-                            <h6 style="color: white;">Filter Training by Month</h6>
+                            <h6 style="color: white;font-family:Barlow;">Filter Training by Month</h6>
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <select class="form-select" name="filter_bulan" id="filter_bulan">
@@ -71,7 +71,7 @@
 
             </div>
             <br />
-            <div id="technical-list">
+            <div id="technical-list" style="font-family:Barlow;">
 
 
 
@@ -104,7 +104,7 @@
 
             </div>
             <div class="container-lg">
-                <div class="row g-4" id="technical2-list">
+                <div class="row g-4" id="technical2-list" style="font-family:Barlow;">
                 </div>
             </div>
 
@@ -134,9 +134,10 @@
 </style>
 
 <footer id="footer" style="color:#ffffff;">
+
     <div class="footer-top" style="background:#01529C;">
         <div class="container">
-            <div class="row">
+            <div class="row justify-content-center">
 
                 <div class="col-lg-3 col-md-6 footer-contact">
                     <h3>Address</h3>
@@ -160,10 +161,16 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6 footer-contact">
-                    <h3>Our Social Media</h3>
-                    <p style="color:white;">
-
-                    </p>
+                    <h3>Information</h3>
+                    <div class="row">
+                        <a>
+                            <p style="color:white;">
+                                About Industrial Services <br />
+                                Astra Polytechnic Main Website <br />
+                                Contact
+                            </p>
+                        </a>
+                    </div>
                 </div>
 
             </div>
@@ -178,7 +185,6 @@
 
     </div>
 </footer><!-- End Footer -->
-
 
 <script>
     var filter = "tanggal";
@@ -385,13 +391,13 @@
                             var cardHtml =
                                 '<div class="col-xs-12 col-sm-4">' +
                                 '<a href="/Home/DetailPelatihanNonTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
-                                '<div class="card bg-dark text-white" style="border:none;">' +
+                                '<div class="card bg-dark text-white" style="border:none;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);">' +
                                 '<img src="/assets/img/' + pelatihan.path_foto_pelatihan + '" class="card-img img-fluid" alt="' + pelatihan.nama_pelatihan + '">' +
                                 '<div class="card-img-overlay d-flex flex-column">' +
-                                '<div class="card-category" style="font-size: 16px; font-weight: bold;">' + tipe_pelatihan + '</div>' +
+                                '<div class="card-category" style="font-size: 16px; font-weight: bold;font-family:Barlow;">' + tipe_pelatihan + '</div>' +
                                 '<div class="card-description flex-grow-1">' +
-                                '<h2 class="card-title" style="font-size: 24px; font-weight: bold;">' + pelatihan.nama_pelatihan + '</h2>' +
-                                '<p class="card-text" style="font-size: 14px;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
+                                '<h2 class="card-title" style="font-size: 24px; font-weight: bold;font-family:Barlow;">' + pelatihan.nama_pelatihan + '</h2>' +
+                                '<p class="card-text" style="font-size: 16px;font-family:Barlow;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
                                 '</div>' +
                                 '</div>' +
                                 '</div>' +

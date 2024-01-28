@@ -149,23 +149,17 @@
             if (result.isConfirmed) {
                 // Jika pengguna mengkonfirmasi, lanjutkan dengan penghapusan
                 var hostname = "https://localhost:7033/";
-                var url = hostname + "DeleteCustomerMapping";
+                var url = hostname + "DeleteCustomerMapping?id=" + id;
                 var method = "POST";
 
                 $.ajax({
                     url: url,
                     method: method,
                     contentType: "application/json",
-                    data: JSON.stringify({ id: id }),
                     success: function (data) {
-                        // Reload data setelah penghapusan
                         loadCustomerMapping();
                         // Menampilkan pesan SweetAlert untuk sukses
-                        Swal.fire(
-                            'Deleted!',
-                            'Your data has been deleted.',
-                            'success'
-                        );
+
                     },
                     error: function (xhr, status, error) {
                         console.error("Error:", error);
@@ -192,10 +186,8 @@
     });
 
     function simpan() {
-        var check = 0;
         var nama_logo = document.getElementById("nama_logo").value;
         var grade_logo = document.getElementById("grade_logo").value;
-        var path_logo = document.getElementById("logo").value;
         var status = document.getElementById("status").value;
 
         var logo = document.getElementById("logo").files[0];
@@ -203,61 +195,76 @@
         var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
         var url = hostname + "InsertCustomerMapping"; // Sesuaikan dengan endpoint Anda
         var method = "POST";
-        var input = {
-            nama_logo: nama_logo,
-            grade_logo: grade_logo,
-            path_logo: path_logo,
-            status: status
-        };
 
-        $.ajax({
-            url: url,
-            method: method,
-            data: JSON.stringify(input),
-            contentType: "application/json",
-            success: function (data) {
-                if (data.status === 500) {
-                    // Tampilkan SweetAlert jika username sudah tersedia
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Warning!',
-                        text: 'Logo was already added!',
-                    });
-                } else {
-                    check = 1;
-
-                    if (check == 1) {
-                        uploadFoto(logo);
+        if (logo != null) {
+            uploadLogo(logo, function (uniqueFileName) {
+                var input = {
+                    nama_logo: nama_logo,
+                    grade_logo: grade_logo,
+                    path_logo: uniqueFileName,
+                    status: status
+                };
+                $.ajax({
+                    url: url,
+                    method: method,
+                    data: JSON.stringify(input),
+                    contentType: "application/json",
+                    success: function (data) {
+                        if (data.status === 500) {
+                            // Tampilkan SweetAlert jika username sudah tersedia
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Warning!',
+                                text: 'Logo was already added!',
+                            });
+                        } else {
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        // Handle error
                     }
-                    location.reload();
-                }
+                });
+            });
+        } else {
+            saveData();
+        }
+    }
 
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                // Handle error
-            }
+    function guid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
     }
 
-    function uploadFoto(file) {
+    function saveData() {
+        alert('warning');
+        console.log("Simpan data tanpa foto");
+    }
+
+    function uploadLogo(file, callback) {
         var formData = new FormData();
-        formData.append('logo', file);
+        var uniqueFileName = guid() + "_" + file.name;
+        formData.append('foto', file, uniqueFileName);
 
         $.ajax({
-            url: '/TestiCM/UploadPhoto',
+            url: '/TestiCM/UploadTestiCM',
             method: 'POST',
             data: formData,
             contentType: false, // false agar FormData menentukan Content-Type
             processData: false, // false agar FormData tidak diproses
-            success: function (response) {
-                window.location.href = '/TestiCM/Index';
+            success: function (data) {
+                callback(uniqueFileName);
             },
             error: function (error) {
                 console.log(error);
             }
         });
     }
+
 
 
 
@@ -409,19 +416,21 @@
             return;
         }
 
+
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "InsertTestimony";
+
+
+        if(foto != null) {
+            uploadFotoTest(foto, function (uniqueFileName){
         var testimonialData = {
             nama_peserta: namaPeserta,
             id_pelatihan: id_pelatihan,
             asal_instansi: asalInstansi,
             testimoni_peserta: testimoni,
-            foto_peserta: foto_peserta, // Ganti URL default gambar profil
+                    foto_peserta: uniqueFileName, // Ganti URL default gambar profil
             status: 1 // Status aktif, sesuaikan dengan kebutuhan
         };
-        console.log(testimonialData)
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "InsertTestimony";
-
-
         // Kirim data testimonial ke server
         $.ajax({
             url: url, // Ganti URL dengan endpoint yang sesuai
@@ -429,7 +438,6 @@
             contentType: "application/json",
             data: JSON.stringify(testimonialData),
             success: function (data) {
-                uploadFotoTest(foto);
                 location.reload();
 
             },
@@ -437,19 +445,25 @@
                 console.error("Error:", error);
             }
         });
+        });
+        }else{
+            saveData();
+        }
     }
 
-    function uploadFotoTest(file) {
+    function uploadFotoTest(file, callback) {
         var formData = new FormData();
-        formData.append('foto', file);
+        var uniqueFileName = guid() + "_" + file.name;
+        formData.append('foto', file, uniqueFileName);
 
         $.ajax({
-            url: '/TestiCM/UploadPhoto',
+            url: '/TestiCM/UploadTestiCM',
             method: 'POST',
             data: formData,
             contentType: false, // false agar FormData menentukan Content-Type
             processData: false, // false agar FormData tidak diproses
             success: function (response) {
+                callback(uniqueFileName);
                 window.location.href = '/TestiCM/Index';
             },
             error: function (error) {

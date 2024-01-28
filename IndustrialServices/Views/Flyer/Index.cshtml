@@ -1,0 +1,408 @@
+﻿@{
+    ViewData["Title"] = "Flyer Data";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    int no = 1;
+    var httpcontext = ViewContext.HttpContext;
+    string role = httpcontext.Session.GetString("Role");
+    if (string.IsNullOrEmpty(role))
+    {
+        // Session is expired or role is not set, redirect to login layout
+        Layout = null;
+
+        <script>
+            window.location.href = '@Url.Action("Index", "Login")';
+        </script>
+
+        return;
+    }
+    if (role == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+}
+
+
+<div class="pagetitle">
+    <h1>Flyer Data</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active">Data</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Datatables</h5>
+
+                    <button class="btn btn-primary addFlyer">+ Add Flyer</button>
+                    <!-- Table with stripped rows -->
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">Flyer</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyFlyers">
+                            <!-- Populate this section with Flyer data -->
+                        </tbody>
+                    </table>
+                    <!-- End Table with stripped rows -->
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    function simpanFlyer() {
+        var path_flyer = document.getElementById("path_flyer").value;
+        var status = document.getElementById("status_flyer").value;
+
+        var flyer = document.getElementById("path_flyer").files[0];
+
+        // Jika flyer_file tidak null, upload flyer
+        if (flyer != null) {
+            uploadFlyer(flyer, function () {
+                // Setelah flyer diupload, lanjutkan dengan menyimpan data
+                var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+                var url = hostname + "InsertFlyer"; // Sesuaikan dengan endpoint Anda
+                var method = "POST";
+                var input = {
+                    path_flyer: path_flyer,
+                    status: status
+                };
+
+                $.ajax({
+                    url: url,
+                    method: method,
+                    data: JSON.stringify(input),
+                    contentType: "application/json",
+                    success: function (data) {
+                        if (data.status === 500) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Warning!',
+                                text: 'Flyer path has already been used!',
+                            });
+                        } else {
+                            console.log("Data berhasil diupload");
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        // Handle error
+                    },
+                });
+            });
+        } else {
+            // Jika flyer_file null, langsung menyimpan data tanpa mengunggah flyer
+            saveFlyerData();
+        }
+    }
+
+    function uploadFlyer(file, callback) {
+        var formData = new FormData();
+        formData.append('flyer', file);
+
+        $.ajax({
+            url: '/Flyer/UploadFlyer',
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                console.log(data);
+                // Panggil callback setelah flyer diupload
+                callback();
+            },
+            error: function (error) {
+                console.log(error);
+                // Handle error
+            }
+        });
+    }
+
+    function saveFlyerData() {
+        alert('warning for flyer');
+        console.log("Simpan data tanpa flyer");
+    }
+
+    loadFlyers();
+    function loadFlyers() {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetAllFlyers";
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var list = data.data;
+                console.log(data);
+                list.forEach(function (flyer, index) {
+                    var newRow = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td> <img src="/assets/img/' + flyer.path_flyer + '" alt="Flyer" width="500" height="auto"></td>' +
+                        '<td>' + flyer.status + '</td>' +
+                        '<td>' +
+                        '<button class="btn btn-primary editFlyer" data-id_flyer="' + flyer.id_flyer + '"><i class="fas fa-edit"></i></button>' +
+                        '<button class="btn btn-danger" value="' + flyer.id_flyer + '" onclick="hapusFlyer(this.value)"><i class="fas fa-trash"></i></button>' +
+                        '</td>' +
+                        '</tr>';
+
+                    $('#tbodyFlyers').append(newRow);
+
+                    // Event listener for edit button
+                    $('.editFlyer[data-id_flyer="' + flyer.id_flyer + '"]').click(function () {
+                        var id_flyer = $(this).data("id_flyer");
+                        loadEditFlyer(id_flyer);
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+
+    function hapusFlyer(id) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "DeleteFlyer?id=" + id;
+        var method = "POST";
+
+        // Konfirmasi sebelum menghapus menggunakan SweetAlert2
+        Swal.fire({
+            title: 'Are you sure for deleting this Flyer?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, Delete!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Ajax untuk menghapus data Flyer
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: "application/json",
+                    success: function (data) {
+                        Swal.fire(
+                            'Success!',
+                            'Flyer data deleted sucessfully.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error deleting flyer:", error);
+                        // Tangani kesalahan jika terjadi saat menghapus data Flyer
+                        Swal.fire(
+                            'Error!',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+
+    $(".addFlyer").click(function () {
+        $("#addFlyerModal").modal("show");
+    });
+
+    function simpanEditFlyer() {
+        var id_flyer = document.getElementById("editid_flyer").value;
+        var path_flyer = document.getElementById("editflyer_file").value;
+        var status = document.getElementById("editstatus_flyer").value;
+
+        var flyer = document.getElementById("editflyer_file").files[0];
+
+        // Jika editflyer_file tidak null, upload flyer
+        if (flyer != null) {
+            uploadFlyer(flyer, function () {
+                // Setelah flyer diupload, lanjutkan dengan menyimpan data
+                var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+                var url = hostname + "UpdateFlyer"; // Sesuaikan dengan endpoint Anda
+                var method = "POST";
+                var input = {
+                    id_flyer: id_flyer,
+                    path_flyer: path_flyer,
+                    status: status
+                };
+
+                $.ajax({
+                    url: url,
+                    method: method,
+                    data: JSON.stringify(input),
+                    contentType: "application/json",
+                    success: function (data) {
+                        if (data.status === 500) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Warning!',
+                                text: 'Flyer path has already been used!',
+                            });
+                        } else {
+                            console.log("Data berhasil diupload");
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                        // Handle error
+                    },
+                });
+            });
+        } else {
+            // Jika editflyer_file null, langsung menyimpan data tanpa mengunggah flyer
+            saveEditFlyerData();
+        }
+    }
+    function loadEditFlyer(id_flyer) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetFlyers?id=" + id_flyer;
+        var method = "GET";
+
+        // Assuming you have corresponding HTML elements for flyer edit modal
+        var status_flyer_input = document.getElementById("editstatus_flyer");
+        var id_flyer_input = document.getElementById("editid_flyer");
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var flyer = data.data;
+                console.log(flyer)
+                // Assuming you have corresponding HTML elements for flyer edit modal
+                status_flyer_input.value = flyer.status;
+                id_flyer_input.value = flyer.id_flyer;
+                
+
+                // Show the Bootstrap modal
+                $('#editFlyerModal').modal('show');
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                // Handle error if needed
+            }
+        });
+    }
+
+
+
+                                </script>
+
+
+@*Modal*@
+<div class="modal fade" id="addFlyerModal" tabindex="-1" role="dialog" aria-labelledby="addFlyer" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Add Flyer</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <!-- General Form Elements -->
+                                <div class="row mb-3">
+                                    <label for="path_flyer" class="col-sm-2 col-form-label">Flyer File (Flyer ratio 3:1)</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="path_flyer" id="path_flyer">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="status_flyer" name="status_flyer" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="cancelFlyer()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpanFlyer()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editFlyerModal" tabindex="-1" role="dialog" aria-labelledby="editFlyerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Flyer</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                <hr />
+                                <br />
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="editid_flyer" id="editid_flyer" hidden>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="editflyer_file" class="col-sm-2 col-form-label">Flyer (Flyer ratio 3:1)</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="editflyer_file" id="editflyer_file">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <input class="form-control" id="editstatus_flyer" name="editstatus_flyer" value="1" hidden />
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row mb-3">
+                                    <div class="col-sm-10">
+                                        <button type="button" class="btn btn-danger" onclick="canceleditFlyer()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary" onclick="simpaneditFlyer()">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*Modal*@
