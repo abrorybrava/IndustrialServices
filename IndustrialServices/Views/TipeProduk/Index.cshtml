@@ -199,6 +199,14 @@
             tipe_produk: tipe_produk,
             status: status_tipe_produk
         };
+        if (tipe_produk == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         var data = JSON.stringify(input);
 
         $.ajax({
@@ -243,7 +251,14 @@
             tipe_produk: tipe_produk,
             status: status_tipe_produk
         };
-
+        if (tipe_produk == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         var data = JSON.stringify(input);
 
         $.ajax({

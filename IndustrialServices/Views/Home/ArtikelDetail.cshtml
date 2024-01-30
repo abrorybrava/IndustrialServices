@@ -130,13 +130,16 @@
                 $('#data-sampul').html(sampul);
 
                 // Tambahkan detail artikel ke elemen HTML
-                $('#load-detail-article').html('<div class="container">' +
+                var isiartikel = 
+                    '<div class="container">' +
                     '<div class="row">' +
                     '<div class="col-sm-9 mx-auto" >' + // Tambahkan kelas mx-auto di sini
-                    '<p style="color:black;font-family:Barlow; font-weight: 400; font-size: 24px;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">' + artikel.isi_artikel + '</p>' +
+                    '<p style="color:black;font-family:Barlow; font-weight: 400; font-size: 24px;">' + artikel.isi_artikel + '</p>' +
                     '</div>' +
                     '</div>' +
-                    '</div>');
+                    '</div>';
+
+                $('#load-detail-article').append(isiartikel);
             },
             error: function (xhr, status, error) {
                 console.error("Error:", error);
@@ -176,7 +179,7 @@
                         month: 'long',
                         year: 'numeric'
                     });
-                    var maxTitleLength = 75; // Set the maximum length for the title
+                    var maxTitleLength = 45; // Set the maximum length for the title
 
                     var truncatedTitle = article.judul_artikel.length > maxTitleLength ?
                         article.judul_artikel.substring(0, maxTitleLength) + '...' :
@@ -189,8 +192,8 @@
                         '<div class="card-zoom position-relative rounded-bottom-0">' +
                         '<img class="shadow-light-lg img-fluid zoom-on-hover" src="/assets/img/' + article.sampul_artikel + '"/>' +
                         '<div class="card-footer p-3">' +
-                        '<h6 class="fw-bolder line-clamp-2 mb-0">' + truncatedTitle + '</h6>' +
-                        '<span style="color:rgba(0,0,0,0.8);font-size:14px;">' + formattedDate + '</span>' +
+                        '<h6 class="fw-bolder line-clamp-2 mb-0" style="font-family:Barlow;>' + truncatedTitle + '</h6>' +
+                        '<span style="color:rgba(0,0,0,0.8);font-size:14px;font-family:Barlow;">' + formattedDate + '</span>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +

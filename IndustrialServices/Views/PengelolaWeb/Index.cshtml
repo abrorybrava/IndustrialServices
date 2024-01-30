@@ -24,13 +24,6 @@
 
 <div class="pagetitle">
     <h1>Web Manager Data</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-            <li class="breadcrumb-item">Tables</li>
-            <li class="breadcrumb-item active">Data</li>
-        </ol>
-    </nav>
 </div><!-- End Page Title -->
 
 <section class="section">
@@ -39,7 +32,7 @@
 
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Datatables</h5>
+                    <h5 class="card-title">Web Manager</h5>
 
                     <button class="btn btn-primary addPengelolaWeb">+ Add Web Manager</button>
                     <!-- Table with stripped rows -->
@@ -90,6 +83,7 @@
                         '<td>' + statusText + '</td>' +
                         '<td>' +
                         '<button class="btn btn-primary editPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-edit"></i></button>' +
+                        '<button class="btn btn-success editusnpwPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-key"></i></button>' +
                         '<button class="btn btn-danger" value="' + pengelola.id_pengelola + '" onclick="hapus(this.value)"><i class="fas fa-trash"></i></button>' +
                         '</td>' +
                         '</tr>';
@@ -100,6 +94,10 @@
                     $('.editPengelolaWeb[data-id="' + pengelola.id_pengelola + '"]').click(function () {
                         var id_pengelola = $(this).data("id");
                         loadEditPengelolaWeb(id_pengelola);
+                    });
+                    $('.editusnpwPengelolaWeb[data-id="' + pengelola.id_pengelola + '"]').click(function () {
+                        var id_pengelola = $(this).data("id");
+                        loadEditUsnPwPengelolaWeb(id_pengelola);
                     });
                 });
             },
@@ -181,6 +179,15 @@
             status: status
         };
 
+        if(nama_pengelola == '' || username == '' || password == '' || peran == ''){
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
+
         var hostname = "https://localhost:7033/";
         var url = hostname + "InsertPengelolaWeb";
         var method = "POST";
@@ -217,6 +224,11 @@
         loadEditPengelolaWeb(id_pengelola);
     });
 
+    $(".editusnpwPengelolaWeb").click(function () {
+        var id_pengelola = $(this).data("id_pengelola");
+        loadEditUsnPwPengelolaWeb(id_pengelola);
+    });
+
     function loadEditPengelolaWeb(id_pengelola) {
         var hostname = "https://localhost:7033/";
         var url = hostname + "GetPengelolaWeb?id=" + id_pengelola;
@@ -232,7 +244,6 @@
                 $('#editid_pengelola').val(pengelola.id_pengelola);
                 $('#editnama_pengelola').val(pengelola.nama_pengelola);
                 $('#editusername').val(pengelola.username);
-                $('#editpassword').val(pengelola.password);
                 $('#editperan').val(pengelola.peran);
                 $('#editstatus').val(pengelola.status);
 
@@ -245,7 +256,6 @@
         var id_pengelola = document.getElementById("editid_pengelola").value;
         var nama_pengelola = document.getElementById("editnama_pengelola").value;
         var username = document.getElementById("editusername").value;
-        var password = document.getElementById("editpassword").value;
         var peran = document.getElementById("editperan").value;
         var status = document.getElementById("editstatus").value;
 
@@ -256,11 +266,19 @@
             id_pengelola: id_pengelola,
             nama_pengelola: nama_pengelola,
             username: username,
-            password: password,
             peran: peran,
             status: status
         };
         var data = JSON.stringify(input);
+
+        if (nama_pengelola == '' || username == '' || peran == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
 
         $.ajax({
             url: url,
@@ -278,6 +296,90 @@
                         text: 'Username or Password already used!',
                     });
                 } else {
+                    // Redirect hanya jika tidak ada error
+                    location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+    function canceledit() {
+        $('#editPengelolaWebModal').modal('hide');
+    }
+
+    function back() {
+        $('#addPengelolaWebModal_').modal('hide');
+    }
+
+        function loadEditUsnPwPengelolaWeb(id_pengelola) {
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "GetPengelolaWeb?id=" + id_pengelola;
+        var method = "GET";
+
+        $.ajax({
+            url: url,
+            method: method,
+            contentType: "application/json",
+            success: function (data) {
+                var pengelola = data.data;
+                $('#editusnpwid_pengelola').val(pengelola.id_pengelola);
+                $('#editusnpwnama_pengelola').val(pengelola.nama_pengelola);
+                $('#editusnpwperan').val(pengelola.peran);
+                $('#editusnpwusername').val(pengelola.username);
+                // Show the Bootstrap modal for editing
+                $('#editUsnPwPengelolaWebModal').modal('show');
+            }
+        });
+    }
+    function simpaneditusnpw() {
+        var id_pengelola = document.getElementById("editusnpwid_pengelola").value;
+        var passwordawal = document.getElementById("passwordawal").value;
+        var password = document.getElementById("editpassword").value;
+
+        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
+        var url = hostname + "UpdateUsnPwPengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var method = "POST";
+        var input = {
+            id_pengelola: id_pengelola,
+            passwordawal: passwordawal,
+            password: password,
+        };
+        var data = JSON.stringify(input);
+
+        if (passwordawal == '' || password == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: data,
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data.messages);
+
+                if (data.status === 500) {
+                    // Tampilkan SweetAlert jika username sudah tersedia
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Inputed current password incorrectly!',
+                    });
+                } else if (data.status === 400) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Warning!',
+                        text: 'Inputed new password was already used!',
+                    });
+                }
+            else {
                     // Redirect hanya jika tidak ada error
                     location.reload();
                 }
@@ -344,7 +446,8 @@
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-sm-10">
-                                                <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                            <button type="button" class="btn btn-secondary" onclick="back()">Back</button>
+                                                <button type="button" class="btn btn-danger" onclick="cancel()">Reset</button>
                                                 <button type="button" class="btn btn-primary" onclick="simpan()">Submit</button>
                                             </div>
                                         </div>
@@ -396,12 +499,6 @@
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label for="password" class="col-sm-2 col-form-label">Password</label>
-                                        <div class="col-sm-10">
-                                            <input type="password" class="form-control" name="editpassword" id="editpassword">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
                                         <label for="peran" class="col-sm-2 col-form-label">Role</label>
                                         <div class="col-sm-10">
                                             <select type="text" class="form-control" name="editperan" id="editperan">
@@ -420,8 +517,90 @@
                                     <br />
                                     <div class="row mb-3">
                                         <div class="col-sm-10">
-                                            <button type="button" class="btn btn-danger" onclick="cancel()">Cancel</button>
+                                            <button type="button" class="btn btn-secondary" onclick="canceledit()">Back</button>
                                             <button type="submit" class="btn btn-primary" onclick="simpanedit()">Submit</button>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editUsnPwPengelolaWebModal" tabindex="-1" role="dialog" aria-labelledby="editPengelolaWebModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title" style="font-size: 28px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Edit Web Manager</h1>
+            </div>
+            <div class="modal-body">
+                <section class="section">
+                    <div class="row">
+                        <div class="col-lg-12">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Please Fill it in Correctly!</h5>
+                                    <hr />
+                                    <br />
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="editusnpwid_pengelola" id="editusnpwid_pengelola" value="@ViewBag.Id" hidden>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="nama_pengelola" class="col-sm-2 col-form-label">Web Manager's Name</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="editusnpwnama_pengelola" id="editusnpwnama_pengelola" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="username" class="col-sm-2 col-form-label">Username</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" name="editusnpwusername" id="editusnpwusername" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="peran" class="col-sm-2 col-form-label">Role</label>
+                                        <div class="col-sm-10">
+                                            <select type="text" class="form-control" name="editusnpwperan" id="editusnpwperan" disabled>
+                                                <option>--- Choose Role ---</option>
+                                                <option value="Admin">Admin</option>
+                                                <option value="Contributor">Contributor</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <div class="row mb-3">
+                                        <label for="username" class="col-sm-2 col-form-label"><strong>Edit Password</strong></label>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="passwordawal" class="col-sm-2 col-form-label">Current Password</label>
+                                        <div class="col-sm-10">
+                                            <input type="password" class="form-control" name="passwordawal" id="passwordawal">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="password" class="col-sm-2 col-form-label">New Password</label>
+                                        <div class="col-sm-10">
+                                            <input type="password" class="form-control" name="editpassword" id="editpassword">
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <br />
+                                    <div class="row mb-3">
+                                        <div class="col-sm-10">
+                                            <button type="button" class="btn btn-secondary" onclick="canceleditusnpw()">Back</button>
+                                            <button type="submit" class="btn btn-primary" onclick="simpaneditusnpw()">Submit</button>
                                         </div>
                                     </div>
 

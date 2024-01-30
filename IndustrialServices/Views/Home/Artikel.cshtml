@@ -104,7 +104,7 @@
                         year: 'numeric'
                     });
 
-                    var maxTitleLength = 40; // Set the maximum length for the title
+                    var maxTitleLength = 45; // Set the maximum length for the title
 
                     // Truncate the title if it exceeds the maximum length
                     var truncatedTitle = article.judul_artikel.length > maxTitleLength ?
@@ -116,7 +116,7 @@
                         '<a class="card-link" class="card-img d-block sk-thumbnail img-ratio-3 rounded-bottom-0" href="/Home/ArtikelDetail?id=' + article.id_artikel + '">' +
                         '<div class="card border rounded-3 sk-fade h-100">' +
                         '<div class="card-zoom position-relative rounded-bottom-0">' +
-                        '<img class="shadow-light-lg img-fluid w-100 zoom-on-hover" src="/assets/img/' + article.sampul_artikel + '" alt="Article Image" />' +
+                        '<img class="shadow-light-lg img-fluid zoom-on-hover" src="/assets/img/' + article.sampul_artikel + '" alt="Article Image" />' +
                         '<div class="card-footer p-3">' +
                         '<h6 class="fw-bolder line-clamp-2 mb-0" style="font-family:Barlow;">' + truncatedTitle + '</h6>' +
                         '<span class="text-muted" style="font-size:14px;font-family:Barlow;">' + formattedDate + '</span>' +

@@ -200,7 +200,14 @@
             status: status_tipe_fasilitas
         };
         var data = JSON.stringify(input);
-
+        if (tipe_fasilitas == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         $.ajax({
             url: url,
             method: method,
@@ -243,7 +250,14 @@
             tipe_fasilitas: tipe_fasilitas,
             status: status_tipe_fasilitas
         };
-
+        if (tipe_fasilitas == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         var data = JSON.stringify(input);
 
         $.ajax({

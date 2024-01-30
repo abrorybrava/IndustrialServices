@@ -270,7 +270,14 @@ function loadProducts() {
         var hostname = "https://localhost:7033/";
         var url = hostname + "InsertProduk";
         var method = "POST";
-
+        if (nama_produk == '' || id_tipe_produk == '' || pesanan == '' || deskripsi_produk == '' || fotoPaths[0] == null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         // Data untuk pengiriman informasi produk
         var productData = {
             nama_produk: nama_produk,
@@ -679,7 +686,14 @@ function loadFasilitas() {
             deskripsi_fasilitas: deskripsi_fasilitas,
             status: status
         };
-        console.log(fasilitasData);
+                if (nama_fasilitas == '' || id_tipe_fasilitas == '' || deskripsi_fasilitas == '' || fotoPaths[0] == null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         // Mengirim permintaan AJAX untuk menyimpan data fasilitas
         if (fotoPaths.length != 0) {
             uploadPhoto2(fileInputs, function (uniqueFileNames) {
@@ -1092,9 +1106,16 @@ function simpanPelatihan() {
         deskripsi_pelatihan: deskripsi_pelatihan,
         status: status
     };
-
+            if(nama_pelatihan == '' || tanggal_pelatihan_awal == '' || tanggal_pelatihan_akhir == '' || id_tipe_pelatihan == '' || deskripsi_pelatihan == '' || fileInputs[0] == null){
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
     // Kirim permintaan AJAX untuk menyimpan data pelatihan dan foto-fotonya secara terpisah
-    if (fileInputs.length != 0) {
+        if (fileInputs.length != 0) {
         uploadPhoto3(fileInputs, function (uniqueFileNames) {
             // Menggunakan nama file unik yang dihasilkan oleh GUID
             pelatihanData.fotoPaths = uniqueFileNames;

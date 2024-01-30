@@ -51,6 +51,11 @@ namespace IndustrialServices.Controllers
             ViewBag.Id = id;
             return View();
         }
+        public IActionResult DetailFacultyMember(int id)
+        {
+            ViewBag.id_pengajar = id;
+            return View();
+        }
         public IActionResult ArtikelDetail(int id)
         {
             ViewBag.Id = id;

@@ -118,7 +118,9 @@
 
                 if (list.length > 0) {
                     list.forEach(function (pengajar, index) {
-                        var newRow = '<div class="col col-md-9 col-lg-7 col-xl-5" style="padding-bottom:20px;">' +
+                        console.log(pengajar)
+                        var newRow = 
+                            '<div class="col col-md-9 col-lg-7 col-xl-5" style="padding-bottom:20px;">' +
                             '<div class="card" style="border-radius: 15px; background-color: rgba(0, 0, 0, 0.05); border: none; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);">' +
                             '<div class="card-body p-4">' +
                             '<div class="d-flex text-black">' +
@@ -131,7 +133,7 @@
                             '<div>' +
                             '</div>' +
                             '<div class="d-flex pt-1">' +
-                            '<button class="btn btn-primary flex-grow-1 detailsFacultyMember" data-id_pengajar="' + pengajar.id_pengajar + '">Details</button>' +
+                            '<a class="btn btn-primary flex-grow-1" href="/Home/DetailFacultyMember?id=' + pengajar.id_pengajar + '">View Profile</a>' +
                             '</div>' +
                             '</div>' +
                             '</div>' +
@@ -141,11 +143,7 @@
 
                         $('#technical-container').append(newRow);
 
-                        // Event listener for details button
-                        $('.detailsFacultyMember[data-id_pengajar="' + pengajar.id_pengajar + '"]').click(function () {
-                            var id_pengajar = $(this).data("id_pengajar");
-                            showDetails(id_pengajar);
-                        });
+                       
                     });
                 } else {
                     // Tampilkan pesan atau card khusus jika tidak ada data yang ditemukan
@@ -173,6 +171,4 @@
         var selectedFilter = $(this).val();
         loadTenagaPengajarTechnical(selectedFilter);
     });
-
-
 </script>

@@ -12,7 +12,7 @@
             <div class="row g-2">
                 <!-- Filter Card -->
                 <div class="col-lg-3">
-                    <div class="card" style="background-color:#013769 ;border:none;">
+                    <div class="card" style="background-color:#01529C;border:none;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);">
                         <div class="card-body">
                             <h6 style="color: white;">Filter Training by Categories</h6>
                             <div class="row g-2">
@@ -52,19 +52,19 @@
 
                 </div>
                    <div class="col-sm-1" style="position:relative;top:145px;left:780px;">
-                        <select class="form-select" name="filter" id="filter">
+                    <select class="form-select" name="filter" id="filter" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);">
                             <option disabled>Sort:</option>
                             <option value="tanggal">Date</option>
                             <option value="nama_pelatihan">Title</option>
                         </select>
                     </div>
                 <div class="col-sm-1" style="position: relative; top: 135px; left: 780px; font-size: 40px;">
-                    <a id="icon-link" class="text-blue">
+                    <a id="icon-link" class="text-primary">
                         <i class="bi bi-list"></i>
                     </a>
                 </div>
                 <div class="col-sm-1" style="position: relative; top: 142px; left: 715px; font-size: 30px;">
-                    <a id="icon-link1" class="text-blue">
+                    <a id="icon-link1" class="text-secondary">
                         <i class="bi bi-grid"></i>
                     </a>
                 </div>
@@ -127,7 +127,7 @@
             left: 100%;
             top: -5px;
             bottom: 10px;
-            border-left: 0.5px solid white;
+            border-left: 0.5px solid #01529C;
             transform: translateX(-50%);
             opacity:50%;
         }
@@ -224,9 +224,11 @@
         // Panggil fungsi loadPelatihanTechnical() saat ikon list diklik
         loadPelatihanTechnical();
 
-        // Tambahan: Tambahkan atau hapus kelas 'text-blue' sesuai kebutuhan
-        $(this).addClass("text-blue");
-        $("#icon-link1").removeClass("text-blue");
+        // Tambahan: Tambahkan atau hapus kelas 'text-primary' sesuai kebutuhan
+        $("#icon-link").removeClass("text-secondary");
+        $(this).addClass("text-primary");
+        $("#icon-link1").removeClass("text-primary");
+        $("#icon-link1").addClass("text-secondary");
         $("#technical2-list").hide();
         $("#technical-list").show();
         $("#tipe_pelatihan").val(0);
@@ -238,14 +240,16 @@
         // Panggil fungsi loadPelatihanTechnical2() saat ikon grid diklik
         loadPelatihanTechnical2();
 
-        // Tambahan: Tambahkan atau hapus kelas 'text-blue' sesuai kebutuhan
-        $(this).addClass("text-blue");
-        $("#icon-link").removeClass("text-blue");
+        // Tambahan: Tambahkan atau hapus kelas 'text-primary' sesuai kebutuhan
+        $("#icon-link1").removeClass("text-secondary");
+        $(this).addClass("text-primary");
+        $("#icon-link").removeClass("text-primary");
+        $("#icon-link").addClass("text-secondary");
         $("#technical2-list").show();
         $("#technical-list").hide();
-            $("#tipe_pelatihan").val(0);
-            $("#filter_bulan").val(0);
-            $("#filter").val("tanggal");
+        $("#tipe_pelatihan").val(0);
+        $("#filter_bulan").val(0);
+        $("#filter").val("tanggal");
     });
 
     // Kembalikan id="tipe_pelatihan" dan "filter_bulan" ke value=0
@@ -294,17 +298,17 @@
                                 '<div class="row g-2">' +
                                 '<div class="col-md-12">' +
                                 '<a href="/Home/DetailPelatihanTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
-                                '<div class="card" style="background-color: #013769; border: none;">' +
-                                '<div class="card-body text-center rounded" style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">' +
+                                '<div class="card" style="background-color: rgba(0,0,0,0.01); border: none;">' +
+                                '<div class="card-body text-center rounded" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);">' +
                                 '<div class="row g-2 justify-content-center" style="position:relative;top:10px;">' +
                                 '<div class="col-sm-3 vertical-line">' +
-                                '<p style="color: white;">' + pelatihan.nama_pelatihan + '</p>' +
+                                '<p style="color: black;">' + pelatihan.nama_pelatihan + '</p>' +
                                 '</div>' +
                                 '<div class="col-sm-3 vertical-line">' +
-                                '<p style="color: white;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
+                                '<p style="color: black;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
                                 '</div>' +
                                 '<div class="col-sm-3 vertical-line">' +
-                                '<p style="color: white;">' + tipe_pelatihan + '</p>' +
+                                '<p style="color: black;">' + tipe_pelatihan + '</p>' +
                                 '</div>' +
                                 '<div class="col-sm-3">' +
                                 '<i class="fa fa-chevron-right text-blue" aria-hidden="true"></i>' +
@@ -320,8 +324,8 @@
 
                             // Add or remove the 'text-blue' class based on the active state
                             if (isActive) {
-                                $("#icon-link").addClass("text-blue");
-                                $("#icon-link1").removeClass("text-blue"); // Pastikan menghapus kelas 'text-blue' jika tidak aktif
+                                $("#icon-link").addClass("text-primary");
+                                $("#icon-link1").removeClass("text-primary"); // Pastikan menghapus kelas 'text-blue' jika tidak aktif
                             }
 
                             $('#technical-list').append(newRow);
@@ -434,10 +438,10 @@
 
         // Periksa apakah salah satu filter memiliki nilai yang tidak sama dengan 0
         if (bulan != 0 || tipePelatihan != 0) {
-            if ($("#icon-link1").hasClass("text-blue")) {
+            if ($("#icon-link1").hasClass("text-primary")) {
                 loadPelatihanTechnical2(tipePelatihan, bulan, filter);
             }
-            if ($("#icon-link").hasClass("text-blue")) {
+            if ($("#icon-link").hasClass("text-primary")) {
             $.ajax({
                 url: 'https://localhost:7033/GetAllPelatihanTechnical',
                 type: 'GET',
@@ -453,38 +457,38 @@
                             contentType: "application/json",
                             success: function (tipePelatihanDetails) {
                                 var tipe_pelatihan = tipePelatihanDetails.tipe_pelatihan;
-                                var newRow = '<br />' +
-                                    '<div class="row g-4">' +
-                                    '<div class="col-md-12">' +
-                                    '<a href="/Home/DetailPelatihanTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
-                                    '<div class="card" style="background-color: #013769; border: none;">' +
-                                    '<div class="card-body text-center rounded" style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">' +
-                                    '<div class="row g-2 justify-content-center" style="position:relative;top:10px;">' +
-                                    '<div class="col-sm-3 vertical-line">' +
-                                    '<p style="color: white;">' + pelatihan.nama_pelatihan + '</p>' +
-                                    '</div>' +
-                                    '<div class="col-sm-3 vertical-line">' +
-                                    '<p style="color: white;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
-                                    '</div>' +
-                                    '<div class="col-sm-3 vertical-line">' +
-                                    '<p style="color: white;">' + tipe_pelatihan + '</p>' +
-                                    '</div>' +
-                                    '<div class="col-sm-3">' +
-                                    '<i class="fa fa-chevron-right text-blue" aria-hidden="true"></i>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</a>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>';
+                                    var newRow = '<br />' +
+                                        '<div class="row g-2">' +
+                                        '<div class="col-md-12">' +
+                                        '<a href="/Home/DetailPelatihanTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
+                                        '<div class="card" style="background-color: rgba(0,0,0,0.01); border: none;">' +
+                                        '<div class="card-body text-center rounded" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);">' +
+                                        '<div class="row g-2 justify-content-center" style="position:relative;top:10px;">' +
+                                        '<div class="col-sm-3 vertical-line">' +
+                                        '<p style="color: black;">' + pelatihan.nama_pelatihan + '</p>' +
+                                        '</div>' +
+                                        '<div class="col-sm-3 vertical-line">' +
+                                        '<p style="color: black;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
+                                        '</div>' +
+                                        '<div class="col-sm-3 vertical-line">' +
+                                        '<p style="color: black;">' + tipe_pelatihan + '</p>' +
+                                        '</div>' +
+                                        '<div class="col-sm-3">' +
+                                        '<i class="fa fa-chevron-right text-blue" aria-hidden="true"></i>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</a>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
 
                                 var isActive = true;
 
-                                // Add or remove the 'text-blue' class based on the active state
+                                // Add or remove the 'text-primary' class based on the active state
                                 if (isActive) {
-                                    $("#icon-link").addClass("text-blue");
-                                    $("#icon-link1").removeClass("text-blue"); // Pastikan menghapus kelas 'text-blue' jika tidak aktif
+                                    $("#icon-link").addClass("text-primary");
+                                    $("#icon-link1").removeClass("text-primary"); // Pastikan menghapus kelas 'text-primary' jika tidak aktif
                                 }
 
                                 $('#technical-list').append(newRow);
@@ -516,10 +520,10 @@
 
         // Periksa apakah salah satu filter memiliki nilai yang tidak sama dengan 0
         if (bulan != 0 || tipePelatihan != 0) {
-            if ($("#icon-link1").hasClass("text-blue")) {
+            if ($("#icon-link1").hasClass("text-primary")) {
                 loadPelatihanTechnical2(tipePelatihan, bulan, filter);
             }
-            if ($("#icon-link").hasClass("text-blue")) {
+            if ($("#icon-link").hasClass("text-primary")) {
             $.ajax({
                 url: 'https://localhost:7033/GetAllPelatihanTechnical',
                 type: 'GET',
@@ -535,38 +539,38 @@
                             contentType: "application/json",
                             success: function (tipePelatihanDetails) {
                                 var tipe_pelatihan = tipePelatihanDetails.tipe_pelatihan;
-                                var newRow = '<br />' +
-                                    '<div class="row g-4">' +
-                                    '<div class="col-md-12">' +
-                                    '<a href="/Home/DetailPelatihanTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
-                                    '<div class="card" style="background-color: #013769; border: none;">' +
-                                    '<div class="card-body text-center rounded" style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">' +
-                                    '<div class="row g-2 justify-content-center" style="position:relative;top:10px;">' +
-                                    '<div class="col-sm-3 vertical-line">' +
-                                    '<p style="color: white;">' + pelatihan.nama_pelatihan + '</p>' +
-                                    '</div>' +
-                                    '<div class="col-sm-3 vertical-line">' +
-                                    '<p style="color: white;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
-                                    '</div>' +
-                                    '<div class="col-sm-3 vertical-line">' +
-                                    '<p style="color: white;">' + tipe_pelatihan + '</p>' +
-                                    '</div>' +
-                                    '<div class="col-sm-3">' +
-                                    '<i class="fa fa-chevron-right text-blue" aria-hidden="true"></i>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</a>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>' +
-                                    '</div>';
+                                    var newRow = '<br />' +
+                                        '<div class="row g-2">' +
+                                        '<div class="col-md-12">' +
+                                        '<a href="/Home/DetailPelatihanTechnical?id=' + pelatihan.id_pelatihan + '"> ' +
+                                        '<div class="card" style="background-color: rgba(0,0,0,0.01); border: none;">' +
+                                        '<div class="card-body text-center rounded" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);">' +
+                                        '<div class="row g-2 justify-content-center" style="position:relative;top:10px;">' +
+                                        '<div class="col-sm-3 vertical-line">' +
+                                        '<p style="color: black;">' + pelatihan.nama_pelatihan + '</p>' +
+                                        '</div>' +
+                                        '<div class="col-sm-3 vertical-line">' +
+                                        '<p style="color: black;">' + formatDate(pelatihan.tanggal_pelatihan_awal, pelatihan.tanggal_pelatihan_akhir) + '</p>' +
+                                        '</div>' +
+                                        '<div class="col-sm-3 vertical-line">' +
+                                        '<p style="color: black;">' + tipe_pelatihan + '</p>' +
+                                        '</div>' +
+                                        '<div class="col-sm-3">' +
+                                        '<i class="fa fa-chevron-right text-blue" aria-hidden="true"></i>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</a>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>' +
+                                        '</div>';
 
                                 var isActive = true;
 
-                                // Add or remove the 'text-blue' class based on the active state
+                                // Add or remove the 'text-primary' class based on the active state
                                 if (isActive) {
-                                    $("#icon-link").addClass("text-blue");
-                                    $("#icon-link1").removeClass("text-blue"); // Pastikan menghapus kelas 'text-blue' jika tidak aktif
+                                    $("#icon-link").addClass("text-primary");
+                                    $("#icon-link1").removeClass("text-primary"); // Pastikan menghapus kelas 'text-primary' jika tidak aktif
                                 }
 
                                 $('#technical-list').append(newRow);
@@ -595,9 +599,9 @@
         // Menangani perubahan pada elemen <select> dengan ID 'filter'
         $('#filter').change(function () {
             var selectedOption = $(this).val();
-                        if ($("#icon-link").hasClass("text-blue")) {
+                        if ($("#icon-link").hasClass("text-primary")) {
             sortPelatihan(selectedOption);
-                        } else if ($("#icon-link1").hasClass("text-blue")) {
+                        } else if ($("#icon-link1").hasClass("text-primary")) {
                 sortPelatihan2(selectedOption);
             }
         });

@@ -145,6 +145,16 @@
 </html>
 
 <script>
+    var passwordInput = document.getElementById("yourPassword");
+    passwordInput.addEventListener("keyup", function (event) {
+        // Periksa jika tombol yang ditekan adalah "Enter" (kode 13)
+        if (event.keyCode === 13) {
+            // Panggil fungsi login() jika "Enter" ditekan
+            login();
+        }
+    });
+
+
     document.addEventListener('DOMContentLoaded', function () {
         const passwordInput = document.getElementById('yourPassword');
         const showPasswordCheckbox = document.getElementById('showPassword');
@@ -170,7 +180,6 @@
             method: method,
             contentType: "application/json",
             success: function (data) {
-                console.log(data);
                 if (data.status === 500) {
                     document.getElementById('yourUsername').value = '';
                     document.getElementById('yourPassword').value = '';

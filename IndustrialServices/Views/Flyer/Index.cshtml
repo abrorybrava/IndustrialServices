@@ -24,13 +24,6 @@
 
 <div class="pagetitle">
     <h1>Flyer Data</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-            <li class="breadcrumb-item">Tables</li>
-            <li class="breadcrumb-item active">Data</li>
-        </ol>
-    </nav>
 </div><!-- End Page Title -->
 
 <section class="section">
@@ -39,7 +32,7 @@
 
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Datatables</h5>
+                    <h5 class="card-title">Flyer</h5>
 
                     <button class="btn btn-primary addFlyer">+ Add Flyer</button>
                     <!-- Table with stripped rows -->
@@ -71,18 +64,27 @@
         var status = document.getElementById("status_flyer").value;
 
         var flyer = document.getElementById("path_flyer").files[0];
-
-        // Jika flyer_file tidak null, upload flyer
+        if (flyer == null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please add flyer first!',
+            });
+            return; // Keluar dari fungsi jika uniqueFileName kosong
+        }
+        // Jika flyer tidak null, upload flyer
         if (flyer != null) {
-            uploadFlyer(flyer, function () {
+            uploadFlyer(flyer, function (uniqueFileName) {
                 // Setelah flyer diupload, lanjutkan dengan menyimpan data
                 var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
                 var url = hostname + "InsertFlyer"; // Sesuaikan dengan endpoint Anda
                 var method = "POST";
                 var input = {
-                    path_flyer: path_flyer,
+                    path_flyer: uniqueFileName, // Gunakan uniqueFileName setelah upload
                     status: status
                 };
+
+
 
                 $.ajax({
                     url: url,
@@ -108,7 +110,7 @@
                 });
             });
         } else {
-            // Jika flyer_file null, langsung menyimpan data tanpa mengunggah flyer
+            // Jika flyer null, langsung menyimpan data tanpa mengunggah flyer
             saveFlyerData();
         }
     }
@@ -118,7 +120,7 @@
         formData.append('flyer', file);
 
         $.ajax({
-            url: '/Flyer/UploadFlyer',
+            url: 'https://localhost:7033/Flyer/UploadFlyer', // Sesuaikan dengan URL API Anda
             method: 'POST',
             data: formData,
             contentType: false,
@@ -126,7 +128,7 @@
             success: function (data) {
                 console.log(data);
                 // Panggil callback setelah flyer diupload
-                callback();
+                callback(data.uniqueFileName); // Kirim uniqueFileName ke callback
             },
             error: function (error) {
                 console.log(error);
@@ -136,7 +138,6 @@
     }
 
     function saveFlyerData() {
-        alert('warning for flyer');
         console.log("Simpan data tanpa flyer");
     }
 
