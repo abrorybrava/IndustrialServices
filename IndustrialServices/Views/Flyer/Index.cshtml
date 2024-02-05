@@ -41,7 +41,6 @@
                             <tr>
                                 <th scope="col">No</th>
                                 <th scope="col">Flyer</th>
-                                <th scope="col">Status</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -66,7 +65,8 @@
         var flyer = document.getElementById("path_flyer").files[0];
         if (flyer == null) {
             Swal.fire({
-                icon: 'error',
+                
+                : 'error',
                 title: 'Warning!',
                 text: 'Please add flyer first!',
             });
@@ -83,7 +83,6 @@
                     path_flyer: uniqueFileName, // Gunakan uniqueFileName setelah upload
                     status: status
                 };
-
 
 
                 $.ajax({
@@ -117,23 +116,42 @@
 
     function uploadFlyer(file, callback) {
         var formData = new FormData();
-        formData.append('flyer', file);
+        var uniqueFileName = guid() + "_" + file.name;
+        formData.append('flyer', file, uniqueFileName);
+        var maxSize = 7 * 1024 * 1024; // 10 MB
+
+        // Pengecekan ukuran file
+        if (file.size > maxSize) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Size Exceeded',
+                text: 'File size should not exceed 7 MB.'
+            });
+            // Tidak melanjutkan proses upload jika ukuran file melebihi batas
+            location.reload();
+        }
 
         $.ajax({
-            url: 'https://localhost:7033/Flyer/UploadFlyer', // Sesuaikan dengan URL API Anda
+            url: '/Flyer/UploadFlyer', // Sesuaikan dengan URL API Anda
             method: 'POST',
             data: formData,
             contentType: false,
             processData: false,
             success: function (data) {
-                console.log(data);
                 // Panggil callback setelah flyer diupload
-                callback(data.uniqueFileName); // Kirim uniqueFileName ke callback
+                callback(uniqueFileName); // Kirim uniqueFileName ke callback
             },
             error: function (error) {
                 console.log(error);
                 // Handle error
             }
+        });
+    }
+    function guid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
         });
     }
 
@@ -153,12 +171,10 @@
             contentType: "application/json",
             success: function (data) {
                 var list = data.data;
-                console.log(data);
                 list.forEach(function (flyer, index) {
                     var newRow = '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td> <img src="/assets/img/' + flyer.path_flyer + '" alt="Flyer" width="500" height="auto"></td>' +
-                        '<td>' + flyer.status + '</td>' +
                         '<td>' +
                         '<button class="btn btn-primary editFlyer" data-id_flyer="' + flyer.id_flyer + '"><i class="fas fa-edit"></i></button>' +
                         '<button class="btn btn-danger" value="' + flyer.id_flyer + '" onclick="hapusFlyer(this.value)"><i class="fas fa-trash"></i></button>' +
@@ -290,7 +306,6 @@
             contentType: "application/json",
             success: function (data) {
                 var flyer = data.data;
-                console.log(flyer)
                 // Assuming you have corresponding HTML elements for flyer edit modal
                 status_flyer_input.value = flyer.status;
                 id_flyer_input.value = flyer.id_flyer;
@@ -329,7 +344,7 @@
 
                                 <!-- General Form Elements -->
                                 <div class="row mb-3">
-                                    <label for="path_flyer" class="col-sm-2 col-form-label">Flyer File (Flyer ratio 3:1)</label>
+                                    <label for="path_flyer" class="col-sm-2 col-form-label">Flyer File (Flyer size 3840 x 1080)</label>
                                     <div class="col-sm-10">
                                         <input class="form-control" type="file" name="path_flyer" id="path_flyer">
                                     </div>
@@ -378,7 +393,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="editflyer_file" class="col-sm-2 col-form-label">Flyer (Flyer ratio 3:1)</label>
+                                    <label for="editflyer_file" class="col-sm-2 col-form-label">Flyer (Flyer size 3840 x 1080)</label>
                                     <div class="col-sm-10">
                                         <input class="form-control" type="file" name="editflyer_file" id="editflyer_file">
                                     </div>

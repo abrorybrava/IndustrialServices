@@ -157,7 +157,7 @@
                     method: method,
                     contentType: "application/json",
                     success: function (data) {
-                        loadCustomerMapping();
+                        location.reload();
                         // Menampilkan pesan SweetAlert untuk sukses
 
                     },
@@ -319,7 +319,7 @@
                                     '</div>' +
                                     '<br />' +
                                     '<p>"' + testimonial.testimoni_peserta + '"</p>' +
-                                    '<h5 class="mb-0" style="font-weight: bold; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; font-size:18px;">' + testimonial.nama_peserta + '</h5>' +
+                                    '<h5 class="mb-0" style="font-weight: bold; font-family: Barlow; font-size:18px;">' + testimonial.nama_peserta + '</h5>' +
                                     '<span style="color:grey; font-size:14px; padding-bottom:10px;">' + testimonial.asal_instansi + '</span>' +
                                     '<span style="color:grey; font-size:16px;font-weight: bold;">' + namaPelatihan + '</span>' +
                                     '</div>' +
@@ -374,14 +374,7 @@
                     method: method,
                     contentType: "application/json",
                     success: function (data) {
-                        // Reload data setelah penghapusan
-                        loadTestimonials();
-                        // Menampilkan pesan SweetAlert untuk sukses
-                        Swal.fire(
-                            'Deleted!',
-                            'The testimonial has been deleted.',
-                            'success'
-                        );
+                        location.reload();
                     },
                     error: function (xhr, status, error) {
                         console.error("Error:", error);
@@ -426,7 +419,8 @@
         var url = hostname + "InsertTestimony";
         if (namaPeserta == '' || asalInstansi == '' || id_pelatihan == '' || testimoni == '' || foto == null) {
             Swal.fire({
-                icon: 'error',
+                
+                : 'error',
                 title: 'Warning!',
                 text: 'Please fill in all fields!',
             });

@@ -56,7 +56,7 @@
                         <div class="row mb-3">
                             <label for="judul_artikel" class="col-sm-2 col-form-label">Article Title</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="judul_artikel" id="judul_artikel">
+                            <input type="text" class="form-control" name="judul_artikel" id="judul_artikel" maxlength="225" placeholder="Max Length of Input is 255 digits">
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -108,7 +108,14 @@
         var hostname = "https://localhost:7033/"; 
         var url = hostname + "InsertArtikel"; 
         var method = "POST";
-
+        if (judul_artikel == '' || isi_artikel == '' || sampulartikel == null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         if(sampulartikel != null){
             uploadFoto(sampulartikel, function (uniqueFileName) {
                 var input = {
@@ -119,6 +126,7 @@
                     status: status,
                     tanggal_rilis: tanggal_rilis
                 };
+
         $.ajax({
             url: url,
             method: method,

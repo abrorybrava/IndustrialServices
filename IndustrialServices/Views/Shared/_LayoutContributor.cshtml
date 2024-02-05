@@ -69,7 +69,7 @@
             <div class="align-items-center">
 
                         <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#">
-                    <span class="d-none d-md-block" style="position:relative; right:20px;">Welcome! @Context.Session.GetString("Nama") (@Context.Session.GetString("Role"))</span>
+                    <span class="d-none d-md-block" style="position:relative; right:20px;">@Context.Session.GetString("Nama") (@Context.Session.GetString("Role"))</span>
                 </a>
             </div>
         </div>
@@ -90,6 +90,12 @@
                 <a class="nav-link collapsed" asp-action="Index" asp-controller="Artikel">
                     <i class="ri-article-line"></i>
                     <span>Article</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" asp-action="ChangePassword" asp-controller="PengelolaWeb">
+                    <i class="ri-article-line"></i>
+                    <span>Change Password</span>
                 </a>
             </li>
             <li class="nav-item">

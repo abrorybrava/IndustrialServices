@@ -272,6 +272,7 @@ function loadProducts() {
         var method = "POST";
         if (nama_produk == '' || id_tipe_produk == '' || pesanan == '' || deskripsi_produk == '' || fotoPaths[0] == null) {
             Swal.fire({
+                
                 icon: 'error',
                 title: 'Warning!',
                 text: 'Please fill in all fields!',
@@ -420,26 +421,57 @@ function guid(length, file) {
         console.log("Simpan data tanpa foto");
     }
 
-    function hapusProduk(id) {
+function hapusProduk(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'You won\'t be able to revert this!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            performDeletion1(id);
+        }
+    });
+
+    function performDeletion1(id) {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "DeleteProduk?id=" + id
+        var url = hostname + "DeleteProduk?id=" + id;
         var method = "POST";
         $.ajax({
             url: url,
             method: method,
             contentType: "application/json",
             success: function (data) {
-                location.reload();
+                Swal.fire(
+                    'Deleted!',
+                    'Your data has been deleted.',
+                    'success'
+                ).then(() => {
+                    location.reload(); // Reload the page after deletion
+                });
             },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                Swal.fire(
+                    'Error!',
+                    'Failed to delete data.',
+                    'error'
+                );
+            }
         });
     }
+}
+
 
     function updateProduct() {
         var id_produk = document.getElementById("editid_produk").value;
         var nama_produk = document.getElementById("editnama_produk").value;
         var id_tipe_produk = document.getElementById("editid_tipe_produk").value;
         var pesanan = document.getElementById("editpesanan").value;
-        var deskripsi_produk = document.getElementById("editdeskripsi_produk")[0].value;
+        var deskripsi_produk = document.getElementsByName("editdeskripsi_produk")[0].value;
         var status = document.getElementById("editstatus_produk").value;
 
         var hostname = "https://localhost:7033/";
@@ -453,6 +485,15 @@ function guid(length, file) {
             deskripsi_produk: deskripsi_produk,
             status: status
         };
+
+                if (nama_produk == '' || id_tipe_produk == '' || pesanan == '' || deskripsi_produk == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
 
         $.ajax({
             url: url,
@@ -806,18 +847,49 @@ function loadFasilitas() {
 
     // Fungsi untuk menghapus mesin berdasarkan ID
     function hapusFasilitas(id) {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "DeleteFasilitas?id=" + id;
-        var method = "POST";
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                location.reload(); // Memuat ulang halaman setelah menghapus
-            },
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performDeletion2(id);
+            }
         });
+
+        function performDeletion2(id) {
+            var hostname = "https://localhost:7033/";
+            var url = hostname + "DeleteFasilitas?id=" + id;
+            var method = "POST";
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: "application/json",
+                success: function (data) {
+                    Swal.fire(
+                        'Deleted!',
+                        'Your data has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload(); // Reload the page after deletion
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                    Swal.fire(
+                        'Error!',
+                        'Failed to delete data.',
+                        'error'
+                    );
+                }
+            });
+        }
     }
+
 
     // Fungsi untuk memuat data fasilitas yang akan diubah ke dalam form edit
 function loadEditFasilitas(id_fasilitas) {
@@ -838,7 +910,7 @@ function loadEditFasilitas(id_fasilitas) {
             $('#editid_tipe_fasilitas').val(fasilitas.id_tipe_fasilitas);
             elements.innerHTML = fasilitas.deskripsi_fasilitas;
             $('#editstatus_fasilitas').val(fasilitas.status);
-                $('#editdeskripsi_fasilitas').summernote();
+            $('#editdeskripsi_fasilitas').summernote();
 
             // Menampilkan modal pop-up untuk edit
             $('#editFasilitasModal').modal('show');
@@ -851,7 +923,7 @@ function loadEditFasilitas(id_fasilitas) {
         var id_fasilitas = document.getElementById("editid_fasilitas").value;
         var nama_fasilitas = document.getElementById("editnama_fasilitas").value;
         var id_tipe_fasilitas = document.getElementById("editid_tipe_fasilitas").value;
-        var deskripsi_fasilitas = document.getElementById("editdeskripsi_fasilitas")[0].value;
+        var deskripsi_fasilitas = document.getElementsByName("editdeskripsi_fasilitas")[0].value;
         var status = document.getElementById("editstatus_fasilitas").value;
 
         var hostname = "https://localhost:7033/";
@@ -862,16 +934,23 @@ function loadEditFasilitas(id_fasilitas) {
             nama_fasilitas: nama_fasilitas,
             id_tipe_fasilitas: id_tipe_fasilitas,
             deskripsi_fasilitas: deskripsi_fasilitas,
-            status: status
+            status: status,
+            path_foto_fasilitas: ""
         };
-
+                        if (nama_fasilitas == '' || id_tipe_fasilitas == '' || deskripsi_fasilitas == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; // Keluar dari fungsi jika NPK bukan angka
+        }
         $.ajax({
             url: url,
             method: method,
             data: JSON.stringify(input),
             contentType: "application/json",
             success: function (data) {
-                console.log("Data fasilitas berhasil diperbarui:", data);
                 $('#editFasilitasModal').modal('hide');
                 location.reload(); // Opsional: Jika ingin memuat ulang halaman setelah update
             },
@@ -1106,13 +1185,13 @@ function simpanPelatihan() {
         deskripsi_pelatihan: deskripsi_pelatihan,
         status: status
     };
-            if(nama_pelatihan == '' || tanggal_pelatihan_awal == '' || tanggal_pelatihan_akhir == '' || id_tipe_pelatihan == '' || deskripsi_pelatihan == '' || fileInputs[0] == null){
+            if(nama_pelatihan == '' || tanggal_pelatihan_awal == '' || tanggal_pelatihan_akhir == '' || id_tipe_pelatihan == '' || deskripsi_pelatihan == '' || fileInputs[0] == null || pengajarArray == null){
             Swal.fire({
                 icon: 'error',
                 title: 'Warning!',
                 text: 'Please fill in all fields!',
             });
-            return; // Keluar dari fungsi jika NPK bukan angka
+            return; 
         }
     // Kirim permintaan AJAX untuk menyimpan data pelatihan dan foto-fotonya secara terpisah
         if (fileInputs.length != 0) {
@@ -1231,6 +1310,7 @@ function simpanPelatihan() {
         var url = hostname + "InsertPengajarPelatihan";
     var dataDropdown = [];
 
+
     // Mengambil nilai dari setiap dropdown yang ditambahkan
     pengajarArray.forEach(function (pengajar) {
         var pengajarId = {
@@ -1238,8 +1318,6 @@ function simpanPelatihan() {
         };
         dataDropdown.push(pengajarId);
     });
-
-    console.log(dataDropdown);
     
     $.ajax({
         url: url,
@@ -1258,18 +1336,49 @@ function simpanPelatihan() {
 }
 
     function hapusPelatihan(id) {
-        var hostname = "https://localhost:7033/";
-        var url = hostname + "DeletePelatihan?id=" + id;
-        var method = "POST";
-        $.ajax({
-            url: url,
-            method: method,
-            contentType: "application/json",
-            success: function (data) {
-                location.reload(); // Memuat ulang halaman setelah menghapus
-            },
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performDeletion3(id);
+            }
         });
+
+        function performDeletion3(id) {
+            var hostname = "https://localhost:7033/";
+            var url = hostname + "DeletePelatihan?id=" + id;
+            var method = "POST";
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: "application/json",
+                success: function (data) {
+                    Swal.fire(
+                        'Deleted!',
+                        'Your data has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload(); // Reload the page after deletion
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                    Swal.fire(
+                        'Error!',
+                        'Failed to delete data.',
+                        'error'
+                    );
+                }
+            });
+        }
     }
+
 
     function loadEditPelatihan(id_pelatihan) {
         var hostname = "https://localhost:7033/";
@@ -1379,6 +1488,14 @@ function simpanPelatihan() {
             deskripsi_pelatihan: deskripsi_pelatihan,
             status: status
         };
+            if(nama_pelatihan == '' || tanggal_pelatihan_awal == '' || tanggal_pelatihan_akhir == '' || deskripsi_pelatihan == ''){
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return; 
+        }
         $.ajax({
             url: url,
             method: method,
@@ -1631,13 +1748,13 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <!-- General Form Elements -->
                                 <div class="row mb-3">
-                                    <label for="nama_produk" class="col-sm-2 col-form-label">Product Name</label>
+                                    <label for="nama_produk" class="col-sm-2 col-form-label">Product Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="nama_produk" id="nama_produk">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="tipe_produk" class="col-sm-2 col-form-label">Product Type</label>
+                                    <label for="tipe_produk" class="col-sm-2 col-form-label">Product Type<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="id_tipe_produk" id="id_tipe_produk">
 
@@ -1645,13 +1762,13 @@ function populateFacultyMembers(bidang_keahlian) {
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="pesanan" class="col-sm-2 col-form-label">Ordered by</label>
+                                    <label for="pesanan" class="col-sm-2 col-form-label">Ordered by<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="pesanan" id="pesanan">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="deskripsi_produk" class="col-sm-2 col-form-label">Product Description</label>
+                                    <label for="deskripsi_produk" class="col-sm-2 col-form-label">Product Description<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control summernote" name="deskripsi_produk" id="summernote" rows="5"></textarea>
                                     </div>
@@ -1662,7 +1779,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 </div>
                                 <br/>
                                 <div class="row mb-3">
-                                    <label for="addphoto1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)</label>
+                                    <label for="addphoto1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="addphoto1" required>
                                     </div>
@@ -1731,13 +1848,13 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <input type="text" class="form-control" id="editid_produk" hidden>
                                 <div class="row mb-3">
-                                    <label for="editnama_produk" class="col-sm-2 col-form-label">Product Name</label>
+                                    <label for="editnama_produk" class="col-sm-2 col-form-label">Product Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="editnama_produk" placeholder="Product Name">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="edittipe_produk" class="col-sm-2 col-form-label">Product Type</label>
+                                    <label for="edittipe_produk" class="col-sm-2 col-form-label">Product Type<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" id="editid_tipe_produk" placeholder="Product Type">
 
@@ -1745,13 +1862,13 @@ function populateFacultyMembers(bidang_keahlian) {
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="editpesanan" class="col-sm-2 col-form-label">Ordered by</label>
+                                    <label for="editpesanan" class="col-sm-2 col-form-label">Ordered by<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="editpesanan" placeholder="Ordered by">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="editdeskripsi_produk" class="col-sm-2 col-form-label">Product Description</label>
+                                    <label for="editdeskripsi_produk" class="col-sm-2 col-form-label">Product Description<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control" id="editdeskripsi_produk" name="editdeskripsi_produk" rows="5" placeholder="Product Description"></textarea>
                                     </div>
@@ -1827,13 +1944,13 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <!-- General Form Elements -->
                                 <div class="row mb-3">
-                                    <label for="nama_fasilitas" class="col-sm-2 col-form-label">Facility Name</label>
+                                    <label for="nama_fasilitas" class="col-sm-2 col-form-label">Facility Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="nama_fasilitas" id="nama_fasilitas">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="id_tipe_fasilitas" class="col-sm-2 col-form-label">Facility Type</label>
+                                    <label for="id_tipe_fasilitas" class="col-sm-2 col-form-label">Facility Type<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="id_tipe_fasilitas" id="id_tipe_fasilitas">
 
@@ -1841,7 +1958,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="deskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
+                                    <label for="deskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control" name="deskripsi_fasilitas" id="deskripsi_fasilitas" rows="5"></textarea>
                                     </div>
@@ -1852,7 +1969,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 </div>
                                 <br />
                                 <div class="row mb-3">
-                                    <label for="photoFasilitas1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)</label>
+                                    <label for="photoFasilitas1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio) <span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="photoFasilitas1" required>
                                     </div>
@@ -1923,13 +2040,13 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <input type="text" class="form-control" id="editid_fasilitas" hidden>
                                 <div class="row mb-3">
-                                    <label for="editnama_fasilitas" class="col-sm-2 col-form-label">Facility Name</label>
+                                    <label for="editnama_fasilitas" class="col-sm-2 col-form-label">Facility Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="editnama_fasilitas" placeholder="Facility Name">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="editid_tipe_fasilitas" class="col-sm-2 col-form-label">Facility Type</label>
+                                    <label for="editid_tipe_fasilitas" class="col-sm-2 col-form-label">Facility Type<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="editid_tipe_fasilitas" id="editid_tipe_fasilitas">
 
@@ -1937,7 +2054,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="editdeskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description</label>
+                                    <label for="editdeskripsi_fasilitas" class="col-sm-2 col-form-label">Facility Description<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control summernote" name="editdeskripsi_fasilitas" id="editdeskripsi_fasilitas" rows="5" placeholder="Facility Description"></textarea>
                                     </div>
@@ -2011,7 +2128,7 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <!-- General Form Elements -->
                                 <div class="row mb-3">
-                                    <label for="nama_pelatihan" class="col-sm-2 col-form-label">Training Name</label>
+                                    <label for="nama_pelatihan" class="col-sm-2 col-form-label">Training Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="nama_pelatihan" id="nama_pelatihan">
                                     </div>
@@ -2019,11 +2136,11 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <!-- Tambahkan input untuk tanggal_pelatihan -->
                                 <div class="form-group row mb-6">
-                                    <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date</label>
+                                    <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date<span class="text-danger">*</span></label>
                                     <div class="col-sm-3">
                                         <input type="date" class="form-control" name="tanggal_pelatihan_awal" id="tanggal_pelatihan_awal">
                                     </div>
-                                     <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training End Date</label>
+                                     <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training End Date<span class="text-danger">*</span></label>
                                     <div class="col-sm-3">
                                         <input type="date" class="form-control" name="tanggal_pelatihan_akhir" id="tanggal_pelatihan_akhir">
                                     </div>
@@ -2031,7 +2148,7 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <br />
                                 <div class="row mb-3">
-                                    <label for="bidang_keahlian" class="col-sm-2 col-form-label">Training Section</label>
+                                    <label for="bidang_keahlian" class="col-sm-2 col-form-label">Training Section<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="bidang_keahlian" id="bidang_keahlian">
                                             <option>Select Training Section</option>
@@ -2043,7 +2160,7 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <!-- Tambahkan input untuk jenis_pelatihan -->
                                 <div class="row mb-3">
-                                    <label for="id_tipe_pelatihan" class="col-sm-2 col-form-label">Training Type</label>
+                                    <label for="id_tipe_pelatihan" class="col-sm-2 col-form-label">Training Type<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="id_tipe_pelatihan" id="id_tipe_pelatihan">
 
@@ -2053,7 +2170,7 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <!-- Tambahkan input untuk deskripsi_pelatihan -->
                                 <div class="row mb-3">
-                                    <label for="deskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
+                                    <label for="deskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <textarea class="form-control summernote" name="deskripsi_pelatihan" id="deskripsi_pelatihan" rows="5"></textarea>
                                     </div>
@@ -2064,7 +2181,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                     <button type="button" class="btn btn-success" onclick="tambahDropdownadd()">+ Add More</button>
                                 </div>
                                 <div class="form-group row mb-3" id="form-group-add">
-                                    <label for="faculty_member" class="col-sm-6 col-form-label">Add Faculty Member for Training (Make sure add it correctly!)</label>
+                                    <label for="faculty_member" class="col-sm-6 col-form-label">Add Faculty Member for Training (Make sure add it correctly!)<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <select class="form-select" name="id_pengajar" id="id_pengajar">
                                             <!-- Opsi Dropdown -->
@@ -2078,7 +2195,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                 </div>
                                                                 <br />
                                 <div class="row mb-3">
-                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)</label>
+                                    <label for="photoPelatihan1" class="col-sm-2 col-form-label">Add Photo 1 (must be in 1:1 ratio)<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="file" class="form-control" id="photoPelatihan1">
                                     </div>
@@ -2148,18 +2265,18 @@ function populateFacultyMembers(bidang_keahlian) {
 
                                 <input type="text" class="form-control" id="editid_pelatihan" hidden>
                                 <div class="row mb-3">
-                                    <label for="editnama_pelatihan" class="col-sm-2 col-form-label">Training Name</label>
+                                    <label for="editnama_pelatihan" class="col-sm-2 col-form-label">Training Name<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" id="editnama_pelatihan" placeholder="Training Name">
                                     </div>
                                 </div>
 
                                 <div class="form-group row mb-6">
-                                    <label for="edittanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date</label>
+                                    <label for="edittanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training Start Date<span class="text-danger">*</span></label>
                                     <div class="col-sm-3">
                                         <input type="date" class="form-control" name="edittanggal_pelatihan_awal" id="edittanggal_pelatihan_awal">
                                     </div>
-                                     <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training End Date</label>
+                                     <label for="tanggal_pelatihan_awal" class="col-sm-2 col-form-label">Training End Date<span class="text-danger">*</span></label>
                                     <div class="col-sm-3">
                                         <input type="date" class="form-control" name="edittanggal_pelatihan_akhir" id="edittanggal_pelatihan_akhir">
                                     </div>
@@ -2173,7 +2290,7 @@ function populateFacultyMembers(bidang_keahlian) {
                                     </div>
 
                                 <div class="row mb-3">
-                                    <label for="editdeskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description</label>
+                                    <label for="editdeskripsi_pelatihan" class="col-sm-2 col-form-label">Training Description<span class="text-danger">*</span></label>
                                     <div class="col-sm-10">
                                     <textarea class="form-control" name="editdeskripsi_pelatihan" id="editdeskripsi_pelatihan" rows="10"></textarea>
                                     </div>

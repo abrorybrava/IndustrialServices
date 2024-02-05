@@ -65,6 +65,20 @@ namespace IndustrialServices.Controllers
         {
             return View();
         }
+        public IActionResult TentangKami()
+        {
+            return View();
+        }
+        public IActionResult DetailFasilitas(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
+        public IActionResult DetailProduk(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();

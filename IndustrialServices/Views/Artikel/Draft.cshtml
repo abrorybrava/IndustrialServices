@@ -2,6 +2,7 @@
     ViewData["Title"] = "Draft Article";
     var httpcontext = ViewContext.HttpContext;
     string role = httpcontext.Session.GetString("Role");
+    string id = httpcontext.Session.GetString("ID");
     if (string.IsNullOrEmpty(role))
     {
         // Session is expired or role is not set, redirect to login layout
@@ -58,7 +59,7 @@
                         <div class="row mb-3">
                             <label for="judul_artikel" class="col-sm-2 col-form-label">Article Title</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="judul_artikel" id="judul_artikel">
+                            <input type="text" class="form-control" name="judul_artikel" id="judul_artikel" maxlength="225" placeholder="Max Length of Input is 255 digits">
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -110,6 +111,7 @@
     loadArticleData();
 
     function loadArticleData() {
+        var userID = '@id';
         var id_artikel = document.getElementById("id_artikel");
         var id_pengelola = document.getElementById("id_pengelola");
         var judul_artikel = document.getElementById("judul_artikel");
@@ -121,6 +123,8 @@
         var url = hostname + "GetArtikel?id=" + @ViewBag.Id;
         var method = "GET";
 
+
+
         $.ajax({
             url: url,
             method: method,
@@ -131,7 +135,16 @@
                 judul_artikel.value = article.judul_artikel;
                 isi_artikel.innerHTML = article.isi_artikel;
                 status.value = article.status;
-
+                if (id_pengelola.value != userID) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Access Denied!',
+                        text: 'Only the Author of this article has access to edit!'
+                    }).then(function () {
+                        window.location.href = '/Artikel/Index';
+                    });
+                    return;
+                }
                 // Tampilkan pratinjau gambar sampul artikel jika ada
                 if (article.sampul_artikel) {
                     var imagePath = "/assets/img/" + article.sampul_artikel;
@@ -141,8 +154,8 @@
         });
     }
 
+
     function simpanEdit() {
-        var check = 0;
         var id_artikel = document.getElementById("id_artikel").value;
         var id_pengelola = document.getElementById("id_pengelola").value;
         var tanggal_rilis = document.getElementById("tanggal_rilis").value;
@@ -150,13 +163,21 @@
         var isi_artikel = document.getElementsByName("isi_artikel")[0].value;
         var sampul_artikel = document.getElementById("sampul_artikel").value;
         var status = document.getElementById("status").value;
-        var tanggal_rilis = document.getElementById("tanggal_rilis").value;
 
         var sampulartikel = document.getElementById("sampul_artikel").files[0];
 
         var hostname = "https://localhost:7033/";
         var url = hostname + "UpdateArtikel";
         var method = "POST";
+
+        if (judul_artikel == '' || isi_artikel == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'Please fill in all fields!',
+            });
+            return;
+        }
 
 
 
@@ -167,12 +188,31 @@
                     id_pengelola: id_pengelola,
                     tanggal_rilis: tanggal_rilis,
                     judul_artikel: judul_artikel,
-                    isi_artikel: isi_artikel,
                     sampul_artikel: uniqueFileName,
-                    status: status,
-                    tanggal_rilis: tanggal_rilis
+                    isi_artikel: isi_artikel,
+                    status: status
                 };
+                sendUpdateRequest(input);
+            });
+        } else {
+            var input = {
+                id_artikel: id_artikel,
+                id_pengelola: id_pengelola,
+                tanggal_rilis: tanggal_rilis,
+                judul_artikel: judul_artikel,
+                sampul_artikel: 'null',
+                isi_artikel: isi_artikel,
+                status: status
+            };
+            sendUpdateRequest(input);
+        }
+    }
+
+    function sendUpdateRequest(input) {
+        var url = "https://localhost:7033/UpdateArtikel";
+        var method = "POST";
         $.ajax({
+
             url: url,
             method: method,
             data: JSON.stringify(input),
@@ -184,11 +224,9 @@
                 console.log(error);
             }
         });
-            });
-        }else{
-            saveData();
-        }
     }
+
+
     function saveData() {
         alert('warning')
         console.log("Simpan data tanpa foto");

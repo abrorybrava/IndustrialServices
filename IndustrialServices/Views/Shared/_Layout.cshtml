@@ -88,7 +88,7 @@
                             <li class="dropdown">
                                 <a class="nav-link scrollto o" href="#portfolio" style="font-size:16px;">About Us<i class="bi bi-chevron-down"></i></a>
                                 <ul>
-                                    <li><a href="#" style="font-size:16px;">Industrial Services</a></li>
+                                    <li><a asp-action="TentangKami" asp-controller="Home" style="font-size:16px;">Industrial Services</a></li>
                                     <li><a href="#" style="font-size:16px;">Helpdesk</a></li>
                                 </ul>
                             </li>
@@ -246,8 +246,11 @@
                             suggestionItem.appendChild(labelSpan);
 
                             suggestionItem.onclick = function () {
-                                // Dummy action when suggestion is clicked
-                                alert('You selected: ' + item.label);
+                                if(tipePelatihanDetails.bidang_keahlian === 'Technical'){
+                                       window.location.href = "/Home/DetailPelatihanTechnical?id=" + item.id_pelatihan;
+                                        } else if (tipePelatihanDetails.bidang_keahlian === 'Non-Technical'){
+                                            window.location.href = "/Home/DetailPelatihanNonTechnical?id=" + item.id_pelatihan;
+                                        }
                             };
 
                             suggestionsElement.appendChild(suggestionItem);

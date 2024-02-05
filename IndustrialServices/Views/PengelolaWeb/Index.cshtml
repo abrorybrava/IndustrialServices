@@ -4,6 +4,7 @@
     int no = 1;
     var httpcontext = ViewContext.HttpContext;
     string role = httpcontext.Session.GetString("Role");
+    string id = httpcontext.Session.GetString("ID");
     if (string.IsNullOrEmpty(role))
     {
         // Session is expired or role is not set, redirect to login layout
@@ -64,7 +65,7 @@
 
     function loadPengelolaWeb() {
         var hostname = "https://localhost:7033/";
-        var url = hostname + "GetAllPengelolaWeb";
+        var url = hostname + "GetAllPengelolaWebinIndex";
         var method = "GET";
 
         $.ajax({
@@ -74,7 +75,26 @@
             success: function (data) {
                 var list = data.data;
                 list.forEach(function (pengelola, index) {
-                    var statusText = pengelola.status === 1 ? "Active" : "Inactive";
+                    var statusText = pengelola.status === 1 ? "Active" : "Non-active";
+
+                    // Tombol activate hanya muncul jika status = 0 dan nama bukan "Super Admin"
+                    var activateButton = (pengelola.status === 0 && pengelola.nama_pengelola !== "Super Admin")
+                        ? '<button class="btn btn-success activatePengelola" data-id="' + pengelola.id_pengelola + '">Activate Account</button>'
+                        : '';
+
+                    // Tombol hapus hanya muncul jika status = 1 dan nama bukan "Super Admin"
+                    var hapusButton = (pengelola.status === 1 && pengelola.nama_pengelola !== "Super Admin")
+                        ? '<button class="btn btn-danger" value="' + pengelola.id_pengelola + '" onclick="hapus(this.value)"><i class="fas fa-trash"></i></button>'
+                        : '';
+
+                    var editButton = (pengelola.status === 1 && pengelola.nama_pengelola !== "Super Admin")
+                        ? '<button class="btn btn-primary editPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-edit"></i></button>'
+                        : '';
+
+                    var editUsnPw = (pengelola.status === 1)
+                        ? '<button class="btn btn-success editusnpwPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-key"></i></button>'
+                        : '';
+
                     var newRow = '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td>' + pengelola.nama_pengelola + '</td>' +
@@ -82,9 +102,7 @@
                         '<td>' + pengelola.peran + '</td>' +
                         '<td>' + statusText + '</td>' +
                         '<td>' +
-                        '<button class="btn btn-primary editPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-edit"></i></button>' +
-                        '<button class="btn btn-success editusnpwPengelolaWeb" data-id="' + pengelola.id_pengelola + '"><i class="fas fa-key"></i></button>' +
-                        '<button class="btn btn-danger" value="' + pengelola.id_pengelola + '" onclick="hapus(this.value)"><i class="fas fa-trash"></i></button>' +
+                        editButton + editUsnPw + hapusButton + activateButton +
                         '</td>' +
                         '</tr>';
 
@@ -99,6 +117,18 @@
                         var id_pengelola = $(this).data("id");
                         loadEditUsnPwPengelolaWeb(id_pengelola);
                     });
+
+                    // Event listener for activate button
+                    $('.activatePengelola[data-id="' + pengelola.id_pengelola + '"]').click(function () {
+                        var id_pengelola = $(this).data("id");
+                        activate(id_pengelola);
+                    });
+
+                    // Event listener for hapus button
+                    $('.hapusPengelola[data-id="' + pengelola.id_pengelola + '"]').click(function () {
+                        var id_pengelola = $(this).data("id");
+                        hapus(id_pengelola);
+                    });
                 });
             },
             error: function (xhr, status, error) {
@@ -109,30 +139,126 @@
 
 
 
+
+
+
     function hapus(id) {
-        // Tampilkan SweetAlert konfirmasi sebelum menghapus
+        var userID = '@id';
+
+        // Cek apakah id sama dengan userID
+        if (id === userID) {
+            Swal.fire({
+                title: 'Confirmation',
+                text: 'You are deleting your own account. This will deactivate your account and log you out. Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var hostname = "https://localhost:7033/";
+                    var url = hostname + "DeletePengelolaWeb?id=" + id;
+                    var method = "POST";
+                    $.ajax({
+                        url: url,
+                        method: method,
+                        contentType: "application/json",
+                        success: function (data) {
+                            // Tampilkan SweetAlert sukses setelah menghapus
+                            Swal.fire(
+                                'Deleted!',
+                                'Your data has been deleted.',
+                                'success'
+                            ).then(() => {
+                                redirectToLoginPage();
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error:", error);
+                            // Tampilkan SweetAlert error jika terjadi kesalahan saat menghapus
+                            Swal.fire(
+                                'Error!',
+                                'Failed to delete data.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        } else {
+            // Tampilkan SweetAlert konfirmasi penghapusan data biasa
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This data will be deleted permanently!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var hostname = "https://localhost:7033/";
+                    var url = hostname + "DeletePengelolaWeb?id=" + id;
+                    var method = "POST";
+                    $.ajax({
+                        url: url,
+                        method: method,
+                        contentType: "application/json",
+                        success: function (data) {
+                            // Tampilkan SweetAlert sukses setelah menghapus
+                            Swal.fire(
+                                'Deleted!',
+                                'Your data has been deleted.',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error:", error);
+                            // Tampilkan SweetAlert error jika terjadi kesalahan saat menghapus
+                            Swal.fire(
+                                'Error!',
+                                'Failed to delete data.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+
+
+
+    function redirectToLoginPage() {
+        window.location.href = '/Login/Index';
+    }
+
+    function activate(id) {
         Swal.fire({
             title: 'Are you sure?',
-            text: 'This data will deleted permanent!',
+            text: 'This data will be activated!',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete!'
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, activate!'
         }).then((result) => {
             if (result.isConfirmed) {
                 var hostname = "https://localhost:7033/";
-                var url = hostname + "DeletePengelolaWeb?id=" + id;
+                var url = hostname + "ActivatePengelolaWeb?id=" + id;
                 var method = "POST";
                 $.ajax({
                     url: url,
                     method: method,
                     contentType: "application/json",
                     success: function (data) {
-                        // Tampilkan SweetAlert sukses setelah menghapus
                         Swal.fire(
-                            'Deleted!',
-                            'Your data has been deleted.',
+                            'Activated!',
+                            'Your data has been activated.',
                             'success'
                         ).then(() => {
                             location.reload();
@@ -140,10 +266,9 @@
                     },
                     error: function (xhr, status, error) {
                         console.error("Error:", error);
-                        // Tampilkan SweetAlert error jika terjadi kesalahan saat menghapus
                         Swal.fire(
                             'Error!',
-                            'Failed to delete data.',
+                            'Failed to activate data.',
                             'error'
                         );
                     }
@@ -253,57 +378,79 @@
         });
     }
     function simpanedit() {
+        var userID = '@id';
         var id_pengelola = document.getElementById("editid_pengelola").value;
         var nama_pengelola = document.getElementById("editnama_pengelola").value;
         var username = document.getElementById("editusername").value;
         var peran = document.getElementById("editperan").value;
         var status = document.getElementById("editstatus").value;
 
-        var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
-        var url = hostname + "UpdatePengelolaWeb"; // Sesuaikan dengan endpoint Anda
+        var hostname = "https://localhost:7033/";
+        var url = hostname + "UpdatePengelolaWeb";
         var method = "POST";
-        var input = {
-            id_pengelola: id_pengelola,
-            nama_pengelola: nama_pengelola,
-            username: username,
-            peran: peran,
-            status: status
-        };
-        var data = JSON.stringify(input);
 
-        if (nama_pengelola == '' || username == '' || peran == '') {
+        // If the user is editing their own account
+        if (id_pengelola == userID) {
             Swal.fire({
-                icon: 'error',
-                title: 'Warning!',
-                text: 'Please fill in all fields!',
+                title: 'Are you sure?',
+                text: 'Editing your own account may require reauthentication. Do you want to proceed?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performUpdate();
+                }
             });
-            return; // Keluar dari fungsi jika NPK bukan angka
+        } else {
+            // If the user is editing another account
+            performUpdate();
         }
 
-        $.ajax({
-            url: url,
-            method: method,
-            data: data,
-            contentType: "application/json",
-            success: function (data) {
-                console.log(data.messages);
+        function performUpdate() {
+            var input = {
+                id_pengelola: id_pengelola,
+                nama_pengelola: nama_pengelola,
+                username: username,
+                peran: peran,
+                status: status
+            };
+            var data = JSON.stringify(input);
 
-                if (data.status === 500) {
-                    // Tampilkan SweetAlert jika username sudah tersedia
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Warning!',
-                        text: 'Username or Password already used!',
-                    });
-                } else {
-                    // Redirect hanya jika tidak ada error
-                    location.reload();
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error:", error);
+            if (nama_pengelola == '' || username == '' || peran == '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Warning!',
+                    text: 'Please fill in all fields!',
+                });
+                return;
             }
-        });
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: data,
+                contentType: "application/json",
+                success: function (data) {
+                    console.log(data.messages);
+
+                    if (data.status === 500) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Warning!',
+                            text: 'Username or Password already used!',
+                        });
+                    } else {
+                        location.reload();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
+        }
     }
     function canceledit() {
         $('#editPengelolaWebModal').modal('hide');
@@ -337,6 +484,7 @@
         var id_pengelola = document.getElementById("editusnpwid_pengelola").value;
         var passwordawal = document.getElementById("passwordawal").value;
         var password = document.getElementById("editpassword").value;
+        var password2 = document.getElementById("editpassword2").value;
 
         var hostname = "https://localhost:7033/"; // Ganti dengan URL API Anda
         var url = hostname + "UpdateUsnPwPengelolaWeb"; // Sesuaikan dengan endpoint Anda
@@ -357,6 +505,17 @@
             return; // Keluar dari fungsi jika NPK bukan angka
         }
 
+        if (password != password2) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Warning!',
+                text: 'New Password and Confirm New Password didn\'t match!',
+            });
+            document.getElementById('editpassword').value = '';
+            document.getElementById('editpassword2').value = '';
+            return;
+        }
+
         $.ajax({
             url: url,
             method: method,
@@ -370,7 +529,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Warning!',
-                        text: 'Inputed current password incorrectly!',
+                        text: 'Inputed current password was incorrect!',
                     });
                 } else if (data.status === 400) {
                     Swal.fire({
@@ -414,26 +573,26 @@
                                         <div class="row mb-3">
                                             <label for="nama_pengelola" class="col-sm-2 col-form-label">Web Manager's Name</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control" name="nama_pengelola" id="nama_pengelola">
+                                            <input type="text" class="form-control" name="nama_pengelola" id="nama_pengelola" maxlength="50" placeholder="Max Length of Input is 50 digits">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <label for="username" class="col-sm-2 col-form-label">Username</label>
                                             <div class="col-sm-10">
-                                                <input type="text" class="form-control" name="username" id="username">
+                                            <input type="text" class="form-control" name="username" id="username" maxlength="15" placeholder="Max Length of Input is 15 digits">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <label for="password" class="col-sm-2 col-form-label">Password</label>
                                             <div class="col-sm-10">
-                                                <input type="password" class="form-control" name="password" id="password">
+                                                <input type="password" class="form-control" name="password" id="password" maxlength="15" placeholder="Max Length of Input is 15 digits">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <label for="peran" class="col-sm-2 col-form-label">Role</label>
                                             <div class="col-sm-10">
-                                                <select type="text" class="form-control" name="peran" id="peran">
-                                                    <option>--- Choose Role ---</option>
+                                                <select type="text" class="form-select" name="peran" id="peran">
+                                                    <option value="">--- Choose Role ---</option>
                                                     <option value="Admin">Admin</option>
                                                     <option value="Contributor">Contributor</option>
                                                 </select>
@@ -501,8 +660,8 @@
                                     <div class="row mb-3">
                                         <label for="peran" class="col-sm-2 col-form-label">Role</label>
                                         <div class="col-sm-10">
-                                            <select type="text" class="form-control" name="editperan" id="editperan">
-                                                <option>--- Choose Role ---</option>
+                                            <select type="text" class="form-select" name="editperan" id="editperan">
+                                                <option value="">--- Choose Role ---</option>
                                                 <option value="Admin">Admin</option>
                                                 <option value="Contributor">Contributor</option>
                                             </select>
@@ -593,6 +752,12 @@
                                         <label for="password" class="col-sm-2 col-form-label">New Password</label>
                                         <div class="col-sm-10">
                                             <input type="password" class="form-control" name="editpassword" id="editpassword">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label for="password" class="col-sm-2 col-form-label">Confirm New Password</label>
+                                        <div class="col-sm-10">
+                                            <input type="password" class="form-control" name="editpassword2" id="editpassword2">
                                         </div>
                                     </div>
                                     <br />
